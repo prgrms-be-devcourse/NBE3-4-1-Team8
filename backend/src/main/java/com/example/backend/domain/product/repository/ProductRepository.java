@@ -1,6 +1,6 @@
-package com.example.backend.product.repository;
+package com.example.backend.domain.product.repository;
 
-import com.example.backend.product.entity.Product;
+import com.example.backend.domain.product.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -11,5 +11,4 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
-
 }

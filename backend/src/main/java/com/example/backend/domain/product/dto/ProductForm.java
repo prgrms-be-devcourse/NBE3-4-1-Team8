@@ -1,4 +1,4 @@
-package com.example.backend.product.dto;
+package com.example.backend.domain.product.dto;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
