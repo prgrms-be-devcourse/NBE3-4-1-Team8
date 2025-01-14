@@ -4,6 +4,12 @@ import java.time.ZonedDateTime;
 
 import lombok.Getter;
 
+/**
+ * GenericResponse
+ * <p>요청이 성공했을 때 공통 응답 클래스 입니다.</p>
+ *
+ * @author Kim Dong O
+ */
 @Getter
 public class GenericResponse<T> {
 	private final ZonedDateTime timestamp;
