@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.example.backend.global.exception.GlobalErrorCode;
+import com.example.backend.global.exception.GlobalException;
 import com.example.backend.global.response.ErrorDetail;
 import com.example.backend.global.response.HttpErrorInfo;
 
@@ -67,4 +68,9 @@ public class GlobalControllerAdvice {
 			);
 	}
 
+	@ExceptionHandler(GlobalException.class)
+	public ResponseEntity<HttpErrorInfo> handlerGlobalException(GlobalException ex, HttpServletRequest request) {
+		return ResponseEntity.status(ex.getStatus())
+			.body(HttpErrorInfo.of(ex.getCode(), request.getRequestURI(), ex.getMessage()));
+	}
 }
