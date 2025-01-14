@@ -48,4 +48,22 @@ public record HttpErrorInfo(String code, String path, String message, ZonedDateT
 			.build();
 	}
 
+	/**
+	 * HttpErrorInfo 생성 팩토리 메서드
+	 * <p>code, path, message만 있을 때</p>
+	 * @param code 커스텀 예외 코드
+	 * @param path 예외가 발생한 요청 경로
+	 * @param message 예외가 발생한 이유
+	 * @author Kim Dong O
+	 * @return {@link HttpErrorInfo}
+	 */
+	public static HttpErrorInfo of(String code, String path, String message) {
+		return HttpErrorInfo.builder()
+			.code(code)
+			.path(path)
+			.message(message)
+			.timeStamp(ZonedDateTime.now())
+			.build();
+	}
+
 }
