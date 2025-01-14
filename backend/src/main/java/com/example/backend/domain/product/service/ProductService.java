@@ -1,6 +1,6 @@
-package com.example.backend.product.service;
+package com.example.backend.domain.product.service;
 
-import com.example.backend.product.dto.ProductForm;
+import com.example.backend.domain.product.dto.ProductForm;
 
 /**
  * ProductService

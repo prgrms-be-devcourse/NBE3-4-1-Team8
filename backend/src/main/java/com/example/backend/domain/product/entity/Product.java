@@ -1,4 +1,4 @@
-package com.example.backend.product.entity;
+package com.example.backend.domain.product.entity;
 
 import com.example.backend.global.baseEntity.BaseEntity;
 import jakarta.persistence.*;
