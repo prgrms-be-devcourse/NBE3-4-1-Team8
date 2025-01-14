@@ -17,7 +17,7 @@ public record HttpErrorInfo(String code, String path, String message, List<Error
 	/**
 	 * HttpErrorInfo 생성 팩토리 메서드
 	 *
-	 * @param code 커스텀 에외 코드
+	 * @param code 커스텀 예외 코드
 	 * @param path 예외가 발생한 요청 경로
 	 * @param message 예외가 발생한 이유
 	 * @param errorDetails 필드 에러 정보
