@@ -1,5 +1,7 @@
 package com.example.backend.product.service;
 
+import com.example.backend.product.dto.ProductForm;
+
 /**
  * ProductService
  * 상품 관련 서비스 로직 추상화
@@ -7,5 +9,5 @@ package com.example.backend.product.service;
  */
 public interface ProductService {
     // 상품 등록
-    void create();
+    void create(ProductForm productForm);
 }
