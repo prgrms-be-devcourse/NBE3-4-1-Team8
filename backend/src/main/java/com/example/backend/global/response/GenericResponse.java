@@ -40,4 +40,16 @@ public class GenericResponse<T> {
 			.isSuccess(true)
 			.build();
 	}
+
+	/**
+	 * 요청이 성공하고 응답할 메세지만 있을 때
+	 * @param message
+	 * @return  {@link GenericResponse} GenericResponse
+	 */
+	public static <T>GenericResponse<T> of(String message) {
+		return GenericResponse.<T>builder()
+			.message(message)
+			.isSuccess(true)
+			.build();
+	}
 }
