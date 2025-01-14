@@ -64,4 +64,14 @@ public class GenericResponse<T> {
 			.isSuccess(true)
 			.build();
 	}
+
+	/**
+	 * 요청이 성공하고 응답 메세지, 데이터가 없을 때
+	 * @return  {@link GenericResponse} GenericResponse
+	 */
+	public static <T>GenericResponse<T> of() {
+		return GenericResponse.<T>builder()
+			.isSuccess(true)
+			.build();
+	}
 }
