@@ -26,4 +26,18 @@ public class GenericResponse<T> {
 		this.message = message;
 		this.isSuccess = isSuccess;
 	}
+
+	/**
+	 * 요청이 성공하고 응답할 데이터, 메세지가 있을 때
+	 * @param data
+	 * @param message
+	 * @return  {@link GenericResponse} GenericResponse
+	 */
+	public static <T>GenericResponse<T> of(T data, String message) {
+		return GenericResponse.<T>builder()
+			.data(data)
+			.message(message)
+			.isSuccess(true)
+			.build();
+	}
 }
