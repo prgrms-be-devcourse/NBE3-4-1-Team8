@@ -29,7 +29,7 @@ class MemberRepositoryTest {
 
 	@DisplayName("회원 저장 성공 테스트")
 	@Test
-	void save() {
+	void save_success() {
 		//given
 		Address givenAddress = Address.builder()
 			.city("testCity")
@@ -58,5 +58,33 @@ class MemberRepositoryTest {
 		assertThat(savedMember.getAddress()).isEqualTo(givenMember.getAddress());
 		assertThat(savedMember.getCreatedAt()).isNotNull();
 		assertThat(savedMember.getModifiedAt()).isNotNull();
+	}
+
+	@DisplayName("회원 조회 성공 테스트")
+	@Test
+	void find_id_success() {
+		//given
+		Address givenAddress = Address.builder()
+			.city("testCity1")
+			.detail("testDetail")
+			.ditrict("testDitrict")
+			.country("testCountry")
+			.build();
+
+		Member givenMember = Member.builder()
+			.username("testEmail1@naver.com")
+			.nickname("testNickname1")
+			.password("testPassword1")
+			.address(givenAddress)
+			.role(Role.ROLE_USER)
+			.build();
+
+		Member savedMember = memberRepository.save(givenMember);
+
+		//when
+		Member findMember = memberRepository.findById(savedMember.getId()).get();
+
+		//then
+		assertThat(findMember).isEqualTo(savedMember);
 	}
 }
