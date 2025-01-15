@@ -1,5 +1,7 @@
 package com.example.backend.global.auth.service;
 
+import com.example.backend.domain.member.entity.Member;
+import com.example.backend.domain.member.repository.MemberRepository;
 import com.example.backend.global.auth.dto.AuthForm;
 import com.example.backend.global.auth.exception.AuthErrorCode;
 import com.example.backend.global.auth.exception.AuthException;
