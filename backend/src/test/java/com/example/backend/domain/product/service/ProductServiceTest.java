@@ -60,6 +60,16 @@ class ProductServiceTest {
     }
 
     @Test
+    @DisplayName("상품 등록 테스트")
+    void createTest() {
+        // given
+        // when
+
+        // then
+        assertThat(productService.findById(1L)).isInstanceOf(Product.class);
+    }
+
+    @Test
     @DisplayName("상품 조회(Entity) 테스트")
     void findById() {
         // given
