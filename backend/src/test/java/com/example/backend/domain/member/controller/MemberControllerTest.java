@@ -267,6 +267,6 @@ class MemberControllerTest {
 			.andExpect(jsonPath("$.code").value("400-1"))
 			.andExpect(jsonPath("$.errorDetails[0].field").value("detail"))
 			.andExpect(jsonPath("$.errorDetails[0].reason")
-				.value("상세주소는 필수 항목 입니다."));
+				.value("상세 주소는 필수 항목 입니다."));
 	}
 }
