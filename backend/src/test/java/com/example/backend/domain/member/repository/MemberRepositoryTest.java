@@ -112,4 +112,31 @@ class MemberRepositoryTest {
 		assertThat(existsByUsername).isTrue();
 	}
 
+	@DisplayName("회원 닉네임 존재하는지 조회 성공 테스트")
+	@Test
+	void exists_nickname_success() {
+		//given
+		Address givenAddress = Address.builder()
+			.city("testCity1")
+			.detail("testDetail")
+			.district("testDitrict")
+			.country("testCountry")
+			.build();
+
+		Member givenMember = Member.builder()
+			.username("testEmail3@naver.com")
+			.nickname("testNickname3")
+			.password("testPassword1")
+			.address(givenAddress)
+			.role(Role.ROLE_USER)
+			.build();
+
+		Member savedMember = memberRepository.save(givenMember);
+
+		//when
+		boolean existsByNickname = memberRepository.existsByNickname(savedMember.getNickname());
+
+		//then
+		assertThat(existsByNickname).isTrue();
+	}
 }
