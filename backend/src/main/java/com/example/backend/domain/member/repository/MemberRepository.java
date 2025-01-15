@@ -13,5 +13,11 @@ import com.example.backend.domain.member.entity.Member;
  * @author Kim Dong O
  */
 public interface MemberRepository extends JpaRepository<Member, Long> {
+	/**
+	 * 회원 Username이 중복인지 체크하는 메서드
+	 * @param username
+	 * @return
+	 */
+	boolean existsByUsername(String username);
     Optional<Member> findByUsername(String username);
 }
