@@ -7,6 +7,7 @@ import com.example.backend.global.config.JpaAuditingConfig;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,6 +43,9 @@ class ProductServiceTest {
 
     private Long productId;
 
+    /**
+     * id 1부터 시작하도록 초기화 후 상품 생성
+     */
     @BeforeEach
     void setUp() {
         em.createNativeQuery("ALTER TABLE product ALTER COLUMN id RESTART WITH 1").executeUpdate();
@@ -53,26 +57,35 @@ class ProductServiceTest {
                 imgUrl1,
                 quantity1
         ));
-
     }
 
     @Test
+    @DisplayName("상품 조회(Entity) 테스트")
     void findById() {
         // given
         // when
         Product product = productService.findById(1L);
 
         // then
-        assertThat(product.getName()).isEqualTo(this.name1) ;
+        assertThat(product.getName()).isEqualTo(this.name1);
+        assertThat(product.getContent()).isEqualTo(this.content1);
+        assertThat(product.getPrice()).isEqualTo(this.price1);
+        assertThat(product.getImgUrl()).isEqualTo(this.imgUrl1);
+        assertThat(product.getQuantity()).isEqualTo(this.quantity1);
     }
 
     @Test
+    @DisplayName("상품 조회(DTO) 테스트")
     void findProductResponseById() {
         // given
         // when
         ProductResponse productResponse = productService.findProductResponseById(1L);
 
         // then
-        assertThat(productResponse.name()).isEqualTo(this.name1) ;
+        assertThat(productResponse.name()).isEqualTo(this.name1);
+        assertThat(productResponse.content()).isEqualTo(this.content1);
+        assertThat(productResponse.price()).isEqualTo(this.price1);
+        assertThat(productResponse.imgUrl()).isEqualTo(this.imgUrl1);
+        assertThat(productResponse.quantity()).isEqualTo(this.quantity1);
     }
 }
