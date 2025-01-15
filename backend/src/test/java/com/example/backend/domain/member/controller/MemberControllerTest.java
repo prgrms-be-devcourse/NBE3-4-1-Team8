@@ -17,6 +17,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.example.backend.domain.member.dto.MemberSignupRequest;
+import com.example.backend.domain.member.exception.MemberErrorCode;
+import com.example.backend.domain.member.exception.MemberException;
 import com.example.backend.domain.member.service.MemberService;
 import com.example.backend.global.config.CorsConfig;
 import com.example.backend.global.config.SecurityConfig;
@@ -370,5 +372,39 @@ class MemberControllerTest {
 			.andExpect(jsonPath("$.errorDetails[0].field").value("verifyCode"))
 			.andExpect(jsonPath("$.errorDetails[0].reason")
 				.value("인증 코드는 필수 항목 입니다."));
+	}
+
+	@DisplayName("회원가입시 닉네임 중복 검사 실패 테스트")
+	@Test
+	void signup_nickname_exists_fail() throws Exception {
+		//given
+		MemberSignupRequest givenMemberSignupRequest = MemberSignupRequest.builder()
+			.username("test@naver.com")
+			.nickname("testNickname")
+			.password("!testPassword1234")
+			.passwordCheck("!testPassword1234")
+			.city("testCity")
+			.detail("testDetail")
+			.country("testCountry")
+			.district("testDistrict")
+			.verifyCode("testCode")
+			.build();
+
+
+		doThrow(new MemberException(MemberErrorCode.EXISTS_NICKNAME))
+			.when(memberService).signup(any(String.class), any(String.class),
+			any(String.class), any(String.class), any(String.class),
+			any(String.class), any(String.class),
+			any(String.class));
+
+		//when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/members/join")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(givenMemberSignupRequest)));
+
+		//then
+		resultActions.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("400-2"))
+			.andExpect(jsonPath("$.message").value("중복된 닉네임 입니다."));
 	}
 }
