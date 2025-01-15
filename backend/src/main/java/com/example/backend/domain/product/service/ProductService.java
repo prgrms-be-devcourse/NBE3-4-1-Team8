@@ -7,6 +7,7 @@ import com.example.backend.domain.product.exception.ProductErrorCode;
 import com.example.backend.domain.product.exception.ProductException;
 import com.example.backend.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,24 +18,25 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ProductService {
 
     private final ProductRepository productRepository;
 
-    @Transactional(readOnly = true)
     public Product findById(Long id) {
 
         return productRepository.findById(id).orElseThrow(()
                 -> new ProductException(ProductErrorCode.NOT_FOUND));
     }
 
-    @Transactional(readOnly = true)
     public ProductResponse findProductResponseById(Long id) {
 
         return productRepository.findProductResponseById(id).orElseThrow(()
                 -> new ProductException(ProductErrorCode.NOT_FOUND));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public void create(ProductForm productForm) {
 
         Product product = Product.builder()
@@ -47,7 +49,4 @@ public class ProductService {
 
         productRepository.save(product);
     }
-
-
-
 }

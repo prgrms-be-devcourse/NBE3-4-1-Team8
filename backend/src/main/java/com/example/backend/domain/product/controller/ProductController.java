@@ -1,9 +1,12 @@
 package com.example.backend.domain.product.controller;
 
+import com.example.backend.domain.product.dto.ProductForm;
 import com.example.backend.domain.product.dto.ProductResponse;
 import com.example.backend.domain.product.service.ProductService;
 import com.example.backend.global.response.GenericResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +27,14 @@ public class ProductController {
         ProductResponse productResponse = productService.findProductResponseById(id);
 
         return ResponseEntity.ok().body(GenericResponse.of(productResponse));
+    }
+
+    @PostMapping
+    public ResponseEntity<GenericResponse<Void>> create(@RequestBody @Valid ProductForm productForm) {
+
+        productService.create(productForm);
+
+        return ResponseEntity.ok().body(GenericResponse.of("상품이 정상적으로 등록되었습니다."));
     }
 
 }
