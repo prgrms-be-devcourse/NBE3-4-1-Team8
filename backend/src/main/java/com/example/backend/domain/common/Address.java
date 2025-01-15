@@ -7,6 +7,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * Address
+ * <p>주소지 정보를 관리하는 클래스 입니다.</p>
+ * @author Kim Dong O
+ */
 @Embeddable
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
