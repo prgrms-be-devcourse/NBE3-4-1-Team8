@@ -33,7 +33,8 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public ProductResponse findProductResponseById(Long id) {
 
-        return ProductResponse.of(this.findById(id));
+        return productRepository.findProductResponseById(id).orElseThrow(()
+                -> new ProductException(ProductErrorCode.NOT_FOUND));
     }
 
     @Override
