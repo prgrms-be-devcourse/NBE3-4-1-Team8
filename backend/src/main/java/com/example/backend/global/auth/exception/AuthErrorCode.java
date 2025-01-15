@@ -12,7 +12,9 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum AuthErrorCode {
 	USER_NOT_FOUND(HttpStatus.NOT_FOUND, "404", "해당 유저가 존재하지 않습니다."),
-	PASSWORD_NOT_MATCH(HttpStatus.UNAUTHORIZED, "401", "비밀번호가 일치하지 않습니다.");
+	PASSWORD_NOT_MATCH(HttpStatus.UNAUTHORIZED, "401", "비밀번호가 일치하지 않습니다."),
+	TOKEN_NOT_VALID(HttpStatus.UNAUTHORIZED, "401", "유효하지 않은 토큰입니다."),
+	TOKEN_MISSING(HttpStatus.UNAUTHORIZED, "401", "토큰이 없습니다.");
 
 	final HttpStatus httpStatus;
 	final String code;
