@@ -3,6 +3,7 @@ package com.example.backend.domain.member.repository;
 import static org.assertj.core.api.Assertions.*;
 
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -26,6 +27,7 @@ class MemberRepositoryTest {
 		this.memberRepository = memberRepository;
 	}
 
+	@DisplayName("회원 조회 성공 테스트")
 	@Test
 	void save() {
 		//given
