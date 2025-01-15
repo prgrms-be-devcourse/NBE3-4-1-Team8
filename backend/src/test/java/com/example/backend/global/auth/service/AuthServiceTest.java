@@ -6,6 +6,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.example.backend.domain.member.dto.MemberDto;
+import com.example.backend.domain.member.entity.Member;
+import com.example.backend.domain.member.entity.Role;
+import com.example.backend.domain.member.repository.MemberRepository;
 import com.example.backend.global.auth.dto.AuthForm;
 import com.example.backend.global.auth.exception.AuthErrorCode;
 import com.example.backend.global.auth.exception.AuthException;
