@@ -41,10 +41,6 @@ public class CartService {
                 .quantity(cartDto.getQuantity())
                 .build();
 
-        // 상품 재고 감소
-        product.decreaseQuantity(cartDto.getQuantity());
-        productRepository.save(product);
-
         // 저장 후 ID 반환
         return cartRepository.save(cart).getId();
 
