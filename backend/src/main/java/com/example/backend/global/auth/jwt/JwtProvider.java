@@ -7,6 +7,8 @@ import java.security.Key;
 import java.util.Date;
 import org.springframework.stereotype.Component;
 
+import com.example.backend.domain.member.entity.Role;
+
 @Component
 public class JwtProvider {
 
