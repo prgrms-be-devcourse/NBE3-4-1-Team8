@@ -25,19 +25,19 @@ public record MemberSignupRequest(
 	@ValidPassword(groups = PatternGroup.class)
 	String passwordCheck,
 
-	@NotBlank(message = "인증코드는 필수 항목입니다.", groups = NotBlankGroup.class)
+	@NotBlank(message = "인증 코드는 필수 항목 입니다.", groups = NotBlankGroup.class)
 	String verifyCode,
 
-	@NotBlank(message = "도시는 필수 항목입니다.", groups = NotBlankGroup.class)
+	@NotBlank(message = "도시는 필수 항목 입니다.", groups = NotBlankGroup.class)
 	String city,
 
-	@NotBlank(message = "지역구는 필수 항목입니다.", groups = NotBlankGroup.class)
+	@NotBlank(message = "지역 구는 필수 항목 입니다.", groups = NotBlankGroup.class)
 	String district,
 
-	@NotBlank(message = "도로명 주소는 필수 항목입니다.", groups = NotBlankGroup.class)
+	@NotBlank(message = "도로명 주소는 필수 항목 입니다.", groups = NotBlankGroup.class)
 	String country,
 
-	@NotBlank(message = "상세주소는 필수 항목 입니다.", groups = NotBlankGroup.class)
+	@NotBlank(message = "상세 주소는 필수 항목 입니다.", groups = NotBlankGroup.class)
 	String detail)
 	implements PasswordMatchable {
 
