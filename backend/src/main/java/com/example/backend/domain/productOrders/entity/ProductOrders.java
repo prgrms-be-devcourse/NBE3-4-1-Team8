@@ -5,12 +5,15 @@ import com.example.backend.domain.orders.entity.Orders;
 import com.example.backend.domain.product.entity.Product;
 import com.example.backend.global.baseEntity.BaseEntity;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "product_orders")
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProductOrders extends BaseEntity {
 
     @Id
