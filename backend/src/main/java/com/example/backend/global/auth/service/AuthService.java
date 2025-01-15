@@ -33,4 +33,9 @@ public class AuthService {
 
         return accessToken + " " + refreshToken;
     }
+
+    public void logout(String accessToken) {
+        String username = jwtProvider.getUsernameFromToken(accessToken);
+        refreshTokenService.deleteRefreshToken(username);
+    }
 }
