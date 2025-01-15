@@ -38,7 +38,7 @@ public class Orders extends BaseEntity {
     @Builder(builderMethodName = "create")
     public Orders(Long id, Member member, List<ProductOrders> productOrders, int totalPrice) {
         this.id = id;
-        this.member
+        this.member = member;
         this.productOrders = productOrders;
         this.totalPrice = totalPrice;
         this.deliveryStatus = DeliveryStatus.READY;
@@ -47,4 +47,13 @@ public class Orders extends BaseEntity {
     // todo 연관관계 메서드 구현 필요
 
 
+    /**
+     * 주문가격 총합 조회
+     * @return
+     */
+    public int getTotalPrice() {
+        return productOrders.stream()
+                .mapToInt(ProductOrders::getTotalPrice)
+                .sum();
+    }
 }

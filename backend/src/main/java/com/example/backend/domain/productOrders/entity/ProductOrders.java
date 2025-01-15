@@ -40,5 +40,13 @@ public class ProductOrders extends BaseEntity {
         this.price = price;
     }
 
+    /**
+     * 주문상품 가격 총합 조회
+     */
+    public int getTotalPrice() {
+        return getPrice() * getQuantity();
+    }
+
+
 
 }
