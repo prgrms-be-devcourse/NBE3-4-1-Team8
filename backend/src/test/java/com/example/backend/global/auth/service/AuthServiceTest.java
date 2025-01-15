@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import com.example.backend.global.auth.dto.AuthForm;
 import com.example.backend.global.auth.exception.AuthErrorCode;
+import com.example.backend.global.auth.exception.AuthException;
 import com.example.backend.global.auth.jwt.JwtProvider;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
