@@ -19,6 +19,6 @@ public class CartController {
     @PostMapping
     public ResponseEntity<GenericResponse<Long>> addCartItem(@RequestBody CartForm cartDto) {
         Long cartId = cartService.addCartItem(cartDto);
-        return ResponseEntity.ok(GenericResponse.of(cartId, "성공적으로 장바구니에 담았습니다."));
+        return ResponseEntity.ok(GenericResponse.of(cartId));
     }
 }
