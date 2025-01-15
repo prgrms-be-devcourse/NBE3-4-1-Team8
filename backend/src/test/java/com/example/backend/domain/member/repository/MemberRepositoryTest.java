@@ -27,7 +27,7 @@ class MemberRepositoryTest {
 		this.memberRepository = memberRepository;
 	}
 
-	@DisplayName("회원 조회 성공 테스트")
+	@DisplayName("회원 저장 성공 테스트")
 	@Test
 	void save() {
 		//given
