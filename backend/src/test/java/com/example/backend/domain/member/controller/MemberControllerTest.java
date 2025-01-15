@@ -201,4 +201,38 @@ class MemberControllerTest {
 			.andExpect(jsonPath("$.errorDetails[0].reason")
 				.value("비밀번호와 비밀번호 확인이 일치하지 않습니다."));
 	}
+
+	@DisplayName("회원가입 도시 유효성 검사 실패 테스트")
+	@Test
+	void signup_city_not_blank_fail() throws Exception {
+		//given
+		MemberSignupRequest givenMemberSignupRequest = MemberSignupRequest.builder()
+			.username("test@naver.com")
+			.nickname("testNickname")
+			.password("!testPassword1234")
+			.passwordCheck("!testPassword1234")
+			.city("")
+			.detail("testDetail")
+			.country("testCountry")
+			.district("testDistrict")
+			.verifyCode("testCode")
+			.build();
+
+		doNothing().when(memberService).signup(givenMemberSignupRequest.username(), givenMemberSignupRequest.nickname(),
+			givenMemberSignupRequest.password(), givenMemberSignupRequest.verifyCode(), givenMemberSignupRequest.city(),
+			givenMemberSignupRequest.district(), givenMemberSignupRequest.verifyCode(),
+			givenMemberSignupRequest.detail());
+
+		//when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/members/join")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(givenMemberSignupRequest)));
+
+		//then
+		resultActions.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("400-1"))
+			.andExpect(jsonPath("$.errorDetails[0].field").value("city"))
+			.andExpect(jsonPath("$.errorDetails[0].reason")
+				.value("도시는 필수 항목입니다."));
+	}
 }
