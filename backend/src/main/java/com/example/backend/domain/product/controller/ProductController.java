@@ -1,7 +1,6 @@
 package com.example.backend.domain.product.controller;
 
 import com.example.backend.domain.product.dto.ProductResponse;
-import com.example.backend.domain.product.entity.Product;
 import com.example.backend.domain.product.service.ProductService;
 import com.example.backend.global.response.GenericResponse;
 import lombok.RequiredArgsConstructor;
