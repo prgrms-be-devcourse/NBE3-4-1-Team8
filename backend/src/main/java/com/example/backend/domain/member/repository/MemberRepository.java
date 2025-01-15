@@ -1,12 +1,16 @@
 package com.example.backend.domain.member.repository;
 
-import com.example.backend.domain.member.dto.MemberDto;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface MemberRepository {
-	/**
-	 * @implSpec MemberDto를 파라미터로 받아 저장 후 MemberDto로 반환합니다.
-	 * @param memberDto
-	 * @return {@link MemberDto}
-	 */
-	MemberDto save(MemberDto memberDto);
+import com.example.backend.domain.member.entity.Member;
+
+
+/**
+ * MemberJpaRepository
+ * <p>MemberJpaRepository 입니다.</p>
+ * @author Kim Dong O
+ */
+public interface MemberRepository extends JpaRepository<Member, Long> {
+	Member save(Member member);
 }
