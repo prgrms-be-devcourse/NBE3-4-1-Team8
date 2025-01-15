@@ -27,4 +27,11 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 	 * @return Nickname이 중복이라면 true, 중복이 아니라면 false
 	 */
 	boolean existsByNickname(String nickname);
+
+	/**
+	 * 회원 Username으로 조회 기능
+	 * @param username
+	 * @return {@link Optional<Member>}
+	 */
+	Optional<Member> findByUsername(String username);
 }
