@@ -38,8 +38,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                 .requestMatchers("/api/v1/members/join").permitAll()
                 .requestMatchers("/api/v1/members/**").hasAnyRole("USER", "ADMIN")
-                .requestMatchers("/api/v1/auth/login", "/api/v1/auth/code", "api/v1/auth/verify")
-                .permitAll()
+                .requestMatchers("/api/v1/auth/login", "/api/v1/auth/code", "api/v1/auth/verify").permitAll()
                 .requestMatchers("/api/v1/auth/**").hasAnyRole("USER", "ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
                 .requestMatchers("/api/v1/products/**").hasAnyRole("ADMIN")
