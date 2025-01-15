@@ -16,8 +16,9 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 	/**
 	 * 회원 Username이 중복인지 체크하는 메서드
 	 * @param username
-	 * @return
+	 * @return Username이 중복이라면 true, 중복이 아니라면 false
 	 */
 	boolean existsByUsername(String username);
     Optional<Member> findByUsername(String username);
+
 }
