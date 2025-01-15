@@ -14,7 +14,7 @@ public class JwtProvider {
 
     private final Key SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     private static final long ACCESS_TOKEN_EXPIRATION_TIME = 30 * 60 * 1000; // 30분
-    private static final long REFRESH_TOKEN_EXPIRATION_TIME = 24 * 60 * 60 * 1000;  // 24시간
+    public static final long REFRESH_TOKEN_EXPIRATION_TIME = 7 * 24 * 60 * 60 * 1000;  // 7일
 
     public String generateAccessToken(Long id, String username, Role role) {
         return Jwts.builder()
