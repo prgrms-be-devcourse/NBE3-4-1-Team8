@@ -17,9 +17,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member extends BaseEntity {
 	@Id
@@ -42,8 +44,8 @@ public class Member extends BaseEntity {
 	private Address address;
 
 	@Builder
-	protected Member(Long id, String username, String nickname, String password, Role role, Address address, LocalDateTime createdAt,
-		LocalDateTime modifiedAt) {
+	protected Member(Long id, String username, String nickname, String password, Role role, Address address, ZonedDateTime createdAt,
+		ZonedDateTime modifiedAt) {
 		this.id = id;
 		this.username = username;
 		this.nickname = nickname;
