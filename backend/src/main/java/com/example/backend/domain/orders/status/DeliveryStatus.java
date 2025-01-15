@@ -1,4 +1,4 @@
-package com.example.backend.domain.order.status;
+package com.example.backend.domain.orders.status;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
