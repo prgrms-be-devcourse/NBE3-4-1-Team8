@@ -123,4 +123,20 @@ class AuthServiceTest {
         verify(memberRepository).findByUsername("user@gmail.com");
         verify(passwordEncoder).matches("pw", "password");
     }
+
+    @Test
+    @DisplayName("로그아웃 성공 시 리프레시 토큰 레디스에서 삭제")
+    void logoutSuccess() {
+        //given
+        String accessToken = "accessToken";
+        String username = "user@gmail.com";
+        when(jwtProvider.getUsernameFromToken(any(String.class))).thenReturn(username);
+
+        //when
+        authService.logout(accessToken);
+
+        //then
+        verify(jwtProvider).getUsernameFromToken(accessToken);
+        verify(refreshTokenService).deleteRefreshToken(username);
+    }
 }
