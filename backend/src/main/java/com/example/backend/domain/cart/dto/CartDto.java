@@ -9,8 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CartRequestDto {
-    private Long memberId; // 어떤 회원이 요청했는지
-    private Long productId; // 어떤 상품을 추가/수정할지
-    private int quantity; // 상품의 수량
+public class CartDto {
+    private Long id;
+    private Long memberId;
+    private Long productId;
+    private int quantity;
 }
