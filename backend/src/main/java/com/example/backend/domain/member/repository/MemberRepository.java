@@ -3,7 +3,6 @@ package com.example.backend.domain.member.repository;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import com.example.backend.domain.member.entity.Member;
 
@@ -27,4 +26,11 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 	 * @return Nickname이 중복이라면 true, 중복이 아니라면 false
 	 */
 	boolean existsByNickname(String nickname);
+
+	/**
+	 * 회원 Username으로 조회 기능
+	 * @param username
+	 * @return {@link Optional<Member>}
+	 */
+	Optional<Member> findByUsername(String username);
 }
