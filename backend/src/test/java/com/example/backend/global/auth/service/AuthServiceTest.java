@@ -2,7 +2,7 @@ package com.example.backend.global.auth.service;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,6 +35,9 @@ class AuthServiceTest {
     @Mock
     private MemberRepository memberRepository;
 
+    @Mock
+    private RefreshTokenService refreshTokenService;
+
     @InjectMocks
     private AuthService authService;
 
@@ -52,10 +55,9 @@ class AuthServiceTest {
 
         when(memberRepository.findByUsername(any(String.class))).thenReturn(Optional.of(member));
         when(passwordEncoder.matches(any(String.class), any(String.class))).thenReturn(true);
-        when(jwtProvider.generateAccessToken(any(Long.class), any(String.class),
-            any(Role.class))).thenReturn("access_token");
-        when(jwtProvider.generateRefreshToken(any(Long.class), any(String.class))).thenReturn(
-            "refresh_token");
+        when(jwtProvider.generateAccessToken(any(Long.class), any(String.class), any(Role.class))).thenReturn("access_token");
+        when(jwtProvider.generateRefreshToken(any(Long.class), any(String.class))).thenReturn("refresh_token");
+        doNothing().when(refreshTokenService).saveRefreshToken(any(String.class), any(String.class));
 
         AuthForm authForm = new AuthForm();
         authForm.setUsername("user@gmail.com");
@@ -71,8 +73,8 @@ class AuthServiceTest {
         verify(jwtProvider).generateAccessToken(1L, "user@gmail.com", Role.ROLE_USER);
         verify(jwtProvider).generateRefreshToken(1L, "user@gmail.com");
 
-        // saveRefreshToken이 한번 호출 되었는지 검증
-        verify(memberRepository, times(1)).save(any(Member.class));
+        // saveRefreshToken이 호출되었는지 검증
+        verify(refreshTokenService).saveRefreshToken("user@gmail.com", "refresh_token");
     }
 
     @Test
