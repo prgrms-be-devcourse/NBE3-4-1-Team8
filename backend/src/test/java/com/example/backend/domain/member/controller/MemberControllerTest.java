@@ -68,5 +68,36 @@ class MemberControllerTest {
 		resultActions.andExpect(status().isCreated());
 	}
 
+@DisplayName("회원가입 이메일 유효성 검사 실패 테스트")
+	@Test
+	void signup_username_valid_username_fail() throws Exception {
+		//given
+		MemberSignupRequest givenMemberSignupRequest = MemberSignupRequest.builder()
+			.username("test")
+			.nickname("testNickName")
+			.password("!testPassword1234")
+			.passwordCheck("!testPassword1234")
+			.city("testCity")
+			.detail("testDetail")
+			.country("testCountry")
+			.district("testDistrict")
+			.verifyCode("testCode")
+			.build();
 
+		doNothing().when(memberService).signup(givenMemberSignupRequest.username(), givenMemberSignupRequest.nickname(),
+			givenMemberSignupRequest.password(), givenMemberSignupRequest.verifyCode(), givenMemberSignupRequest.city(),
+			givenMemberSignupRequest.district(), givenMemberSignupRequest.verifyCode(),
+			givenMemberSignupRequest.detail());
+
+		//when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/members/join")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(givenMemberSignupRequest)));
+
+		//then
+		resultActions.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("400-1"))
+			.andExpect(jsonPath("$.errorDetails[0].field").value("username"))
+			.andExpect(jsonPath("$.errorDetails[0].reason").value("유효하지 않은 이메일 입니다."));
+	}
 }
