@@ -20,7 +20,7 @@ public class Address {
 	private String city; //시
 
 	@Column(nullable = false)
-	private String ditrict; //구
+	private String district; //구
 
 	@Column(nullable = false)
 	private String country; //도로명 주소
@@ -29,9 +29,9 @@ public class Address {
 	private String detail; //상세 주소
 
 	@Builder
-	public Address(String city, String ditrict, String country, String detail) {
+	public Address(String city, String district, String country, String detail) {
 		this.city = city;
-		this.ditrict = ditrict;
+		this.district = district;
 		this.country = country;
 		this.detail = detail;
 	}
