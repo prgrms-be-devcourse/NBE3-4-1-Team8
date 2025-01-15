@@ -8,12 +8,12 @@ import com.example.backend.domain.member.entity.Role;
 
 import lombok.Builder;
 
-public record MemberDto(Long id, String username, String nickname, String password, Role role, Address address, LocalDateTime createdAt,
-		LocalDateTime modifiedAt) {
+public record MemberDto(Long id, String username, String nickname, String password, Role role, Address address, ZonedDateTime createdAt,
+		ZonedDateTime modifiedAt) {
 
 	@Builder
-	public MemberDto(Long id, String username, String nickname, String password, Role role, Address address, LocalDateTime createdAt,
-		LocalDateTime modifiedAt) {
+	public MemberDto(Long id, String username, String nickname, String password, Role role, Address address, ZonedDateTime createdAt,
+		ZonedDateTime modifiedAt) {
 		this.id = id;
 		this.username = username;
 		this.nickname = nickname;
