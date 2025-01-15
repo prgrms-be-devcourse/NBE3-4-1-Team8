@@ -337,4 +337,38 @@ class MemberControllerTest {
 			.andExpect(jsonPath("$.errorDetails[0].reason")
 				.value("지역 구는 필수 항목 입니다."));
 	}
+
+	@DisplayName("회원가입 인증 코드 유효성 검사 실패 테스트")
+	@Test
+	void signup_verifyCode_not_blank_fail() throws Exception {
+		//given
+		MemberSignupRequest givenMemberSignupRequest = MemberSignupRequest.builder()
+			.username("test@naver.com")
+			.nickname("testNickname")
+			.password("!testPassword1234")
+			.passwordCheck("!testPassword1234")
+			.city("testCity")
+			.detail("testDetail")
+			.country("testCountry")
+			.district("testDistrict")
+			.verifyCode("")
+			.build();
+
+		doNothing().when(memberService).signup(givenMemberSignupRequest.username(), givenMemberSignupRequest.nickname(),
+			givenMemberSignupRequest.password(), givenMemberSignupRequest.verifyCode(), givenMemberSignupRequest.city(),
+			givenMemberSignupRequest.district(), givenMemberSignupRequest.verifyCode(),
+			givenMemberSignupRequest.detail());
+
+		//when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/members/join")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(givenMemberSignupRequest)));
+
+		//then
+		resultActions.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("400-1"))
+			.andExpect(jsonPath("$.errorDetails[0].field").value("verifyCode"))
+			.andExpect(jsonPath("$.errorDetails[0].reason")
+				.value("인증 코드는 필수 항목 입니다."));
+	}
 }
