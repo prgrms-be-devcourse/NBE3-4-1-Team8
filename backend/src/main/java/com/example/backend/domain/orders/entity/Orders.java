@@ -25,7 +25,7 @@ public class Orders extends BaseEntity {
     @JoinColumn(name = "member_id") // 외래 키 매핑
     private Member member;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "orders")
     private List<ProductOrders> productOrders = new ArrayList<>();
 
     @Column(name = "total_price", nullable = false)
