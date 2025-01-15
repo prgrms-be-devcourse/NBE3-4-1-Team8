@@ -32,5 +32,4 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 	 * @param username
 	 * @return {@link Optional<Member>}
 	 */
-	Optional<Member> findByUsername(String username);
 }
