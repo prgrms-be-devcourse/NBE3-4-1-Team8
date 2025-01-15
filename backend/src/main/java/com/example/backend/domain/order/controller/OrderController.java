@@ -1,7 +1,7 @@
-package com.example.backend.domain.orders.controller;
+package com.example.backend.domain.order.controller;
 
 
-import com.example.backend.domain.orders.service.OrderService;
+import com.example.backend.domain.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

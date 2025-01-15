@@ -1,7 +1,6 @@
-package com.example.backend.domain.orders.service;
+package com.example.backend.domain.order.service;
 
 
-import com.example.backend.domain.orders.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
