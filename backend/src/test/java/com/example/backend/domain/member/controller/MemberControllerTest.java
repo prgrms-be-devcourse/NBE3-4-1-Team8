@@ -133,4 +133,38 @@ class MemberControllerTest {
 			.andExpect(jsonPath("$.errorDetails[0].field").value("nickname"))
 			.andExpect(jsonPath("$.errorDetails[0].reason").value("유효하지 않은 회원 이름 입니다."));
 	}
+
+	@DisplayName("회원가입 비밀번호 유효성 검사 실패 테스트")
+	@Test
+	void signup_password_valid_password_fail() throws Exception {
+		//given
+		MemberSignupRequest givenMemberSignupRequest = MemberSignupRequest.builder()
+			.username("test@naver.com")
+			.nickname("testNickname")
+			.password("testPassword1234")
+			.passwordCheck("!testPassword1234")
+			.city("testCity")
+			.detail("testDetail")
+			.country("testCountry")
+			.district("testDistrict")
+			.verifyCode("testCode")
+			.build();
+
+		doNothing().when(memberService).signup(givenMemberSignupRequest.username(), givenMemberSignupRequest.nickname(),
+			givenMemberSignupRequest.password(), givenMemberSignupRequest.verifyCode(), givenMemberSignupRequest.city(),
+			givenMemberSignupRequest.district(), givenMemberSignupRequest.verifyCode(),
+			givenMemberSignupRequest.detail());
+
+		//when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/members/join")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(givenMemberSignupRequest)));
+
+		//then
+		resultActions.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("400-1"))
+			.andExpect(jsonPath("$.errorDetails[0].field").value("password"))
+			.andExpect(jsonPath("$.errorDetails[0].reason")
+				.value("공백 없이 비밀번호는 최소 8자리, 최대 20자리이며 대소문자, 숫자, 특수문자 1개씩 필수 입력해야 합니다."));
+	}
 }
