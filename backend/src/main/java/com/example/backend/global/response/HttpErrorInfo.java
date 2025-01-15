@@ -3,6 +3,9 @@ package com.example.backend.global.response;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import lombok.AccessLevel;
+import lombok.Builder;
+
 /**
  * HttpErrorInfo
  * <p>예외 발생시 사용할 공통 응답 클래스</p>
@@ -13,7 +16,18 @@ import java.util.List;
  * @param timeStamp
  * @author Kim Dong O
  */
-public record HttpErrorInfo(String code, String path, String message, List<ErrorDetail> errorDetails, ZonedDateTime timeStamp) {
+public record HttpErrorInfo(String code, String path, String message, ZonedDateTime timeStamp, List<ErrorDetail> errorDetails) {
+
+	@Builder(access = AccessLevel.PROTECTED)
+	public HttpErrorInfo(String code, String path, String message, ZonedDateTime timeStamp,
+		List<ErrorDetail> errorDetails) {
+		this.code = code;
+		this.path = path;
+		this.message = message;
+		this.timeStamp = timeStamp;
+		this.errorDetails = errorDetails;
+	}
+
 	/**
 	 * HttpErrorInfo 생성 팩토리 메서드
 	 *
@@ -25,7 +39,31 @@ public record HttpErrorInfo(String code, String path, String message, List<Error
 	 * @return {@link HttpErrorInfo}
 	 */
 	public static HttpErrorInfo of(String code, String path, String message, List<ErrorDetail> errorDetails) {
-		return new HttpErrorInfo(code, path, message, errorDetails, ZonedDateTime.now());
+		return HttpErrorInfo.builder()
+			.code(code)
+			.path(path)
+			.message(message)
+			.errorDetails(errorDetails)
+			.timeStamp(ZonedDateTime.now())
+			.build();
+	}
+
+	/**
+	 * HttpErrorInfo 생성 팩토리 메서드
+	 * <p>code, path, message만 있을 때</p>
+	 * @param code 커스텀 예외 코드
+	 * @param path 예외가 발생한 요청 경로
+	 * @param message 예외가 발생한 이유
+	 * @author Kim Dong O
+	 * @return {@link HttpErrorInfo}
+	 */
+	public static HttpErrorInfo of(String code, String path, String message) {
+		return HttpErrorInfo.builder()
+			.code(code)
+			.path(path)
+			.message(message)
+			.timeStamp(ZonedDateTime.now())
+			.build();
 	}
 
 }
