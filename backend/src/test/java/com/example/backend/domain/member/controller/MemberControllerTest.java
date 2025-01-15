@@ -233,6 +233,40 @@ class MemberControllerTest {
 			.andExpect(jsonPath("$.code").value("400-1"))
 			.andExpect(jsonPath("$.errorDetails[0].field").value("city"))
 			.andExpect(jsonPath("$.errorDetails[0].reason")
-				.value("도시는 필수 항목입니다."));
+				.value("도시는 필수 항목 입니다."));
+	}
+
+	@DisplayName("회원가입 상세주소 유효성 검사 실패 테스트")
+	@Test
+	void signup_detail_not_blank_fail() throws Exception {
+		//given
+		MemberSignupRequest givenMemberSignupRequest = MemberSignupRequest.builder()
+			.username("test@naver.com")
+			.nickname("testNickname")
+			.password("!testPassword1234")
+			.passwordCheck("!testPassword1234")
+			.city("testCity")
+			.detail("")
+			.country("testCountry")
+			.district("testDistrict")
+			.verifyCode("testCode")
+			.build();
+
+		doNothing().when(memberService).signup(givenMemberSignupRequest.username(), givenMemberSignupRequest.nickname(),
+			givenMemberSignupRequest.password(), givenMemberSignupRequest.verifyCode(), givenMemberSignupRequest.city(),
+			givenMemberSignupRequest.district(), givenMemberSignupRequest.verifyCode(),
+			givenMemberSignupRequest.detail());
+
+		//when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/members/join")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(givenMemberSignupRequest)));
+
+		//then
+		resultActions.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("400-1"))
+			.andExpect(jsonPath("$.errorDetails[0].field").value("detail"))
+			.andExpect(jsonPath("$.errorDetails[0].reason")
+				.value("상세주소는 필수 항목 입니다."));
 	}
 }
