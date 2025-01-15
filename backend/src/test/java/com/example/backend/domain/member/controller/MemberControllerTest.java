@@ -407,4 +407,38 @@ class MemberControllerTest {
 			.andExpect(jsonPath("$.code").value("400-2"))
 			.andExpect(jsonPath("$.message").value("중복된 닉네임 입니다."));
 	}
+
+	@DisplayName("회원가입시 이메일 중복 검사 실패 테스트")
+	@Test
+	void signup_username_exists_fail() throws Exception {
+		//given
+		MemberSignupRequest givenMemberSignupRequest = MemberSignupRequest.builder()
+			.username("test@naver.com")
+			.nickname("testNickname")
+			.password("!testPassword1234")
+			.passwordCheck("!testPassword1234")
+			.city("testCity")
+			.detail("testDetail")
+			.country("testCountry")
+			.district("testDistrict")
+			.verifyCode("testCode")
+			.build();
+
+
+		doThrow(new MemberException(MemberErrorCode.EXISTS_USERNAME))
+			.when(memberService).signup(any(String.class), any(String.class),
+			any(String.class), any(String.class), any(String.class),
+			any(String.class), any(String.class),
+			any(String.class));
+
+		//when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/members/join")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(givenMemberSignupRequest)));
+
+		//then
+		resultActions.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("400-1"))
+			.andExpect(jsonPath("$.message").value("중복된 이메일 입니다."));
+	}
 }
