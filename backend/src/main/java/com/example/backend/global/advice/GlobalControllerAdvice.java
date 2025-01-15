@@ -3,7 +3,9 @@ package com.example.backend.global.advice;
 import com.example.backend.global.auth.exception.AuthException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -18,6 +20,8 @@ import com.example.backend.global.response.ErrorDetail;
 import com.example.backend.global.response.HttpErrorInfo;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -69,8 +73,33 @@ public class GlobalControllerAdvice {
 			);
 	}
 
+		/**
+	 * Validation 예외 발생시 처리하는 핸들러
+	 * @param ex Exception
+	 * @param request HttpServletRequest
+	 * @return {@link ResponseEntity<HttpErrorInfo>}
+	 */
+	@ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<HttpErrorInfo> handleConstraintViolationException(ConstraintViolationException ex, HttpServletRequest request) {
+		Set<ConstraintViolation<?>> constraintViolations = ex.getConstraintViolations();
+		List<ErrorDetail> errorDetails = new ArrayList<>();
+
+		for (ConstraintViolation<?> constraintViolation : constraintViolations) {
+			errorDetails.add(ErrorDetail.of(
+                constraintViolation.getPropertyPath().toString(),
+                constraintViolation.getMessage()
+            ));
+		}
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+			.body(HttpErrorInfo.of(GlobalErrorCode.NOT_VALID.getCode(), request.getRequestURI(), GlobalErrorCode.NOT_VALID.getMessage(),
+				errorDetails)
+			);
+    }
+
 	@ExceptionHandler(GlobalException.class)
 	public ResponseEntity<HttpErrorInfo> handlerGlobalException(GlobalException ex, HttpServletRequest request) {
+		log.info("GlobalControllerAdvice={}", ex);
 		return ResponseEntity.status(ex.getStatus())
 			.body(HttpErrorInfo.of(ex.getCode(), request.getRequestURI(), ex.getMessage()));
 	}
