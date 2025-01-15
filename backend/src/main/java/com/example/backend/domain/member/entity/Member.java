@@ -1,6 +1,5 @@
 package com.example.backend.domain.member.entity;
 
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 import com.example.backend.domain.common.Address;
@@ -43,7 +42,7 @@ public class Member extends BaseEntity {
 	@Embedded
 	private Address address;
 
-	@Builder
+	@Builder(toBuilder = true)
 	protected Member(Long id, String username, String nickname, String password, Role role, Address address, ZonedDateTime createdAt,
 		ZonedDateTime modifiedAt) {
 		this.id = id;
