@@ -86,6 +86,7 @@ class MemberServiceTest {
 	@DisplayName("회원가입 이메일 중복 실패 테스트")
 	@Test
 	void signup_exists_username_fail() {
+		//given
 		MemberSignupRequest givenMemberSignupRequest = MemberSignupRequest.builder()
 			.username("testEmail@naver.com")
 			.nickname("testNickName")
@@ -113,8 +114,6 @@ class MemberServiceTest {
 			.role(Role.ROLE_USER)
 			.build();
 
-		Member givenMemberEntity = Member.from(givenMember);
-
 		given(memberRepository.existsByUsername(givenMember.username())).willReturn(true);
 		given(memberRepository.existsByNickname(givenMember.nickname())).willReturn(false);
 
@@ -125,5 +124,48 @@ class MemberServiceTest {
 			givenMemberSignupRequest.detail()))
 			.isInstanceOf(MemberException.class)
 			.hasMessage(MemberErrorCode.EXISTS_USERNAME.getMessage());
+	}
+
+	@DisplayName("회원가입 닉네임 중복 실패 테스트")
+	@Test
+	void signup_exists_nickname_fail() {
+		//given
+		MemberSignupRequest givenMemberSignupRequest = MemberSignupRequest.builder()
+			.username("testEmail@naver.com")
+			.nickname("testNickName")
+			.password("!testPassword1234")
+			.passwordCheck("!testPassword1234")
+			.city("testCity")
+			.detail("testDetail")
+			.country("testCountry")
+			.district("testDistrict")
+			.verifyCode("testCode")
+			.build();
+
+		Address givenAddress = Address.builder()
+			.city(givenMemberSignupRequest.city())
+			.detail(givenMemberSignupRequest.detail())
+			.country(givenMemberSignupRequest.country())
+			.district(givenMemberSignupRequest.district())
+			.build();
+
+		MemberDto givenMember = MemberDto.builder()
+			.username(givenMemberSignupRequest.username())
+			.nickname(givenMemberSignupRequest.nickname())
+			.password(givenMemberSignupRequest.password())
+			.address(givenAddress)
+			.role(Role.ROLE_USER)
+			.build();
+
+		given(memberRepository.existsByUsername(givenMember.username())).willReturn(false);
+		given(memberRepository.existsByNickname(givenMember.nickname())).willReturn(true);
+
+		//when & then
+		Assertions.assertThatThrownBy(() -> memberService.signup(givenMemberSignupRequest.username(), givenMemberSignupRequest.nickname(),
+			givenMemberSignupRequest.password(), givenMemberSignupRequest.passwordCheck(),
+			givenMemberSignupRequest.city(), givenMemberSignupRequest.district(), givenMemberSignupRequest.country(),
+			givenMemberSignupRequest.detail()))
+			.isInstanceOf(MemberException.class)
+			.hasMessage(MemberErrorCode.EXISTS_NICKNAME.getMessage());
 	}
 }
