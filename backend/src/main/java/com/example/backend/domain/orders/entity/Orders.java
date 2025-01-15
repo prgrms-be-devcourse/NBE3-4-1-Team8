@@ -1,6 +1,7 @@
 package com.example.backend.domain.orders.entity;
 
 
+import com.example.backend.domain.member.entity.Member;
 import com.example.backend.domain.orders.status.DeliveryStatus;
 import com.example.backend.domain.productOrders.entity.ProductOrders;
 import com.example.backend.global.baseEntity.BaseEntity;

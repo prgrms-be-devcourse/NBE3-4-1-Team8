@@ -4,7 +4,7 @@ package com.example.backend.domain.orders.dto;
 import com.example.backend.domain.orders.status.DeliveryStatus;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 /**
@@ -21,7 +21,7 @@ public class OrderResponse {
     private List<ProductInfoDto> products;
     private int totalPrice;
     private DeliveryStatus status;
-    private LocalDateTime createAt;
-    private LocalDateTime modifiedAt;
+    private ZonedDateTime createAt;
+    private ZonedDateTime modifiedAt;
 
 }
