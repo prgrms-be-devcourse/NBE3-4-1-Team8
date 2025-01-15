@@ -1,5 +1,6 @@
 package com.example.backend.global.advice;
 
+import com.example.backend.global.auth.exception.AuthException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -113,6 +114,12 @@ public class GlobalControllerAdvice {
 	@ExceptionHandler(GlobalException.class)
 	public ResponseEntity<HttpErrorInfo> handlerGlobalException(GlobalException ex, HttpServletRequest request) {
 		log.info("GlobalControllerAdvice={}", ex);
+		return ResponseEntity.status(ex.getStatus())
+			.body(HttpErrorInfo.of(ex.getCode(), request.getRequestURI(), ex.getMessage()));
+	}
+
+	@ExceptionHandler(AuthException.class)
+	public ResponseEntity<HttpErrorInfo> handlerAuthException(AuthException ex, HttpServletRequest request) {
 		return ResponseEntity.status(ex.getStatus())
 			.body(HttpErrorInfo.of(ex.getCode(), request.getRequestURI(), ex.getMessage()));
 	}
