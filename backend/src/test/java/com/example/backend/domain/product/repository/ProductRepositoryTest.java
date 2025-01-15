@@ -1,4 +1,4 @@
-package com.example.backend.product.repository;
+package com.example.backend.domain.product.repository;
 
 import com.example.backend.domain.product.entity.Product;
 import com.example.backend.domain.product.repository.ProductRepository;
@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author 100minha
  */
 @DataJpaTest
-@Import(JpaAuditingConfig.class)
 @ActiveProfiles("test")
 @Transactional
 public class ProductRepositoryTest {
