@@ -5,9 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.example.backend.global.validation.ValidationGroups;
 import com.example.backend.global.validation.validator.EnumValidator;
-import com.example.backend.global.validation.validator.ValidUsernameValidator;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
@@ -26,7 +24,7 @@ import jakarta.validation.Payload;
 public @interface ValidEnum {
 	String message() default "요청 값이 유효하지 않습니다.";
 
-	Class<?>[] groups() default ValidationGroups.ValidEnumGroup.class;
+	Class<?>[] groups() default {};
 
 	Class<? extends Payload>[] payload() default {};
 
