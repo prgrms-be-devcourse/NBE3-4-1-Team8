@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.domain.common.Address;
 import com.example.backend.domain.member.dto.MemberDto;
-import com.example.backend.domain.member.dto.MemberSignupResponse;
 import com.example.backend.domain.member.entity.Member;
 import com.example.backend.domain.member.entity.Role;
 import com.example.backend.domain.member.exception.MemberErrorCode;
