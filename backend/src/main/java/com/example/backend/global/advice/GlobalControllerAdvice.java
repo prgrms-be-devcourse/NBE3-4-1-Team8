@@ -13,6 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.example.backend.domain.member.exception.MemberException;
 import com.example.backend.global.exception.GlobalErrorCode;
 import com.example.backend.global.exception.GlobalException;
 import com.example.backend.global.response.ErrorDetail;
@@ -95,6 +96,19 @@ public class GlobalControllerAdvice {
 				errorDetails)
 			);
     }
+
+	/**
+	 * Member 예외 발생시 처리하는 핸들러
+	 * @param ex Exception
+	 * @param request HttpServletRequest
+	 * @return {@link ResponseEntity<HttpErrorInfo>}
+	 */
+	@ExceptionHandler(MemberException.class)
+	public ResponseEntity<HttpErrorInfo> handlerMemberException(MemberException ex, HttpServletRequest request) {
+		log.info("GlobalControllerAdvice={}", ex);
+		return ResponseEntity.status(ex.getStatus())
+			.body(HttpErrorInfo.of(ex.getCode(), request.getRequestURI(), ex.getMessage()));
+	}
 
 	@ExceptionHandler(GlobalException.class)
 	public ResponseEntity<HttpErrorInfo> handlerGlobalException(GlobalException ex, HttpServletRequest request) {
