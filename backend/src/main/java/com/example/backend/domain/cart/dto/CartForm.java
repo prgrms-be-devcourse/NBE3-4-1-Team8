@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CartDto {
-    private Long id;
+public class CartForm {
+
     private Long memberId;
     private Long productId;
     private int quantity;
