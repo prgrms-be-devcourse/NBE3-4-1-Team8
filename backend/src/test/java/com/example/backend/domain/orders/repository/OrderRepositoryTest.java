@@ -35,13 +35,8 @@ public class OrderRepositoryTest {
     @Autowired
     ProductOrdersRepository productOrdersRepository;
 
-
-    @Test
-    @DisplayName("주문 저장 성공")
-    void saveOrder() {
-
-        // Member 객체 생성
-        Member member = Member.builder()
+    Member createMember() {
+        return Member.builder()
                 .username("test")
                 .nickname("test")
                 .password("123")
@@ -50,27 +45,40 @@ public class OrderRepositoryTest {
                 .createdAt(ZonedDateTime.now())
                 .modifiedAt(ZonedDateTime.now())
                 .build();
+    }
 
-        Member savedMember = memberRepository.save(member);
-
-        // Product 객체 생성
-        Product product = Product.builder()
+    Product createProduct() {
+        return Product.builder()
                 .name("test")
                 .content("test")
                 .price(100)
                 .imgUrl("test")
                 .quantity(10)
                 .build();
+    }
 
-        Product savedProduct = productRepository.save(product);
-
-        // ProductOrders 객체 생성
-        ProductOrders productOrders = ProductOrders.create()
+    ProductOrders createProductOrders(Product product) {
+        return ProductOrders.create()
                 .product(product)
                 .quantity(2)
                 .price(100)
                 .build();
-        ProductOrders savedProductOrders = productOrdersRepository.save(productOrders);
+    }
+
+
+    @Test
+    @DisplayName("주문 저장 성공")
+    void saveOrder() {
+
+        // Member 객체 생성
+
+        Member savedMember = memberRepository.save(createMember());
+
+        // Product 객체 생성
+        Product savedProduct = productRepository.save(createProduct());
+
+        // ProductOrders 객체 생성
+        ProductOrders savedProductOrders = productOrdersRepository.save(createProductOrders(savedProduct));
 
         // ProductOrders 목록 준비
         List<ProductOrders> productOrdersList = new ArrayList<>();
@@ -92,4 +100,6 @@ public class OrderRepositoryTest {
         Assertions.assertThat(orders.getProductOrders()).isEqualTo(savedOrder.getProductOrders());
         Assertions.assertThat(200).isEqualTo(savedOrder.getTotalPrice());
     }
+
+
 }
