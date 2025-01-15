@@ -1,7 +1,12 @@
 package com.example.backend.domain.cart.controller;
 
+import com.example.backend.domain.cart.dto.CartForm;
 import com.example.backend.domain.cart.service.CartService;
+import com.example.backend.global.response.GenericResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -11,4 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class CartController {
     private final CartService cartService;
 
+    @PostMapping
+    public ResponseEntity<GenericResponse<Long>> addCartItem(@RequestBody CartForm cartDto) {
+        Long cartId = cartService.addCartItem(cartDto);
+        return ResponseEntity.ok(GenericResponse.of(cartId, "성공적으로 장바구니에 담았습니다."));
+    }
 }
