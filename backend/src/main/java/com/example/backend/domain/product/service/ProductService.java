@@ -1,6 +1,7 @@
 package com.example.backend.domain.product.service;
 
 import com.example.backend.domain.product.dto.ProductForm;
+import com.example.backend.domain.product.dto.ProductResponse;
 import com.example.backend.domain.product.entity.Product;
 
 /**
@@ -9,9 +10,10 @@ import com.example.backend.domain.product.entity.Product;
  * @author 100mi
  */
 public interface ProductService {
-    // 상품 단건 조회
+    // 상품 단건 조회 (Entity)
     Product findById(Long id);
-
+    // 상품 단건 조회 (DTO)
+    public ProductResponse findProductResponseById(Long id);
     // 상품 등록
     void create(ProductForm productForm);
 
