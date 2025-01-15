@@ -1,6 +1,6 @@
 package com.example.backend.domain.product.repository;
 
-<<<<<<< HEAD
+
 import com.example.backend.domain.product.dto.ProductResponse;
 import com.example.backend.domain.product.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
