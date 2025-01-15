@@ -2,15 +2,11 @@ package com.example.backend.domain.member.repository;
 
 import static org.assertj.core.api.Assertions.*;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
-import org.springframework.stereotype.Repository;
 
 import com.example.backend.domain.common.Address;
 import com.example.backend.domain.member.entity.Member;
@@ -34,7 +30,7 @@ class MemberRepositoryTest {
 		Address givenAddress = Address.builder()
 			.city("testCity")
 			.detail("testDetail")
-			.ditrict("testDitrict")
+			.district("testDitrict")
 			.country("testCountry")
 			.build();
 
@@ -67,7 +63,7 @@ class MemberRepositoryTest {
 		Address givenAddress = Address.builder()
 			.city("testCity1")
 			.detail("testDetail")
-			.ditrict("testDitrict")
+			.district("testDitrict")
 			.country("testCountry")
 			.build();
 
@@ -87,4 +83,33 @@ class MemberRepositoryTest {
 		//then
 		assertThat(findMember).isEqualTo(savedMember);
 	}
+
+	@DisplayName("회원 이메일 존재하는지 조회 성공 테스트")
+	@Test
+	void exists_username_success() {
+		//given
+		Address givenAddress = Address.builder()
+			.city("testCity1")
+			.detail("testDetail")
+			.district("testDitrict")
+			.country("testCountry")
+			.build();
+
+		Member givenMember = Member.builder()
+			.username("testEmail2@naver.com")
+			.nickname("testNickname2")
+			.password("testPassword1")
+			.address(givenAddress)
+			.role(Role.ROLE_USER)
+			.build();
+
+		Member savedMember = memberRepository.save(givenMember);
+
+		//when
+		boolean existsByUsername = memberRepository.existsByUsername(savedMember.getUsername());
+
+		//then
+		assertThat(existsByUsername).isTrue();
+	}
+
 }
