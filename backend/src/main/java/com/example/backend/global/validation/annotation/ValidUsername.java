@@ -1,10 +1,13 @@
 package com.example.backend.global.validation.annotation;
 
+import static com.example.backend.global.validation.ValidationGroups.*;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import com.example.backend.global.validation.ValidationGroups;
 import com.example.backend.global.validation.validator.ValidUsernameValidator;
 
 import jakarta.validation.Constraint;
@@ -22,7 +25,7 @@ import jakarta.validation.Payload;
 public @interface ValidUsername {
 	String message() default "유효하지 않은 이메일 입니다.";
 
-	Class<?>[] groups() default {};
+	Class<?>[] groups() default PatternGroup.class;
 
 	Class<? extends Payload>[] payload() default {};
 }

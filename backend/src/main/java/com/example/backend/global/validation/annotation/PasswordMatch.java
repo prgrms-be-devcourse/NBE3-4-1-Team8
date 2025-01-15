@@ -5,6 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import com.example.backend.global.validation.ValidationGroups;
 import com.example.backend.global.validation.validator.PasswordMatchValidator;
 
 import jakarta.validation.Constraint;
@@ -23,6 +24,6 @@ import jakarta.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PasswordMatch {
 	String message() default "비밀번호와 비밀번호 확인이 일치하지 않습니다.";
-	Class<?>[] groups() default {};
+	Class<?>[] groups() default ValidationGroups.PatternGroup.class;
 	Class<? extends Payload>[] payload() default {};
 }
