@@ -15,27 +15,22 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     private final JwtProvider jwtProvider;
-    private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RefreshTokenService refreshTokenService;
+    private final MemberRepository memberRepository;
 
     public String login(AuthForm authForm) {
         Member member = memberRepository.findByUsername(authForm.getUsername())
             .orElseThrow(() -> new AuthException(AuthErrorCode.USER_NOT_FOUND));
 
-        if (!passwordEncoder.matches(authForm.getPassword(), member.getPassword())) {
+        if (!member.checkPassword(authForm.getPassword(), passwordEncoder)) {
             throw new AuthException(AuthErrorCode.PASSWORD_NOT_MATCH);
         }
 
         String accessToken = jwtProvider.generateAccessToken(member.getId(), member.getUsername(), member.getRole());
         String refreshToken = jwtProvider.generateRefreshToken(member.getId(), member.getUsername());
-        saveRefreshToken(member, refreshToken);
+        refreshTokenService.saveRefreshToken(member.getUsername(), refreshToken);
 
         return accessToken + " " + refreshToken;
-    }
-
-    private void saveRefreshToken(Member member, String refreshToken) {
-        memberRepository.save(member.toBuilder()
-            .refreshToken(refreshToken)
-            .build());
     }
 }
