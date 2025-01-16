@@ -6,7 +6,7 @@ import lombok.Getter;
 
 /**
  * AuthErrorCode
- * <p>Global 예외 발생시 예외 코드를 정의하는 Enum 클래스 입니다.</p>
+ * <p>Auth 예외 발생시 예외 코드를 정의하는 Enum 클래스 입니다.</p>
  *
  * @author vdvhk12
  */
