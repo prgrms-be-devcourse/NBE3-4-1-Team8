@@ -11,6 +11,8 @@ import com.example.backend.domain.member.entity.Role;
 import com.example.backend.domain.member.exception.MemberErrorCode;
 import com.example.backend.domain.member.exception.MemberException;
 import com.example.backend.domain.member.repository.MemberRepository;
+import com.example.backend.global.mail.service.MailService;
+import com.example.backend.global.redis.service.RedisService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,6 +21,8 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class MemberService {
 	private final MemberRepository memberRepository;
+	private final RedisService redisService;
+	private final MailService mailService;
 	private final PasswordEncoder passwordEncoder;
 
 	public void signup(String username, String nickname, String password, String verifyCode,
@@ -26,6 +30,7 @@ public class MemberService {
 		existsMember(username, nickname);
 
 		//TODO 추후에 인증 메일 발송 기능 구현 후 수정 예정
+
 
 		Address saveAddress = Address.builder()
 			.city(city)
