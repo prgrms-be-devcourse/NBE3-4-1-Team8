@@ -35,7 +35,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 
 @WebMvcTest(ProductController.class)
-@ActiveProfiles("test")
 @Import({TestSecurityConfig.class, CorsConfig.class})
 @WithMockUser(roles = "ADMIN")
 public class ProductControllerTest {
