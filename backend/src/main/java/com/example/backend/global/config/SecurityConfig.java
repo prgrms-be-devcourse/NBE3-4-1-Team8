@@ -1,5 +1,11 @@
 package com.example.backend.global.config;
 
+import com.example.backend.global.auth.jwt.JwtAuthorizationFilter;
+import com.example.backend.global.auth.jwt.JwtProvider;
+import com.example.backend.global.auth.service.CustomUserDetailsService;
+import com.example.backend.global.auth.service.RefreshTokenService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -30,6 +36,7 @@ public class SecurityConfig {
     private final JwtProvider jwtProvider;
     private final ObjectMapper objectMapper;
     private final CustomUserDetailsService customUserDetailsService;
+    private final RefreshTokenService refreshTokenService;
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -48,7 +55,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/products/**").hasAnyRole("ADMIN")
                 .requestMatchers("/api/v1/orders/**").hasAnyRole("USER", "ADMIN")
                 .requestMatchers("/api/v1/cart/**").hasAnyRole("USER", "ADMIN"))
-            .addFilterBefore(new JwtAuthorizationFilter(jwtProvider, objectMapper, customUserDetailsService),
+            .addFilterBefore(new JwtAuthorizationFilter(jwtProvider, objectMapper, customUserDetailsService, refreshTokenService),
                 UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
