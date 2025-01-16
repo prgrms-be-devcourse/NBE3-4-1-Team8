@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class JwtUtil {
+public class JwtUtils {
 
     private final JwtConfig jwtConfig;
-    private final Logger logger = LoggerFactory.getLogger(JwtUtil.class);
+    private final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
     public Claims parseClaims(String token) {
         return Jwts.parserBuilder()
