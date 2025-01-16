@@ -21,16 +21,10 @@ public class RedisDaoImpl implements RedisDao {
 		this.redisTemplate = redisTemplate;
 	}
 
-	/**
-	 *
-	 * @param key redis key 값 (member-id)
-	 * @param data uuid 인증 코드 저장 (certificationCode)
-	 * @param timeout 저장 시간
-	 */
 	@Override
 	public void setData(String key, String data, long timeout) {
 		ValueOperations<String, Object> value = redisTemplate.opsForValue();
-		value.set(key, data, timeout, TimeUnit.MILLISECONDS);
+		value.set(key, data, timeout, TimeUnit.MINUTES);
 	}
 
 	@Override
@@ -70,7 +64,7 @@ public class RedisDaoImpl implements RedisDao {
 
 	@Override
 	public void setTimeout(String key, long timeout) {
-		redisTemplate.expire(key, timeout, TimeUnit.MILLISECONDS);
+		redisTemplate.expire(key, timeout, TimeUnit.MINUTES);
 	}
 
 	@Override
