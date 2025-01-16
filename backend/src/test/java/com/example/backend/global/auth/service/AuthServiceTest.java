@@ -275,4 +275,52 @@ class AuthServiceTest {
             .hasMessage(AuthErrorCode.CERTIFICATION_CODE_NOT_FOUND.getMessage());
 	}
 
+    @DisplayName("이메일 인증시 인증 타입이 일치하지 않을 때 실패 테스트")
+	@Test
+	void verify_verify_type_not_match_fail() {
+		//given
+		String givenRedisPrefix = "certification_email:";
+
+		Address givenAddress = Address.builder()
+			.city("testCity")
+			.detail("testDetail")
+			.country("testCountry")
+			.district("testDistrict")
+			.build();
+
+		MemberDto givenMember = MemberDto.builder()
+			.username("testEmail@naver.com")
+			.nickname("testNickName")
+			.password("!testPassword1234")
+			.address(givenAddress)
+			.memberStatus(MemberStatus.PENDING)
+			.role(Role.ROLE_USER)
+			.build();
+
+		MemberDto verifyMember = givenMember.verify();
+
+		EmailCertificationForm givenEmailCertificationForm = EmailCertificationForm.builder()
+			.certificationCode("testCode")
+			.verifyType(VerifyType.SIGNUP)
+			.username("testEmail@naver.com")
+			.build();
+
+        EmailCertification givenEmailCertification = EmailCertification.builder()
+            .verifyType(VerifyType.PASSWORD_RESET.toString())
+            .certificationCode(givenEmailCertificationForm.certificationCode())
+            .sendCount("1")
+            .build();
+
+        Map<Object, Object> givenConvertMap = testObjectMapper.convertValue(givenEmailCertification, Map.class);
+
+        given(redisService.getHashDataAll(givenRedisPrefix + givenEmailCertificationForm.username()))
+			.willReturn(givenConvertMap);
+
+		given(objectMapper.convertValue(givenConvertMap, EmailCertification.class)).willReturn(givenEmailCertification);
+		//when & then
+		assertThatThrownBy(() -> authService.verify(givenEmailCertificationForm.username(),
+            givenEmailCertificationForm.certificationCode(), givenEmailCertificationForm.verifyType()))
+            .isInstanceOf(AuthException.class)
+            .hasMessage(AuthErrorCode.VERIFY_TYPE_NOT_MATCH.getMessage());
+	}
 }
