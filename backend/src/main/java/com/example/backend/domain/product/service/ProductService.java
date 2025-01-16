@@ -7,7 +7,6 @@ import com.example.backend.domain.product.exception.ProductErrorCode;
 import com.example.backend.domain.product.exception.ProductException;
 import com.example.backend.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,7 +34,6 @@ public class ProductService {
                 -> new ProductException(ProductErrorCode.NOT_FOUND));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void create(ProductForm productForm) {
 
