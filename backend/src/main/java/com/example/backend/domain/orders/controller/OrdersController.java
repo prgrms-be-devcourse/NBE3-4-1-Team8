@@ -1,8 +1,8 @@
 package com.example.backend.domain.orders.controller;
 
 
-import com.example.backend.domain.orders.dto.OrderResponse;
-import com.example.backend.domain.orders.service.OrderService;
+import com.example.backend.domain.orders.dto.OrdersResponse;
+import com.example.backend.domain.orders.service.OrdersService;
 import com.example.backend.global.response.GenericResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,16 +13,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/orders")
-public class OrderController {
+@RequestMapping("/api/v1/orders")
+public class OrdersController {
 
-    private final OrderService orderService;
+    private final OrdersService ordersService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<GenericResponse<OrderResponse>> findOne(
+    public ResponseEntity<GenericResponse<OrdersResponse>> findOne(
             @PathVariable(name = "id") Long id
     ) {
-        OrderResponse response = orderService.findOne(id);
+        OrdersResponse response = ordersService.findOne(id);
 
         return ResponseEntity.ok()
                 .body(GenericResponse.of(response));

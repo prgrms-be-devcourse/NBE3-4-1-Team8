@@ -15,7 +15,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
@@ -24,10 +23,10 @@ import java.util.List;
 
 @Transactional
 @DataJpaTest
-public class OrderRepositoryTest {
+public class OrdersRepositoryTest {
 
     @Autowired
-    OrderRepository orderRepository;
+    OrdersRepository ordersRepository;
     @Autowired
     MemberRepository memberRepository;
     @Autowired
@@ -92,7 +91,7 @@ public class OrderRepositoryTest {
                 .build();
 
         // 주문 저장
-        Orders savedOrder = orderRepository.save(orders);
+        Orders savedOrder = ordersRepository.save(orders);
 
         // 저장된 주문이 예상한 주문과 동일한지 검증
         Assertions.assertThat(orders).isEqualTo(savedOrder);

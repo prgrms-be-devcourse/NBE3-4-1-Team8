@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class OrderResponse {
+public class OrdersResponse {
 
     private Long id;
     private List<ProductInfoDto> products;
