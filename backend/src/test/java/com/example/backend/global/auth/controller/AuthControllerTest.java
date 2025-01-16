@@ -101,4 +101,30 @@ public class AuthControllerTest {
 			.andExpect(jsonPath("$.message").value(AuthErrorCode.CERTIFICATION_CODE_NOT_FOUND.getMessage()));
 	}
 
+	@DisplayName("이메일 인증 코드 일치하지 않을 때 실패 테스트")
+	@Test
+	void verify_certification_not_match_fail() throws Exception {
+		//given
+		EmailCertificationForm givenEmailCertificationForm = EmailCertificationForm.builder()
+			.username("testEmail@naver.com")
+			.certificationCode("testCode")
+			.verifyType(VerifyType.SIGNUP)
+			.build();
+
+		doThrow(new AuthException(AuthErrorCode.CERTIFICATION_CODE_NOT_MATCH))
+			.when(authService).verify(givenEmailCertificationForm.username(),
+				givenEmailCertificationForm.certificationCode(), givenEmailCertificationForm.verifyType());
+
+		//when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/auth/verify")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(givenEmailCertificationForm)));
+
+		//then
+		resultActions
+			.andExpect(status().isUnauthorized())
+			.andExpect(jsonPath("$.code").value(AuthErrorCode.CERTIFICATION_CODE_NOT_MATCH.getCode()))
+			.andExpect(jsonPath("$.message").value(AuthErrorCode.CERTIFICATION_CODE_NOT_MATCH.getMessage()));
+	}
+
 }
