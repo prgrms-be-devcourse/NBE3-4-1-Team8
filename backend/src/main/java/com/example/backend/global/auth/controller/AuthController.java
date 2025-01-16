@@ -76,4 +76,6 @@ public class AuthController {
 
 		return ResponseEntity.ok().body(GenericResponse.of());
 	}
+        response.addHeader("Set-Cookie", cookie.toString());
+    }
 }
