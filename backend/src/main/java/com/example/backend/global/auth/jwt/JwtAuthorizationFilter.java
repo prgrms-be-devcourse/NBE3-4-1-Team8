@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -47,7 +48,6 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         }
 
         String token = getTokenFromRequest(request);
-
         if (token == null) {
             createErrorInfo(AuthErrorCode.TOKEN_MISSING, request, response);
             return;
@@ -91,6 +91,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    // 예외 발생시 에러 메세지 생성 후 응답객체에 추가하는 메서드
     private void createErrorInfo(AuthErrorCode tokenMissing, HttpServletRequest request,
         HttpServletResponse response) throws IOException {
         HttpErrorInfo httpErrorInfo = HttpErrorInfo.of(
@@ -104,10 +105,15 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         response.setStatus(Integer.parseInt(httpErrorInfo.code()));
     }
 
+    // 쿠키에서 accessToken을 꺼내오는 메서드
     private String getTokenFromRequest(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("accessToken".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
         }
         return null;
     }
