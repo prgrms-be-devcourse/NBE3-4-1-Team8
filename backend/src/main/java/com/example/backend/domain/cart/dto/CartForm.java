@@ -3,24 +3,20 @@ package com.example.backend.domain.cart.dto;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
+@Getter
 @AllArgsConstructor
-@Builder
+@NoArgsConstructor
 public class CartForm {
 
-    private Long id;
-
-    @NotNull(message = "Member ID cannot be null")
+    @NotNull(message = "회원 ID는 필수입니다.")
     private Long memberId;
 
-    @NotNull(message = "Product ID cannot be null")
+    @NotNull(message = "상품 ID는 필수입니다.")
     private Long productId;
 
-    @Min(value = 1, message = "Quantity must be at least 1")
+    @Min(value = 1, message = "수량은 1 이상이어야 합니다.")
     private int quantity;
 }
