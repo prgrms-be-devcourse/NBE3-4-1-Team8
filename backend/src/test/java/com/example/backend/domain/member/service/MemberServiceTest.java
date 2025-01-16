@@ -13,7 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.example.backend.domain.common.Address;
 import com.example.backend.domain.member.dto.MemberDto;
-import com.example.backend.domain.member.dto.MemberSignupRequest;
+import com.example.backend.domain.member.dto.MemberSignupForm;
 import com.example.backend.domain.member.entity.Member;
 import com.example.backend.domain.member.entity.Role;
 import com.example.backend.domain.member.exception.MemberErrorCode;
@@ -35,7 +35,7 @@ class MemberServiceTest {
 	@Test
 	void signup_success() {
 		//given
-		MemberSignupRequest givenMemberSignupRequest = MemberSignupRequest.builder()
+		MemberSignupForm givenMemberSignupForm = MemberSignupForm.builder()
 			.username("testEmail@naver.com")
 			.nickname("testNickName")
 			.password("!testPassword1234")
@@ -48,36 +48,36 @@ class MemberServiceTest {
 			.build();
 
 		Address givenAddress = Address.builder()
-			.city(givenMemberSignupRequest.city())
-			.detail(givenMemberSignupRequest.detail())
-			.country(givenMemberSignupRequest.country())
-			.district(givenMemberSignupRequest.district())
+			.city(givenMemberSignupForm.city())
+			.detail(givenMemberSignupForm.detail())
+			.country(givenMemberSignupForm.country())
+			.district(givenMemberSignupForm.district())
 			.build();
 
 		MemberDto givenMember = MemberDto.builder()
-			.username(givenMemberSignupRequest.username())
-			.nickname(givenMemberSignupRequest.nickname())
-			.password(givenMemberSignupRequest.password())
+			.username(givenMemberSignupForm.username())
+			.nickname(givenMemberSignupForm.nickname())
+			.password(givenMemberSignupForm.password())
 			.address(givenAddress)
 			.role(Role.ROLE_USER)
 			.build();
 
 		Member givenMemberEntity = Member.from(givenMember);
 
-		given(passwordEncoder.encode(givenMemberSignupRequest.password())).willReturn(
-			givenMemberSignupRequest.password());
+		given(passwordEncoder.encode(givenMemberSignupForm.password())).willReturn(
+			givenMemberSignupForm.password());
 		given(memberRepository.existsByNickname(givenMember.nickname())).willReturn(false);
 		given(memberRepository.existsByUsername(givenMember.username())).willReturn(false);
 		given(memberRepository.save(any(Member.class))).willReturn(givenMemberEntity);
 
 		//when
-		memberService.signup(givenMemberSignupRequest.username(), givenMemberSignupRequest.nickname(),
-			givenMemberSignupRequest.password(), givenMemberSignupRequest.passwordCheck(),
-			givenMemberSignupRequest.city(), givenMemberSignupRequest.district(), givenMemberSignupRequest.country(),
-			givenMemberSignupRequest.detail());
+		memberService.signup(givenMemberSignupForm.username(), givenMemberSignupForm.nickname(),
+			givenMemberSignupForm.password(), givenMemberSignupForm.passwordCheck(),
+			givenMemberSignupForm.city(), givenMemberSignupForm.district(), givenMemberSignupForm.country(),
+			givenMemberSignupForm.detail());
 
 		//then
-		verify(passwordEncoder, times(1)).encode(givenMemberSignupRequest.password());
+		verify(passwordEncoder, times(1)).encode(givenMemberSignupForm.password());
 		verify(memberRepository, times(1)).existsByNickname(givenMember.nickname());
 		verify(memberRepository, times(1)).existsByUsername(givenMember.username());
 		verify(memberRepository, times(1)).save(any(Member.class));
@@ -87,7 +87,7 @@ class MemberServiceTest {
 	@Test
 	void signup_exists_username_fail() {
 		//given
-		MemberSignupRequest givenMemberSignupRequest = MemberSignupRequest.builder()
+		MemberSignupForm givenMemberSignupForm = MemberSignupForm.builder()
 			.username("testEmail@naver.com")
 			.nickname("testNickName")
 			.password("!testPassword1234")
@@ -100,16 +100,16 @@ class MemberServiceTest {
 			.build();
 
 		Address givenAddress = Address.builder()
-			.city(givenMemberSignupRequest.city())
-			.detail(givenMemberSignupRequest.detail())
-			.country(givenMemberSignupRequest.country())
-			.district(givenMemberSignupRequest.district())
+			.city(givenMemberSignupForm.city())
+			.detail(givenMemberSignupForm.detail())
+			.country(givenMemberSignupForm.country())
+			.district(givenMemberSignupForm.district())
 			.build();
 
 		MemberDto givenMember = MemberDto.builder()
-			.username(givenMemberSignupRequest.username())
-			.nickname(givenMemberSignupRequest.nickname())
-			.password(givenMemberSignupRequest.password())
+			.username(givenMemberSignupForm.username())
+			.nickname(givenMemberSignupForm.nickname())
+			.password(givenMemberSignupForm.password())
 			.address(givenAddress)
 			.role(Role.ROLE_USER)
 			.build();
@@ -118,10 +118,11 @@ class MemberServiceTest {
 		given(memberRepository.existsByNickname(givenMember.nickname())).willReturn(false);
 
 		//when & then
-		Assertions.assertThatThrownBy(() -> memberService.signup(givenMemberSignupRequest.username(), givenMemberSignupRequest.nickname(),
-			givenMemberSignupRequest.password(), givenMemberSignupRequest.passwordCheck(),
-			givenMemberSignupRequest.city(), givenMemberSignupRequest.district(), givenMemberSignupRequest.country(),
-			givenMemberSignupRequest.detail()))
+		Assertions.assertThatThrownBy(() -> memberService.signup(
+				givenMemberSignupForm.username(), givenMemberSignupForm.nickname(),
+			givenMemberSignupForm.password(), givenMemberSignupForm.passwordCheck(),
+			givenMemberSignupForm.city(), givenMemberSignupForm.district(), givenMemberSignupForm.country(),
+			givenMemberSignupForm.detail()))
 			.isInstanceOf(MemberException.class)
 			.hasMessage(MemberErrorCode.EXISTS_USERNAME.getMessage());
 	}
@@ -130,7 +131,7 @@ class MemberServiceTest {
 	@Test
 	void signup_exists_nickname_fail() {
 		//given
-		MemberSignupRequest givenMemberSignupRequest = MemberSignupRequest.builder()
+		MemberSignupForm givenMemberSignupForm = MemberSignupForm.builder()
 			.username("testEmail@naver.com")
 			.nickname("testNickName")
 			.password("!testPassword1234")
@@ -143,16 +144,16 @@ class MemberServiceTest {
 			.build();
 
 		Address givenAddress = Address.builder()
-			.city(givenMemberSignupRequest.city())
-			.detail(givenMemberSignupRequest.detail())
-			.country(givenMemberSignupRequest.country())
-			.district(givenMemberSignupRequest.district())
+			.city(givenMemberSignupForm.city())
+			.detail(givenMemberSignupForm.detail())
+			.country(givenMemberSignupForm.country())
+			.district(givenMemberSignupForm.district())
 			.build();
 
 		MemberDto givenMember = MemberDto.builder()
-			.username(givenMemberSignupRequest.username())
-			.nickname(givenMemberSignupRequest.nickname())
-			.password(givenMemberSignupRequest.password())
+			.username(givenMemberSignupForm.username())
+			.nickname(givenMemberSignupForm.nickname())
+			.password(givenMemberSignupForm.password())
 			.address(givenAddress)
 			.role(Role.ROLE_USER)
 			.build();
@@ -161,10 +162,11 @@ class MemberServiceTest {
 		given(memberRepository.existsByNickname(givenMember.nickname())).willReturn(true);
 
 		//when & then
-		Assertions.assertThatThrownBy(() -> memberService.signup(givenMemberSignupRequest.username(), givenMemberSignupRequest.nickname(),
-			givenMemberSignupRequest.password(), givenMemberSignupRequest.passwordCheck(),
-			givenMemberSignupRequest.city(), givenMemberSignupRequest.district(), givenMemberSignupRequest.country(),
-			givenMemberSignupRequest.detail()))
+		Assertions.assertThatThrownBy(() -> memberService.signup(
+				givenMemberSignupForm.username(), givenMemberSignupForm.nickname(),
+			givenMemberSignupForm.password(), givenMemberSignupForm.passwordCheck(),
+			givenMemberSignupForm.city(), givenMemberSignupForm.district(), givenMemberSignupForm.country(),
+			givenMemberSignupForm.detail()))
 			.isInstanceOf(MemberException.class)
 			.hasMessage(MemberErrorCode.EXISTS_NICKNAME.getMessage());
 	}

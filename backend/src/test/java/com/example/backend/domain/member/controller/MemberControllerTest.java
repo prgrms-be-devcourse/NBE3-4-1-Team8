@@ -16,7 +16,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import com.example.backend.domain.member.dto.MemberSignupRequest;
+import com.example.backend.domain.member.dto.MemberSignupForm;
 import com.example.backend.domain.member.exception.MemberErrorCode;
 import com.example.backend.domain.member.exception.MemberException;
 import com.example.backend.domain.member.service.MemberService;
@@ -44,7 +44,7 @@ class MemberControllerTest {
 	@Test
 	void signup_success() throws Exception {
 		//given
-		MemberSignupRequest givenMemberSignupRequest = MemberSignupRequest.builder()
+		MemberSignupForm givenMemberSignupForm = MemberSignupForm.builder()
 			.username("testEmail@naver.com")
 			.nickname("testNickName")
 			.password("!testPassword1234")
@@ -56,15 +56,15 @@ class MemberControllerTest {
 			.verifyCode("testCode")
 			.build();
 
-		doNothing().when(memberService).signup(givenMemberSignupRequest.username(), givenMemberSignupRequest.nickname(),
-			givenMemberSignupRequest.password(), givenMemberSignupRequest.verifyCode(), givenMemberSignupRequest.city(),
-			givenMemberSignupRequest.district(), givenMemberSignupRequest.verifyCode(),
-			givenMemberSignupRequest.detail());
+		doNothing().when(memberService).signup(givenMemberSignupForm.username(), givenMemberSignupForm.nickname(),
+			givenMemberSignupForm.password(), givenMemberSignupForm.verifyCode(), givenMemberSignupForm.city(),
+			givenMemberSignupForm.district(), givenMemberSignupForm.verifyCode(),
+			givenMemberSignupForm.detail());
 
 		//when
 		ResultActions resultActions = mockMvc.perform(post("/api/v1/members/join")
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(objectMapper.writeValueAsString(givenMemberSignupRequest)));
+			.content(objectMapper.writeValueAsString(givenMemberSignupForm)));
 
 		//then
 		resultActions.andExpect(status().isCreated());
@@ -74,7 +74,7 @@ class MemberControllerTest {
 	@Test
 	void signup_username_valid_username_fail() throws Exception {
 		//given
-		MemberSignupRequest givenMemberSignupRequest = MemberSignupRequest.builder()
+		MemberSignupForm givenMemberSignupForm = MemberSignupForm.builder()
 			.username("test")
 			.nickname("testNickName")
 			.password("!testPassword1234")
@@ -86,15 +86,15 @@ class MemberControllerTest {
 			.verifyCode("testCode")
 			.build();
 
-		doNothing().when(memberService).signup(givenMemberSignupRequest.username(), givenMemberSignupRequest.nickname(),
-			givenMemberSignupRequest.password(), givenMemberSignupRequest.verifyCode(), givenMemberSignupRequest.city(),
-			givenMemberSignupRequest.district(), givenMemberSignupRequest.verifyCode(),
-			givenMemberSignupRequest.detail());
+		doNothing().when(memberService).signup(givenMemberSignupForm.username(), givenMemberSignupForm.nickname(),
+			givenMemberSignupForm.password(), givenMemberSignupForm.verifyCode(), givenMemberSignupForm.city(),
+			givenMemberSignupForm.district(), givenMemberSignupForm.verifyCode(),
+			givenMemberSignupForm.detail());
 
 		//when
 		ResultActions resultActions = mockMvc.perform(post("/api/v1/members/join")
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(objectMapper.writeValueAsString(givenMemberSignupRequest)));
+			.content(objectMapper.writeValueAsString(givenMemberSignupForm)));
 
 		//then
 		resultActions.andExpect(status().isBadRequest())
@@ -107,7 +107,7 @@ class MemberControllerTest {
 	@Test
 	void signup_nickname_valid_nickname_fail() throws Exception {
 		//given
-		MemberSignupRequest givenMemberSignupRequest = MemberSignupRequest.builder()
+		MemberSignupForm givenMemberSignupForm = MemberSignupForm.builder()
 			.username("test@naver.com")
 			.nickname("")
 			.password("!testPassword1234")
@@ -119,15 +119,15 @@ class MemberControllerTest {
 			.verifyCode("testCode")
 			.build();
 
-		doNothing().when(memberService).signup(givenMemberSignupRequest.username(), givenMemberSignupRequest.nickname(),
-			givenMemberSignupRequest.password(), givenMemberSignupRequest.verifyCode(), givenMemberSignupRequest.city(),
-			givenMemberSignupRequest.district(), givenMemberSignupRequest.verifyCode(),
-			givenMemberSignupRequest.detail());
+		doNothing().when(memberService).signup(givenMemberSignupForm.username(), givenMemberSignupForm.nickname(),
+			givenMemberSignupForm.password(), givenMemberSignupForm.verifyCode(), givenMemberSignupForm.city(),
+			givenMemberSignupForm.district(), givenMemberSignupForm.verifyCode(),
+			givenMemberSignupForm.detail());
 
 		//when
 		ResultActions resultActions = mockMvc.perform(post("/api/v1/members/join")
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(objectMapper.writeValueAsString(givenMemberSignupRequest)));
+			.content(objectMapper.writeValueAsString(givenMemberSignupForm)));
 
 		//then
 		resultActions.andExpect(status().isBadRequest())
@@ -140,7 +140,7 @@ class MemberControllerTest {
 	@Test
 	void signup_password_valid_password_fail() throws Exception {
 		//given
-		MemberSignupRequest givenMemberSignupRequest = MemberSignupRequest.builder()
+		MemberSignupForm givenMemberSignupForm = MemberSignupForm.builder()
 			.username("test@naver.com")
 			.nickname("testNickname")
 			.password("testPassword1234")
@@ -152,15 +152,15 @@ class MemberControllerTest {
 			.verifyCode("testCode")
 			.build();
 
-		doNothing().when(memberService).signup(givenMemberSignupRequest.username(), givenMemberSignupRequest.nickname(),
-			givenMemberSignupRequest.password(), givenMemberSignupRequest.verifyCode(), givenMemberSignupRequest.city(),
-			givenMemberSignupRequest.district(), givenMemberSignupRequest.verifyCode(),
-			givenMemberSignupRequest.detail());
+		doNothing().when(memberService).signup(givenMemberSignupForm.username(), givenMemberSignupForm.nickname(),
+			givenMemberSignupForm.password(), givenMemberSignupForm.verifyCode(), givenMemberSignupForm.city(),
+			givenMemberSignupForm.district(), givenMemberSignupForm.verifyCode(),
+			givenMemberSignupForm.detail());
 
 		//when
 		ResultActions resultActions = mockMvc.perform(post("/api/v1/members/join")
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(objectMapper.writeValueAsString(givenMemberSignupRequest)));
+			.content(objectMapper.writeValueAsString(givenMemberSignupForm)));
 
 		//then
 		resultActions.andExpect(status().isBadRequest())
@@ -174,7 +174,7 @@ class MemberControllerTest {
 	@Test
 	void signup_password_match_fail() throws Exception {
 		//given
-		MemberSignupRequest givenMemberSignupRequest = MemberSignupRequest.builder()
+		MemberSignupForm givenMemberSignupForm = MemberSignupForm.builder()
 			.username("test@naver.com")
 			.nickname("testNickname")
 			.password("!testPassword1234")
@@ -186,15 +186,15 @@ class MemberControllerTest {
 			.verifyCode("testCode")
 			.build();
 
-		doNothing().when(memberService).signup(givenMemberSignupRequest.username(), givenMemberSignupRequest.nickname(),
-			givenMemberSignupRequest.password(), givenMemberSignupRequest.verifyCode(), givenMemberSignupRequest.city(),
-			givenMemberSignupRequest.district(), givenMemberSignupRequest.verifyCode(),
-			givenMemberSignupRequest.detail());
+		doNothing().when(memberService).signup(givenMemberSignupForm.username(), givenMemberSignupForm.nickname(),
+			givenMemberSignupForm.password(), givenMemberSignupForm.verifyCode(), givenMemberSignupForm.city(),
+			givenMemberSignupForm.district(), givenMemberSignupForm.verifyCode(),
+			givenMemberSignupForm.detail());
 
 		//when
 		ResultActions resultActions = mockMvc.perform(post("/api/v1/members/join")
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(objectMapper.writeValueAsString(givenMemberSignupRequest)));
+			.content(objectMapper.writeValueAsString(givenMemberSignupForm)));
 
 		//then
 		resultActions.andExpect(status().isBadRequest())
@@ -208,7 +208,7 @@ class MemberControllerTest {
 	@Test
 	void signup_city_not_blank_fail() throws Exception {
 		//given
-		MemberSignupRequest givenMemberSignupRequest = MemberSignupRequest.builder()
+		MemberSignupForm givenMemberSignupForm = MemberSignupForm.builder()
 			.username("test@naver.com")
 			.nickname("testNickname")
 			.password("!testPassword1234")
@@ -220,15 +220,15 @@ class MemberControllerTest {
 			.verifyCode("testCode")
 			.build();
 
-		doNothing().when(memberService).signup(givenMemberSignupRequest.username(), givenMemberSignupRequest.nickname(),
-			givenMemberSignupRequest.password(), givenMemberSignupRequest.verifyCode(), givenMemberSignupRequest.city(),
-			givenMemberSignupRequest.district(), givenMemberSignupRequest.verifyCode(),
-			givenMemberSignupRequest.detail());
+		doNothing().when(memberService).signup(givenMemberSignupForm.username(), givenMemberSignupForm.nickname(),
+			givenMemberSignupForm.password(), givenMemberSignupForm.verifyCode(), givenMemberSignupForm.city(),
+			givenMemberSignupForm.district(), givenMemberSignupForm.verifyCode(),
+			givenMemberSignupForm.detail());
 
 		//when
 		ResultActions resultActions = mockMvc.perform(post("/api/v1/members/join")
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(objectMapper.writeValueAsString(givenMemberSignupRequest)));
+			.content(objectMapper.writeValueAsString(givenMemberSignupForm)));
 
 		//then
 		resultActions.andExpect(status().isBadRequest())
@@ -242,7 +242,7 @@ class MemberControllerTest {
 	@Test
 	void signup_detail_not_blank_fail() throws Exception {
 		//given
-		MemberSignupRequest givenMemberSignupRequest = MemberSignupRequest.builder()
+		MemberSignupForm givenMemberSignupForm = MemberSignupForm.builder()
 			.username("test@naver.com")
 			.nickname("testNickname")
 			.password("!testPassword1234")
@@ -254,15 +254,15 @@ class MemberControllerTest {
 			.verifyCode("testCode")
 			.build();
 
-		doNothing().when(memberService).signup(givenMemberSignupRequest.username(), givenMemberSignupRequest.nickname(),
-			givenMemberSignupRequest.password(), givenMemberSignupRequest.verifyCode(), givenMemberSignupRequest.city(),
-			givenMemberSignupRequest.district(), givenMemberSignupRequest.verifyCode(),
-			givenMemberSignupRequest.detail());
+		doNothing().when(memberService).signup(givenMemberSignupForm.username(), givenMemberSignupForm.nickname(),
+			givenMemberSignupForm.password(), givenMemberSignupForm.verifyCode(), givenMemberSignupForm.city(),
+			givenMemberSignupForm.district(), givenMemberSignupForm.verifyCode(),
+			givenMemberSignupForm.detail());
 
 		//when
 		ResultActions resultActions = mockMvc.perform(post("/api/v1/members/join")
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(objectMapper.writeValueAsString(givenMemberSignupRequest)));
+			.content(objectMapper.writeValueAsString(givenMemberSignupForm)));
 
 		//then
 		resultActions.andExpect(status().isBadRequest())
@@ -276,7 +276,7 @@ class MemberControllerTest {
 	@Test
 	void signup_country_not_blank_fail() throws Exception {
 		//given
-		MemberSignupRequest givenMemberSignupRequest = MemberSignupRequest.builder()
+		MemberSignupForm givenMemberSignupForm = MemberSignupForm.builder()
 			.username("test@naver.com")
 			.nickname("testNickname")
 			.password("!testPassword1234")
@@ -288,15 +288,15 @@ class MemberControllerTest {
 			.verifyCode("testCode")
 			.build();
 
-		doNothing().when(memberService).signup(givenMemberSignupRequest.username(), givenMemberSignupRequest.nickname(),
-			givenMemberSignupRequest.password(), givenMemberSignupRequest.verifyCode(), givenMemberSignupRequest.city(),
-			givenMemberSignupRequest.district(), givenMemberSignupRequest.verifyCode(),
-			givenMemberSignupRequest.detail());
+		doNothing().when(memberService).signup(givenMemberSignupForm.username(), givenMemberSignupForm.nickname(),
+			givenMemberSignupForm.password(), givenMemberSignupForm.verifyCode(), givenMemberSignupForm.city(),
+			givenMemberSignupForm.district(), givenMemberSignupForm.verifyCode(),
+			givenMemberSignupForm.detail());
 
 		//when
 		ResultActions resultActions = mockMvc.perform(post("/api/v1/members/join")
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(objectMapper.writeValueAsString(givenMemberSignupRequest)));
+			.content(objectMapper.writeValueAsString(givenMemberSignupForm)));
 
 		//then
 		resultActions.andExpect(status().isBadRequest())
@@ -310,7 +310,7 @@ class MemberControllerTest {
 	@Test
 	void signup_district_not_blank_fail() throws Exception {
 		//given
-		MemberSignupRequest givenMemberSignupRequest = MemberSignupRequest.builder()
+		MemberSignupForm givenMemberSignupForm = MemberSignupForm.builder()
 			.username("test@naver.com")
 			.nickname("testNickname")
 			.password("!testPassword1234")
@@ -322,15 +322,15 @@ class MemberControllerTest {
 			.verifyCode("testCode")
 			.build();
 
-		doNothing().when(memberService).signup(givenMemberSignupRequest.username(), givenMemberSignupRequest.nickname(),
-			givenMemberSignupRequest.password(), givenMemberSignupRequest.verifyCode(), givenMemberSignupRequest.city(),
-			givenMemberSignupRequest.district(), givenMemberSignupRequest.verifyCode(),
-			givenMemberSignupRequest.detail());
+		doNothing().when(memberService).signup(givenMemberSignupForm.username(), givenMemberSignupForm.nickname(),
+			givenMemberSignupForm.password(), givenMemberSignupForm.verifyCode(), givenMemberSignupForm.city(),
+			givenMemberSignupForm.district(), givenMemberSignupForm.verifyCode(),
+			givenMemberSignupForm.detail());
 
 		//when
 		ResultActions resultActions = mockMvc.perform(post("/api/v1/members/join")
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(objectMapper.writeValueAsString(givenMemberSignupRequest)));
+			.content(objectMapper.writeValueAsString(givenMemberSignupForm)));
 
 		//then
 		resultActions.andExpect(status().isBadRequest())
@@ -344,7 +344,7 @@ class MemberControllerTest {
 	@Test
 	void signup_verifyCode_not_blank_fail() throws Exception {
 		//given
-		MemberSignupRequest givenMemberSignupRequest = MemberSignupRequest.builder()
+		MemberSignupForm givenMemberSignupForm = MemberSignupForm.builder()
 			.username("test@naver.com")
 			.nickname("testNickname")
 			.password("!testPassword1234")
@@ -356,15 +356,15 @@ class MemberControllerTest {
 			.verifyCode("")
 			.build();
 
-		doNothing().when(memberService).signup(givenMemberSignupRequest.username(), givenMemberSignupRequest.nickname(),
-			givenMemberSignupRequest.password(), givenMemberSignupRequest.verifyCode(), givenMemberSignupRequest.city(),
-			givenMemberSignupRequest.district(), givenMemberSignupRequest.verifyCode(),
-			givenMemberSignupRequest.detail());
+		doNothing().when(memberService).signup(givenMemberSignupForm.username(), givenMemberSignupForm.nickname(),
+			givenMemberSignupForm.password(), givenMemberSignupForm.verifyCode(), givenMemberSignupForm.city(),
+			givenMemberSignupForm.district(), givenMemberSignupForm.verifyCode(),
+			givenMemberSignupForm.detail());
 
 		//when
 		ResultActions resultActions = mockMvc.perform(post("/api/v1/members/join")
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(objectMapper.writeValueAsString(givenMemberSignupRequest)));
+			.content(objectMapper.writeValueAsString(givenMemberSignupForm)));
 
 		//then
 		resultActions.andExpect(status().isBadRequest())
@@ -378,7 +378,7 @@ class MemberControllerTest {
 	@Test
 	void signup_nickname_exists_fail() throws Exception {
 		//given
-		MemberSignupRequest givenMemberSignupRequest = MemberSignupRequest.builder()
+		MemberSignupForm givenMemberSignupForm = MemberSignupForm.builder()
 			.username("test@naver.com")
 			.nickname("testNickname")
 			.password("!testPassword1234")
@@ -400,7 +400,7 @@ class MemberControllerTest {
 		//when
 		ResultActions resultActions = mockMvc.perform(post("/api/v1/members/join")
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(objectMapper.writeValueAsString(givenMemberSignupRequest)));
+			.content(objectMapper.writeValueAsString(givenMemberSignupForm)));
 
 		//then
 		resultActions.andExpect(status().isBadRequest())
@@ -412,7 +412,7 @@ class MemberControllerTest {
 	@Test
 	void signup_username_exists_fail() throws Exception {
 		//given
-		MemberSignupRequest givenMemberSignupRequest = MemberSignupRequest.builder()
+		MemberSignupForm givenMemberSignupForm = MemberSignupForm.builder()
 			.username("test@naver.com")
 			.nickname("testNickname")
 			.password("!testPassword1234")
@@ -434,7 +434,7 @@ class MemberControllerTest {
 		//when
 		ResultActions resultActions = mockMvc.perform(post("/api/v1/members/join")
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(objectMapper.writeValueAsString(givenMemberSignupRequest)));
+			.content(objectMapper.writeValueAsString(givenMemberSignupForm)));
 
 		//then
 		resultActions.andExpect(status().isBadRequest())

@@ -11,8 +11,21 @@ import com.example.backend.global.validation.validator.PasswordMatchable;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 
+/**
+ * MemberForm
+ * <p>회원가입시 사용하는 Request 객체 입니다.</p>
+ * @param username 이메일
+ * @param nickname 닉네임
+ * @param password 비밀번호
+ * @param passwordCheck 비밀번호 확인
+ * @param city 시
+ * @param district 지역 구
+ * @param country 도로명 주소
+ * @param detail 상세 주소
+ * @author Kim Dong O
+ */
 @PasswordMatch(groups = PatternGroup.class)
-public record MemberSignupRequest(
+public record MemberSignupForm(
 	@ValidUsername(groups = PatternGroup.class)
 	String username,
 
@@ -39,7 +52,7 @@ public record MemberSignupRequest(
 	implements PasswordMatchable {
 
 	@Builder
-	public MemberSignupRequest(String username, String nickname, String password, String passwordCheck,
+	public MemberSignupForm(String username, String nickname, String password, String passwordCheck,
 		String city, String district, String country, String detail) {
 		this.username = username;
 		this.nickname = nickname;
