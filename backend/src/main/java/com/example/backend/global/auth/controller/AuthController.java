@@ -1,7 +1,16 @@
 package com.example.backend.global.auth.controller;
 
+import com.example.backend.global.auth.dto.AuthForm;
+import com.example.backend.global.auth.dto.AuthLoginResponse;
+import com.example.backend.global.auth.dto.AuthResponse;
+import com.example.backend.global.auth.service.AuthService;
+import com.example.backend.global.auth.service.CookieService;
+import com.example.backend.global.response.GenericResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,26 +34,31 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthController {
 
+    private final AuthService authService;
+    private final CookieService cookieService;
 	private final AuthService authService;
 
     @PostMapping("/login")
+    public ResponseEntity<GenericResponse<AuthLoginResponse>> login(
+        @RequestBody @Valid AuthForm authForm, HttpServletResponse response) {
+        AuthResponse authResponse = authService.login(authForm);
     public ResponseEntity<GenericResponse<AuthResponse>> login(
         @RequestBody @Validated(ValidationSequence.class) AuthForm authForm, HttpServletResponse response) {
         String[] tokens = authService.login(authForm).split(" ");
 
-        setTokenCookie("accessToken", tokens[0], 30 * 60L, response);
-        setTokenCookie("refreshToken", tokens[1], 7 * 24 * 60 * 60L, response);
+        cookieService.addAccessTokenToCookie(authResponse.getAccessToken(), response);
+        cookieService.addRefreshTokenToCookie(authResponse.getRefreshToken(), response);
 
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(GenericResponse.of(AuthResponse.of(authForm.getUsername()), "로그인 성공"));
+        return ResponseEntity.status(HttpStatus.OK).body(GenericResponse.of(
+            AuthLoginResponse.of(authResponse.getId(), authResponse.getUsername()), "로그인 성공"));
     }
 
     @PostMapping("/logout")
     public ResponseEntity<GenericResponse<Void>> logout(HttpServletRequest request, HttpServletResponse response) {
-        String token = request.getHeader("Authorization").replace("Bearer ", "");
+        String accessToken = cookieService.getAccessTokenFromRequest(request);
 
-        authService.logout(token);
-        setTokenCookie("refreshToken", token, 0L, response);
+        authService.logout(accessToken);
+        cookieService.deleteRefreshTokenFromCookie(null, response);
 
         return ResponseEntity.status(HttpStatus.OK).body(GenericResponse.of());
     }

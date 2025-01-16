@@ -23,6 +23,9 @@ import com.example.backend.global.redis.service.RedisService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -51,10 +54,19 @@ public class AuthService {
         String accessToken = jwtProvider.generateAccessToken(findMember.id(), findMember.username(), findMember.role());
         String refreshToken = jwtProvider.generateRefreshToken(findMember.id(), findMember.username());
         refreshTokenService.saveRefreshToken(findMember.username(), refreshToken);
+        String accessToken = jwtProvider.generateAccessToken(member.getId(), member.getUsername(), member.getRole());
+        String refreshToken = jwtProvider.generateRefreshToken(member.getId(), member.getUsername(), member.getRole());
+        refreshTokenService.saveRefreshToken(member.getUsername(), refreshToken);
 
-		return accessToken + " " + refreshToken;
-	}
+        return AuthResponse.of(member.getId(), member.getUsername(), accessToken, refreshToken);
+    }
 
+    public void logout(String accessToken) {
+        String username = jwtUtils.getUsernameFromToken(accessToken);
+
+        refreshTokenService.deleteRefreshToken(username);
+        SecurityContextHolder.clearContext();
+    }
 	public void verify(String username, String certificationCode, VerifyType verifyType) {
 		handleVerify(username, certificationCode, verifyType);
 
