@@ -4,11 +4,13 @@ import com.example.backend.domain.product.dto.ProductForm;
 import com.example.backend.domain.product.dto.ProductResponse;
 import com.example.backend.domain.product.service.ProductService;
 import com.example.backend.global.response.GenericResponse;
+import com.example.backend.global.validation.ValidationSequence;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -23,7 +25,7 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<GenericResponse<ProductResponse>> findById(@PathVariable Long id) {
+    public ResponseEntity<GenericResponse<ProductResponse>> findById(@PathVariable("id") Long id) {
 
         ProductResponse productResponse = productService.findProductResponseById(id);
 
@@ -32,7 +34,7 @@ public class ProductController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<GenericResponse<Void>> create(@RequestBody @Valid ProductForm productForm) {
+    public ResponseEntity<GenericResponse<Void>> create(@RequestBody @Validated(ValidationSequence.class) ProductForm productForm) {
 
         productService.create(productForm);
 

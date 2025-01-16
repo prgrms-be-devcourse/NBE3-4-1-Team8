@@ -1,8 +1,10 @@
 package com.example.backend.domain.product.dto;
 
+import static com.example.backend.global.validation.ValidationGroups.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import org.hibernate.validator.constraints.Length;
 
 /**
@@ -11,20 +13,20 @@ import org.hibernate.validator.constraints.Length;
  * @author 100
  */
 public record ProductForm(
-        @NotBlank(message = "상품 이름은 공백일 수 없습니다.")
-        @Length(min = 2, max = 50, message = "상품 이름은 2자 이상 50자 이하여야 합니다.")
+        @NotBlank(message = "상품 이름은 공백일 수 없습니다.", groups = NotBlankGroup.class)
+        @Length(min = 2, max = 50, message = "상품 이름은 2자 이상 50자 이하여야 합니다.", groups = SizeGroup.class)
         String name,
 
-        @NotBlank(message = "상품 설명은 공백일 수 없습니다.")
+        @NotBlank(message = "상품 설명은 공백일 수 없습니다.", groups = NotBlankGroup.class)
         String content,
 
-        @Min(value = 100, message = "상품 가격은 100원 이상이어야 합니다.")
-        @Max(value = 9999999, message = "상품 가격은 9,999,999원 이하여야 합니다.")
+        @Min(value = 100, message = "상품 가격은 100원 이상이어야 합니다.", groups = MinGroup.class)
+        @Max(value = 9999999, message = "상품 가격은 9,999,999원 이하여야 합니다.", groups = MaxGroup.class)
         int price,
 
         String imgUrl,
 
-        @Min(value = 0, message = "상품 수량은 0 이상이어야 합니다.")
+        @Min(value = 0, message = "상품 수량은 0 이상이어야 합니다.", groups = MaxGroup.class)
         int quantity
 ) {
 
