@@ -44,6 +44,12 @@ class AuthServiceTest {
 	@Mock
 	private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private JwtUtils jwtUtils;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
 	@Mock
 	private MemberRepository memberRepository;
 
@@ -87,15 +93,18 @@ class AuthServiceTest {
 		authForm.setUsername("user@gmail.com");
 		authForm.setPassword("password");
 
-		//when
-		String result = authService.login(authForm);
+        //when
+        AuthResponse result = authService.login(authForm);
 
-		//then
-		assertThat(result).isEqualTo("access_token refresh_token");
-		verify(memberRepository).findByUsername("user@gmail.com");
-		verify(passwordEncoder).matches("password", "password");
-		verify(jwtProvider).generateAccessToken(1L, "user@gmail.com", Role.ROLE_USER);
-		verify(jwtProvider).generateRefreshToken(1L, "user@gmail.com");
+        //then
+        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getUsername()).isEqualTo("user@gmail.com");
+        assertThat(result.getAccessToken()).isEqualTo("access_token");
+        assertThat(result.getRefreshToken()).isEqualTo("refresh_token");
+        verify(memberRepository).findByUsername("user@gmail.com");
+        verify(passwordEncoder).matches("password", "password");
+        verify(jwtProvider).generateAccessToken(1L, "user@gmail.com", Role.ROLE_USER);
+        verify(jwtProvider).generateRefreshToken(1L, "user@gmail.com", Role.ROLE_USER);
 
 		// saveRefreshToken이 호출되었는지 검증
 		verify(refreshTokenService).saveRefreshToken("user@gmail.com", "refresh_token");
