@@ -32,7 +32,7 @@ public class MailConfig {
 	@Value("${mail.port}")
 	private int mailPort;
 	@Value("${mail.username}")
-	private String mailUesrname;
+	private String mailUsername;
 	@Value("${mail.password}")
 	private String mailPassword;
 	@Value("${mail.properties.mail.smtp.auth}")
@@ -59,7 +59,7 @@ public class MailConfig {
 		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 		mailSender.setHost(mailHost);
 		mailSender.setPort(mailPort);
-		mailSender.setUsername(mailUesrname);
+		mailSender.setUsername(mailUsername);
 		mailSender.setPassword(mailPassword);
 		Properties props = System.getProperties();
 		props.put("mail.transport.protocol", "smtp");
