@@ -45,6 +45,12 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body(GenericResponse.of());
     }
 
+    /**
+     * 리프레시 토큰 Set-Cookie로 response에 추가하는 메서드
+     * @param response
+     * @param token
+     * @param expirationTime
+     */
     private void setRefreshTokenCookie(HttpServletResponse response, String token, Long expirationTime) {
         ResponseCookie cookie = ResponseCookie.from("refreshToken", token)
             .httpOnly(true)
@@ -54,7 +60,6 @@ public class AuthController {
             .maxAge(expirationTime)
             .build();
 
-        // Set-Cookie 헤더로 쿠키를 응답에 추가
         response.addHeader("Set-Cookie", cookie.toString());
     }
 }
