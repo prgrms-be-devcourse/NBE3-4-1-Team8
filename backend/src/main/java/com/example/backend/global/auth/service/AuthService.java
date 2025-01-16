@@ -5,11 +5,13 @@ import java.util.Map;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.domain.common.EmailCertification;
 import com.example.backend.domain.common.VerifyType;
 import com.example.backend.domain.member.dto.MemberDto;
 import com.example.backend.domain.member.entity.Member;
+import com.example.backend.domain.member.entity.MemberStatus;
 import com.example.backend.domain.member.exception.MemberErrorCode;
 import com.example.backend.domain.member.exception.MemberException;
 import com.example.backend.domain.member.repository.MemberRepository;
@@ -24,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AuthService {
 	private static final String REDIS_EMAIL_PREFIX = "certification_email:";
 	private final JwtProvider jwtProvider;
@@ -58,7 +61,10 @@ public class AuthService {
         MemberDto findMember = memberRepository.findByUsername(username)
             .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND)).toModel();
 
-		MemberDto verifyMember = findMember.verify();
+        if (MemberStatus.ACTIVE.equals(findMember.memberStatus())) {
+            throw new AuthException(AuthErrorCode.ALREADY_CERTIFIED);
+        }
+        MemberDto verifyMember = findMember.verify();
 
 		memberRepository.save(Member.from(verifyMember));
 	}
