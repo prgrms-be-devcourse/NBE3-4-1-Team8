@@ -19,14 +19,22 @@ import com.example.backend.domain.member.entity.Role;
 import com.example.backend.domain.member.exception.MemberErrorCode;
 import com.example.backend.domain.member.exception.MemberException;
 import com.example.backend.domain.member.repository.MemberRepository;
+import com.example.backend.global.mail.service.MailService;
+import com.example.backend.global.redis.service.RedisService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
 	@Mock
 	private MemberRepository memberRepository;
-
+	@Mock
+	private RedisService redisService;
+	@Mock
+	private MailService mailService;
 	@Mock
 	private PasswordEncoder passwordEncoder;
+	@Mock
+	private ObjectMapper objectMapper;
 
 	@InjectMocks
 	private MemberService memberService;
@@ -44,7 +52,6 @@ class MemberServiceTest {
 			.detail("testDetail")
 			.country("testCountry")
 			.district("testDistrict")
-			.verifyCode("testCode")
 			.build();
 
 		Address givenAddress = Address.builder()
@@ -72,9 +79,8 @@ class MemberServiceTest {
 
 		//when
 		memberService.signup(givenMemberSignupForm.username(), givenMemberSignupForm.nickname(),
-			givenMemberSignupForm.password(), givenMemberSignupForm.passwordCheck(),
-			givenMemberSignupForm.city(), givenMemberSignupForm.district(), givenMemberSignupForm.country(),
-			givenMemberSignupForm.detail());
+			givenMemberSignupForm.password(), givenMemberSignupForm.city(), givenMemberSignupForm.district(),
+			givenMemberSignupForm.country(), givenMemberSignupForm.detail());
 
 		//then
 		verify(passwordEncoder, times(1)).encode(givenMemberSignupForm.password());
@@ -96,7 +102,6 @@ class MemberServiceTest {
 			.detail("testDetail")
 			.country("testCountry")
 			.district("testDistrict")
-			.verifyCode("testCode")
 			.build();
 
 		Address givenAddress = Address.builder()
@@ -120,9 +125,8 @@ class MemberServiceTest {
 		//when & then
 		Assertions.assertThatThrownBy(() -> memberService.signup(
 				givenMemberSignupForm.username(), givenMemberSignupForm.nickname(),
-			givenMemberSignupForm.password(), givenMemberSignupForm.passwordCheck(),
-			givenMemberSignupForm.city(), givenMemberSignupForm.district(), givenMemberSignupForm.country(),
-			givenMemberSignupForm.detail()))
+				givenMemberSignupForm.password(), givenMemberSignupForm.city(), givenMemberSignupForm.district(),
+				givenMemberSignupForm.country(), givenMemberSignupForm.detail()))
 			.isInstanceOf(MemberException.class)
 			.hasMessage(MemberErrorCode.EXISTS_USERNAME.getMessage());
 	}
@@ -140,7 +144,6 @@ class MemberServiceTest {
 			.detail("testDetail")
 			.country("testCountry")
 			.district("testDistrict")
-			.verifyCode("testCode")
 			.build();
 
 		Address givenAddress = Address.builder()
@@ -164,9 +167,8 @@ class MemberServiceTest {
 		//when & then
 		Assertions.assertThatThrownBy(() -> memberService.signup(
 				givenMemberSignupForm.username(), givenMemberSignupForm.nickname(),
-			givenMemberSignupForm.password(), givenMemberSignupForm.passwordCheck(),
-			givenMemberSignupForm.city(), givenMemberSignupForm.district(), givenMemberSignupForm.country(),
-			givenMemberSignupForm.detail()))
+				givenMemberSignupForm.password(), givenMemberSignupForm.city(), givenMemberSignupForm.district(),
+				givenMemberSignupForm.country(), givenMemberSignupForm.detail()))
 			.isInstanceOf(MemberException.class)
 			.hasMessage(MemberErrorCode.EXISTS_NICKNAME.getMessage());
 	}
