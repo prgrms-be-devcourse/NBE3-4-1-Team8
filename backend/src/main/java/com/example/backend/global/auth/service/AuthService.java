@@ -41,7 +41,7 @@ public class AuthService {
             throw new AuthException(AuthErrorCode.PASSWORD_NOT_MATCH);
         }
 
-        if (MemberStatus.PENDING.equals(findMember.memberStatus())) {
+        if (!MemberStatus.ACTIVE.equals(findMember.memberStatus())) {
             throw new AuthException(AuthErrorCode.NOT_CERTIFICATION);
         }
 
