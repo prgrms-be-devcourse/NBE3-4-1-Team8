@@ -26,7 +26,7 @@ public class MemberController {
 		@RequestBody @Validated(ValidationSequence.class) MemberSignupRequest memberSignupRequest) {
 
 		memberService.signup(memberSignupRequest.username(), memberSignupRequest.nickname(),
-			memberSignupRequest.password(), memberSignupRequest.verifyCode(), memberSignupRequest.city(),
+			memberSignupRequest.password(), memberSignupRequest.city(),
 			memberSignupRequest.district(), memberSignupRequest.country(), memberSignupRequest.detail());
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(GenericResponse.of());
