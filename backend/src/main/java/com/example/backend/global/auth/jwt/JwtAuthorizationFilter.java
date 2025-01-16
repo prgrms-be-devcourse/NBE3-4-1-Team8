@@ -1,22 +1,24 @@
 package com.example.backend.global.auth.jwt;
 
-import com.example.backend.global.auth.exception.AuthErrorCode;
-import com.example.backend.global.auth.model.CustomUserDetails;
-import com.example.backend.global.auth.service.CustomUserDetailsService;
-import com.example.backend.global.response.HttpErrorInfo;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import com.example.backend.global.auth.exception.AuthErrorCode;
+import com.example.backend.global.auth.model.CustomUserDetails;
+import com.example.backend.global.auth.service.CustomUserDetailsService;
+import com.example.backend.global.response.HttpErrorInfo;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
@@ -85,6 +87,6 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     private boolean isUnprotectedUrl(HttpServletRequest request) {
         String path = request.getRequestURI();
         return path.equals("/api/v1/auth/login") || path.equals("/api/v1/members/join")
-            || path.equals("/api/v1/auth/refresh");
+            || path.equals("/api/v1/auth/refresh") || path.equals("/api/v1/auth/verify");
     }
 }
