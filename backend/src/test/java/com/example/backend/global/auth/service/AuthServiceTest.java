@@ -343,12 +343,12 @@ class AuthServiceTest {
 
 		//when & then
 		assertThatThrownBy(() -> authService.verify(givenEmailCertificationForm.username(),
-            givenEmailCertificationForm.certificationCode(), givenEmailCertificationForm.verifyType()))
-            .isInstanceOf(AuthException.class)
-            .hasMessage(AuthErrorCode.VERIFY_TYPE_NOT_MATCH.getMessage());
+			givenEmailCertificationForm.certificationCode(), givenEmailCertificationForm.verifyType()))
+			.isInstanceOf(AuthException.class)
+			.hasMessage(AuthErrorCode.VERIFY_TYPE_NOT_MATCH.getMessage());
 	}
 
-    @DisplayName("이메일 인증시 인증 코드가 일치하지 않을 때 실패 테스트")
+	@DisplayName("이메일 인증시 인증 코드가 일치하지 않을 때 실패 테스트")
 	@Test
 	void verify_certification_not_match_fail() {
 		//given
