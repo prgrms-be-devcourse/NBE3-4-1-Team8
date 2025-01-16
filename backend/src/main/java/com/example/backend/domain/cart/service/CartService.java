@@ -9,47 +9,52 @@ import com.example.backend.domain.member.entity.Member;
 import com.example.backend.domain.member.repository.MemberRepository;
 import com.example.backend.domain.product.entity.Product;
 import com.example.backend.domain.product.repository.ProductRepository;
+import com.example.backend.global.auth.model.CustomUserDetails;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class CartService {
 
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
     private final MemberRepository memberRepository;
 
+    @Transactional
     public Long addCartItem(CartForm cartForm) {
-        // 회원 조회
-        Member member = memberRepository.findById(cartForm.getMemberId())
-                .orElseThrow(()->new CartException(CartErrorCode.INVALID_MEMBER_ID));
 
-        // 상품 조회
-        Product product = productRepository.findById(cartForm.getProductId())
-                .orElseThrow(()->new CartException(CartErrorCode.INVALID_PRODUCT_ID));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long memberId = ((CustomUserDetails) authentication.getPrincipal()).getMember().getId();
+        Long productId = cartForm.getProductId();
+        int quantity = cartForm.getQuantity();
 
-        // 현재 장바구니에 있는 동일 상품의 수량 합산
-        int currentCartQuantity = cartRepository.findByMemberIdAndProductId(member, product)
-                .map(Cart::getQuantity)
-                .orElse(0);
-
-        // 재고 확인
-        if (cartForm.getQuantity() + currentCartQuantity > product.getQuantity()) {
-            throw new CartException(CartErrorCode.INSUFFICIENT_STOCK);
+        // 유효성 검사
+        if (quantity <= 0) {
+            throw new CartException(CartErrorCode.INVALID_QUANTITY);
         }
 
-        // 요청된 상품 -> 장바구니 저장
+        // 장바구니에 상품 존재 여부 확인(존재하면 exception 발생)
+        if (cartRepository.existsByProductId_IdAndMemberId_Id(productId, memberId)) {
+            throw new CartException(CartErrorCode.ALREADY_EXISTS_IN_CART);
+        }
+
+        // 회원 및 상품 조회
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CartException(CartErrorCode.INVALID_MEMBER_ID));
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new CartException(CartErrorCode.INVALID_PRODUCT_ID));
+
+        // 장바구니에 새로운 상품 추가
         Cart cart = Cart.builder()
                 .memberId(member)
                 .productId(product)
-                .quantity(cartForm.getQuantity())
+                .quantity(quantity)
                 .build();
 
-        // 저장 후 ID 반환
         return cartRepository.save(cart).getId();
-
     }
 }
