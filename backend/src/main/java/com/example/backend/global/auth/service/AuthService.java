@@ -7,6 +7,7 @@ import com.example.backend.global.auth.exception.AuthErrorCode;
 import com.example.backend.global.auth.exception.AuthException;
 import com.example.backend.global.auth.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -37,5 +38,8 @@ public class AuthService {
     public void logout(String accessToken) {
         String username = jwtProvider.getUsernameFromToken(accessToken);
         refreshTokenService.deleteRefreshToken(username);
+
+        // 시큐리티 컨텍스트 초기화
+        SecurityContextHolder.clearContext();
     }
 }
