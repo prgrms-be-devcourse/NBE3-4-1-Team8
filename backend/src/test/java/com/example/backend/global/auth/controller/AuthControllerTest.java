@@ -255,4 +255,28 @@ public class AuthControllerTest {
 			.andExpect(jsonPath("$.errorDetails[0].field").value("certificationCode"))
 			.andExpect(jsonPath("$.errorDetails[0].reason").value("인증 코드는 필수 항목 입니다."));
 	}
+
+	@DisplayName("이메일 인증시 인증 타입이 비었을 때 실패 테스트")
+	@Test
+	void verify_verify_type_valid_enum_fail() throws Exception {
+		//given
+		EmailCertificationForm givenEmailCertificationForm = EmailCertificationForm.builder()
+			.username("testEmail@naver.com")
+			.certificationCode("testCode")
+			.verifyType(null)
+			.build();
+
+		//when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/auth/verify")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(givenEmailCertificationForm)));
+
+		//then
+		resultActions
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value(GlobalErrorCode.NOT_VALID.getCode()))
+			.andExpect(jsonPath("$.message").value(GlobalErrorCode.NOT_VALID.getMessage()))
+			.andExpect(jsonPath("$.errorDetails[0].field").value("verifyType"))
+			.andExpect(jsonPath("$.errorDetails[0].reason").value("인증 타입은 필수 항목 입니다."));
+	}
 }
