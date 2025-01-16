@@ -11,13 +11,15 @@ import org.hibernate.validator.constraints.Length;
  * @author 100
  */
 public record ProductForm(
-        @NotBlank(message = "상품 이름은 공백일 수 없습니다.") @Length(min = 2, max = 50)
+        @NotBlank(message = "상품 이름은 공백일 수 없습니다.")
+        @Length(min = 2, max = 50, message = "상품 이름은 2자 이상 50자 이하여야 합니다.")
         String name,
 
         @NotBlank(message = "상품 설명은 공백일 수 없습니다.")
         String content,
 
-        @Min(value = 100) @Max(value = 9999999)
+        @Min(value = 100, message = "상품 가격은 100원 이상이어야 합니다.")
+        @Max(value = 9999999, message = "상품 가격은 9,999,999원 이하여야 합니다.")
         int price,
 
         String imgUrl,
