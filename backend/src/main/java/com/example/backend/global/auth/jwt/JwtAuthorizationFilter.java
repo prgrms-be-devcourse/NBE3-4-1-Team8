@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -42,13 +43,19 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             createErrorInfo(AuthErrorCode.TOKEN_NOT_VALID, request, response);
             return;
         } else {
-            CustomUserDetails customUserDetails = (CustomUserDetails) customUserDetailsService.loadUserByUsername(
-                jwtProvider.getUsernameFromToken(token));
+            try {
+                CustomUserDetails customUserDetails = (CustomUserDetails) customUserDetailsService.loadUserByUsername(
+                    jwtProvider.getUsernameFromToken(token));
 
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                customUserDetails, null, customUserDetails.getAuthorities());
-            authentication.setDetails(new WebAuthenticationDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                    customUserDetails, null, customUserDetails.getAuthorities());
+                authentication.setDetails(new WebAuthenticationDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } catch (UsernameNotFoundException e) {
+                createErrorInfo(AuthErrorCode.USER_NOT_FOUND, request, response);
+                return;
+            }
+
         }
         filterChain.doFilter(request, response);
     }
