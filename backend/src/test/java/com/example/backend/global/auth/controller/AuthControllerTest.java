@@ -19,6 +19,8 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.example.backend.domain.common.VerifyType;
 import com.example.backend.domain.member.repository.MemberRepository;
 import com.example.backend.global.auth.dto.EmailCertificationForm;
+import com.example.backend.global.auth.exception.AuthErrorCode;
+import com.example.backend.global.auth.exception.AuthException;
 import com.example.backend.global.auth.jwt.JwtProvider;
 import com.example.backend.global.auth.service.AuthService;
 import com.example.backend.global.auth.service.CustomUserDetailsService;
@@ -73,5 +75,30 @@ public class AuthControllerTest {
 		resultActions.andExpect(status().isOk());
 	}
 
+	@DisplayName("이메일 인증 정보 조회 실패 테스트")
+	@Test
+	void verify_certification_not_found_fail() throws Exception {
+		//given
+		EmailCertificationForm givenEmailCertificationForm = EmailCertificationForm.builder()
+			.username("testEmail@naver.com")
+			.certificationCode("testCode")
+			.verifyType(VerifyType.SIGNUP)
+			.build();
+
+		doThrow(new AuthException(AuthErrorCode.CERTIFICATION_CODE_NOT_FOUND))
+			.when(authService).verify(givenEmailCertificationForm.username(),
+				givenEmailCertificationForm.certificationCode(), givenEmailCertificationForm.verifyType());
+
+		//when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/auth/verify")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(givenEmailCertificationForm)));
+
+		//then
+		resultActions
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.code").value(AuthErrorCode.CERTIFICATION_CODE_NOT_FOUND.getCode()))
+			.andExpect(jsonPath("$.message").value(AuthErrorCode.CERTIFICATION_CODE_NOT_FOUND.getMessage()));
+	}
 
 }
