@@ -118,6 +118,7 @@ class AuthServiceTest {
 		// saveRefreshToken이 호출되었는지 검증
 		verify(refreshTokenService).saveRefreshToken("user@gmail.com", "refresh_token");
 	}
+
 	@Test
 	@DisplayName("로그인 실패 - 이메일 미인증일 때")
 	void loginFail_memberStatus_pending() {
@@ -272,7 +273,7 @@ class AuthServiceTest {
 		verify(redisService, times(1)).delete(givenRedisPrefix + givenEmailCertificationForm.username());
 	}
 
-    @DisplayName("이메일 인증시 인증 정보 없을 때 실패 테스트")
+	@DisplayName("이메일 인증시 인증 정보 없을 때 실패 테스트")
 	@Test
 	void verify_emailCertification_not_found_fail() {
 		//given
@@ -301,18 +302,18 @@ class AuthServiceTest {
 			.verifyType(VerifyType.SIGNUP)
 			.username("testEmail@naver.com")
 			.build();
-        
+
 		given(redisService.getHashDataAll(givenRedisPrefix + givenEmailCertificationForm.username()))
 			.willReturn(Map.of());
 
 		//when & then
 		assertThatThrownBy(() -> authService.verify(givenEmailCertificationForm.username(),
-            givenEmailCertificationForm.certificationCode(), givenEmailCertificationForm.verifyType()))
-            .isInstanceOf(AuthException.class)
-            .hasMessage(AuthErrorCode.CERTIFICATION_CODE_NOT_FOUND.getMessage());
+			givenEmailCertificationForm.certificationCode(), givenEmailCertificationForm.verifyType()))
+			.isInstanceOf(AuthException.class)
+			.hasMessage(AuthErrorCode.CERTIFICATION_CODE_NOT_FOUND.getMessage());
 	}
 
-    @DisplayName("이메일 인증시 인증 타입이 일치하지 않을 때 실패 테스트")
+	@DisplayName("이메일 인증시 인증 타입이 일치하지 않을 때 실패 테스트")
 	@Test
 	void verify_verify_type_not_match_fail() {
 		//given
@@ -342,27 +343,27 @@ class AuthServiceTest {
 			.username("testEmail@naver.com")
 			.build();
 
-        EmailCertification givenEmailCertification = EmailCertification.builder()
-            .verifyType(VerifyType.PASSWORD_RESET.toString())
-            .certificationCode(givenEmailCertificationForm.certificationCode())
-            .sendCount("1")
-            .build();
+		EmailCertification givenEmailCertification = EmailCertification.builder()
+			.verifyType(VerifyType.PASSWORD_RESET.toString())
+			.certificationCode(givenEmailCertificationForm.certificationCode())
+			.sendCount("1")
+			.build();
 
-        Map<Object, Object> givenConvertMap = testObjectMapper.convertValue(givenEmailCertification, Map.class);
+		Map<Object, Object> givenConvertMap = testObjectMapper.convertValue(givenEmailCertification, Map.class);
 
-        given(redisService.getHashDataAll(givenRedisPrefix + givenEmailCertificationForm.username()))
+		given(redisService.getHashDataAll(givenRedisPrefix + givenEmailCertificationForm.username()))
 			.willReturn(givenConvertMap);
 
 		given(objectMapper.convertValue(givenConvertMap, EmailCertification.class)).willReturn(givenEmailCertification);
 
 		//when & then
 		assertThatThrownBy(() -> authService.verify(givenEmailCertificationForm.username(),
-            givenEmailCertificationForm.certificationCode(), givenEmailCertificationForm.verifyType()))
-            .isInstanceOf(AuthException.class)
-            .hasMessage(AuthErrorCode.VERIFY_TYPE_NOT_MATCH.getMessage());
+			givenEmailCertificationForm.certificationCode(), givenEmailCertificationForm.verifyType()))
+			.isInstanceOf(AuthException.class)
+			.hasMessage(AuthErrorCode.VERIFY_TYPE_NOT_MATCH.getMessage());
 	}
 
-    @DisplayName("이메일 인증시 인증 코드가 일치하지 않을 때 실패 테스트")
+	@DisplayName("이메일 인증시 인증 코드가 일치하지 않을 때 실패 테스트")
 	@Test
 	void verify_certification_not_match_fail() {
 		//given
@@ -392,27 +393,27 @@ class AuthServiceTest {
 			.username("testEmail@naver.com")
 			.build();
 
-        EmailCertification givenEmailCertification = EmailCertification.builder()
-            .verifyType(givenEmailCertificationForm.verifyType().toString())
-            .certificationCode("notMatchCode")
-            .sendCount("1")
-            .build();
+		EmailCertification givenEmailCertification = EmailCertification.builder()
+			.verifyType(givenEmailCertificationForm.verifyType().toString())
+			.certificationCode("notMatchCode")
+			.sendCount("1")
+			.build();
 
-        Map<Object, Object> givenConvertMap = testObjectMapper.convertValue(givenEmailCertification, Map.class);
+		Map<Object, Object> givenConvertMap = testObjectMapper.convertValue(givenEmailCertification, Map.class);
 
-        given(redisService.getHashDataAll(givenRedisPrefix + givenEmailCertificationForm.username()))
+		given(redisService.getHashDataAll(givenRedisPrefix + givenEmailCertificationForm.username()))
 			.willReturn(givenConvertMap);
 
 		given(objectMapper.convertValue(givenConvertMap, EmailCertification.class)).willReturn(givenEmailCertification);
 
 		//when & then
 		assertThatThrownBy(() -> authService.verify(givenEmailCertificationForm.username(),
-            givenEmailCertificationForm.certificationCode(), givenEmailCertificationForm.verifyType()))
-            .isInstanceOf(AuthException.class)
-            .hasMessage(AuthErrorCode.CERTIFICATION_CODE_NOT_MATCH.getMessage());
+			givenEmailCertificationForm.certificationCode(), givenEmailCertificationForm.verifyType()))
+			.isInstanceOf(AuthException.class)
+			.hasMessage(AuthErrorCode.CERTIFICATION_CODE_NOT_MATCH.getMessage());
 	}
 
-    @DisplayName("이메일 인증시 회원 조회 실패 테스트")
+	@DisplayName("이메일 인증시 회원 조회 실패 테스트")
 	@Test
 	void verify_member_not_found_fail() {
 		//given
@@ -461,10 +462,63 @@ class AuthServiceTest {
 		doNothing().when(redisService).delete(givenRedisPrefix + givenEmailCertificationForm.username());
 
 		//when & then
-        assertThatThrownBy(() -> authService.verify(givenEmailCertificationForm.username(),
+		assertThatThrownBy(() -> authService.verify(givenEmailCertificationForm.username(),
 			givenEmailCertificationForm.certificationCode(), givenEmailCertificationForm.verifyType()))
-            .isInstanceOf(MemberException.class)
+			.isInstanceOf(MemberException.class)
 			.hasMessage(MemberErrorCode.MEMBER_NOT_FOUND.getMessage());
+	}
 
+	@DisplayName("이메일 인증시 이미 인증이 되어 있을 때 실패 테스트")
+	@Test
+	void verify_already_certified_fail() {
+		//given
+		String givenRedisPrefix = "certification_email:";
+		Address givenAddress = Address.builder()
+			.city("testCity")
+			.detail("testDetail")
+			.country("testCountry")
+			.district("testDistrict")
+			.build();
+
+		MemberDto givenMember = MemberDto.builder()
+			.username("testEmail@naver.com")
+			.nickname("testNickName")
+			.password("!testPassword1234")
+			.address(givenAddress)
+			.memberStatus(MemberStatus.ACTIVE)
+			.role(Role.ROLE_USER)
+			.build();
+
+		MemberDto verifyMember = givenMember.verify();
+
+		EmailCertificationForm givenEmailCertificationForm = EmailCertificationForm.builder()
+			.certificationCode("testCode")
+			.verifyType(VerifyType.SIGNUP)
+			.username("testEmail@naver.com")
+			.build();
+
+		EmailCertification givenEmailCertification = EmailCertification.builder()
+			.certificationCode(givenEmailCertificationForm.certificationCode())
+			.verifyType(givenEmailCertificationForm.verifyType().toString())
+			.sendCount("1")
+			.build();
+
+		Map<Object, Object> givenConvertMap = testObjectMapper.convertValue(givenEmailCertification, Map.class);
+
+		given(redisService.getHashDataAll(givenRedisPrefix + givenEmailCertificationForm.username()))
+			.willReturn(givenConvertMap);
+
+		given(objectMapper.convertValue(givenConvertMap, EmailCertification.class)).willReturn(givenEmailCertification);
+
+		given(memberRepository.findByUsername(givenEmailCertificationForm.username()))
+			.willReturn(Optional.of(Member.from(givenMember)));
+
+		doNothing().when(redisService).delete(givenRedisPrefix + givenEmailCertificationForm.username());
+
+		//when & then
+		assertThatThrownBy(() -> authService.verify(givenEmailCertificationForm.username(),
+			givenEmailCertificationForm.certificationCode(), givenEmailCertificationForm.verifyType()))
+			.isInstanceOf(AuthException.class)
+			.hasMessage(AuthErrorCode.ALREADY_CERTIFIED.getMessage());
 	}
 }
