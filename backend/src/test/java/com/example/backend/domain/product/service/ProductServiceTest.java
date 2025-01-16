@@ -3,37 +3,36 @@ package com.example.backend.domain.product.service;
 import com.example.backend.domain.product.dto.ProductForm;
 import com.example.backend.domain.product.dto.ProductResponse;
 import com.example.backend.domain.product.entity.Product;
-import com.example.backend.global.config.JpaAuditingConfig;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import org.junit.jupiter.api.BeforeEach;
+import com.example.backend.domain.product.exception.ProductException;
+import com.example.backend.domain.product.repository.ProductRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 /**
  * ProductServiceTest
- * <p></p>
+ * ProductService 테스트 클래스
  *
- * @author 100mi
+ * @author 100minha
  */
-@SpringBootTest
-@Import(JpaAuditingConfig.class)
-@ActiveProfiles("test")
-@Transactional
+@ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
 
-    @Autowired
-    private ProductService productService;
+    @Mock
+    private ProductRepository productRepository;
 
-    @PersistenceContext
-    private EntityManager em;
+    @InjectMocks
+    private ProductService productService;
 
     private final String name1 = "Test Product Name";
     private final String content1 = "Test Product Description";
@@ -41,40 +40,44 @@ class ProductServiceTest {
     private final String imgUrl1 = "Test Product Image";
     private final int quantity1 = 10;
 
-    private Long productId;
-
-    /**
-     * id 1부터 시작하도록 초기화 후 상품 생성
-     */
-    @BeforeEach
-    void setUp() {
-        em.createNativeQuery("ALTER TABLE product ALTER COLUMN id RESTART WITH 1").executeUpdate();
-
-        productService.create(new ProductForm(
-                name1,
-                content1,
-                price1,
-                imgUrl1,
-                quantity1
-        ));
-    }
+    ProductForm productForm1 = new ProductForm(name1, content1, price1, imgUrl1, quantity1);
+    Product product1 = Product.builder()
+            .name(name1)
+            .content(content1)
+            .price(price1)
+            .imgUrl(imgUrl1)
+            .quantity(quantity1)
+            .build();
 
     @Test
     @DisplayName("상품 등록 테스트")
     void createTest() {
         // given
+        ArgumentCaptor<Product> productCaptor = ArgumentCaptor.forClass(Product.class);
+
         // when
+        productService.create(productForm1);
 
         // then
-        assertThat(productService.findById(1L)).isInstanceOf(Product.class);
+        verify(productRepository, times(1)).save(productCaptor.capture());
+        Product savedProduct = productCaptor.getValue();
+
+        assertThat(name1).isEqualTo(savedProduct.getName());
+        assertThat(content1).isEqualTo(savedProduct.getContent());
+        assertThat(price1).isEqualTo(savedProduct.getPrice());
+        assertThat(imgUrl1).isEqualTo(savedProduct.getImgUrl());
+        assertThat(quantity1).isEqualTo(savedProduct.getQuantity());
     }
 
     @Test
-    @DisplayName("상품 조회(Entity) 테스트")
-    void findById() {
+    @DisplayName("상품 조회(Entity) 성공 테스트")
+    void findByIdSuccessTest() {
         // given
+        Long id = 1L;
+        when(productRepository.findById(id)).thenReturn(Optional.of(product1));
+
         // when
-        Product product = productService.findById(1L);
+        Product product = productService.findById(id);
 
         // then
         assertThat(product.getName()).isEqualTo(this.name1);
@@ -85,9 +88,29 @@ class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("상품 조회(DTO) 테스트")
-    void findProductResponseById() {
+    @DisplayName("상품 조회(Entity) 실패 테스트")
+    void findByIdFailTest() {
         // given
+        Long invalidId = 999L; // 존재하지 않는 상품 ID
+        when(productRepository.findById(invalidId)).thenReturn(Optional.empty());
+
+        // when
+        ProductException exception = assertThrows(
+                ProductException.class,
+                () -> productService.findById(invalidId)
+        );
+
+        // then
+        assertThat(exception.getCode()).isEqualTo("404");
+    }
+
+    @Test
+    @DisplayName("상품 조회(DTO) 테스트")
+    void findProductResponseByIdSuccessTest() {
+        // given
+        Long id = 1L;
+        when(productRepository.findProductResponseById(id)).thenReturn(Optional.of(ProductResponse.of(product1)));
+
         // when
         ProductResponse productResponse = productService.findProductResponseById(1L);
 
@@ -97,5 +120,22 @@ class ProductServiceTest {
         assertThat(productResponse.price()).isEqualTo(this.price1);
         assertThat(productResponse.imgUrl()).isEqualTo(this.imgUrl1);
         assertThat(productResponse.quantity()).isEqualTo(this.quantity1);
+    }
+
+    @Test
+    @DisplayName("상품 조회(DTO) 실패 테스트")
+    void findProductResponseByIdFailTest() {
+        // given
+        Long invalidId = 999L; // 존재하지 않는 상품 ID
+        when(productRepository.findProductResponseById(invalidId)).thenReturn(Optional.empty());
+
+        // when
+        ProductException exception = assertThrows(
+                ProductException.class,
+                () -> productService.findProductResponseById(invalidId)
+        );
+
+        // then
+        assertThat(exception.getCode()).isEqualTo("404");
     }
 }
