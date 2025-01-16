@@ -41,6 +41,13 @@ public class ProductOrders extends BaseEntity {
     }
 
     /**
+     * 연관관계 편의 메서드
+     */
+
+    public void addOrders(Orders orders){
+        this.orders = orders;
+    }
+    /**
      * 주문상품 가격 총합 조회
      */
     public int getTotalPrice() {

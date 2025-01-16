@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -48,8 +49,9 @@ public class OrdersService {
     public List<OrdersResponse> current(String username) {
         Member member = getMember(username);
 
-        List<Orders> ordersList = ordersRepository
-                .findByMemberIdAndDeliveryStatus(member.getId(), DeliveryStatus.READY);
+        List<Orders> ordersList = Optional.ofNullable(
+                ordersRepository.findByMemberIdAndDeliveryStatus(member.getId(), DeliveryStatus.READY)
+        ).orElseThrow(() -> new OrdersException(OrdersErrorCode.NOT_FOUND));
 
         List<OrdersResponse> responseList = ordersList.stream().map(
                 o -> OrdersResponse.builder()

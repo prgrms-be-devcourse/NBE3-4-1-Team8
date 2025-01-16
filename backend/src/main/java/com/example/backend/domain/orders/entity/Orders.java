@@ -40,13 +40,20 @@ public class Orders extends BaseEntity {
     public Orders(Long id, Member member, List<ProductOrders> productOrders, int totalPrice) {
         this.id = id;
         this.member = member;
-        this.productOrders = productOrders;
+        addProductOrder(productOrders);
         this.totalPrice = totalPrice;
         this.deliveryStatus = DeliveryStatus.READY;
     }
 
-    // todo 연관관계 메서드 구현 필요
-
+    /**
+     * 연관관계 편의 메서드
+     */
+    public void addProductOrder(List<ProductOrders> productOrders){
+        for (ProductOrders po : productOrders) {
+            this.productOrders.add(po);
+            po.addOrders(this);
+        }
+    }
 
     /**
      * 주문가격 총합 조회

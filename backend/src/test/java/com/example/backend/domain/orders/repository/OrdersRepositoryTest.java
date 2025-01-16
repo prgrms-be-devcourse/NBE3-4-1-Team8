@@ -6,10 +6,12 @@ import com.example.backend.domain.member.entity.Member;
 import com.example.backend.domain.member.entity.Role;
 import com.example.backend.domain.member.repository.MemberRepository;
 import com.example.backend.domain.orders.entity.Orders;
+import com.example.backend.domain.orders.status.DeliveryStatus;
 import com.example.backend.domain.product.entity.Product;
 import com.example.backend.domain.product.repository.ProductRepository;
 import com.example.backend.domain.productOrders.entity.ProductOrders;
 import com.example.backend.domain.productOrders.repository.ProductOrdersRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,8 +23,11 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.*;
+
 @Transactional
 @DataJpaTest
+@Slf4j
 public class OrdersRepositoryTest {
 
     @Autowired
@@ -94,10 +99,40 @@ public class OrdersRepositoryTest {
         Orders savedOrder = ordersRepository.save(orders);
 
         // 저장된 주문이 예상한 주문과 동일한지 검증
-        Assertions.assertThat(orders).isEqualTo(savedOrder);
-        Assertions.assertThat(orders.getMember()).isEqualTo(savedOrder.getMember());
-        Assertions.assertThat(orders.getProductOrders()).isEqualTo(savedOrder.getProductOrders());
-        Assertions.assertThat(200).isEqualTo(savedOrder.getTotalPrice());
+        assertThat(orders).isEqualTo(savedOrder);
+        assertThat(orders.getMember()).isEqualTo(savedOrder.getMember());
+        assertThat(orders.getProductOrders()).isEqualTo(savedOrder.getProductOrders());
+        assertThat(200).isEqualTo(savedOrder.getTotalPrice());
+    }
+
+    @Test
+    @DisplayName("현재 주문 조회 성공")
+    void findByMemberIdAndDeliveryStatus() {
+        Member savedMember = memberRepository.save(createMember());
+        log.info("memberId = {}", savedMember.getId()); // memberId: 1 반환
+
+        Product savedProduct = productRepository.save(createProduct());
+
+        ProductOrders savedProductOrders = productOrdersRepository.save(createProductOrders(savedProduct));
+
+        Orders orders = Orders.create()
+                .member(savedMember)
+                .productOrders(List.of(savedProductOrders))
+                .totalPrice(200)
+                .build();
+
+        Orders save = ordersRepository.save(orders);
+
+        List<Orders> ordersList =
+                ordersRepository.findByMemberIdAndDeliveryStatus(save.getMember().getId(), DeliveryStatus.READY);
+
+        log.info("orderList = {}", ordersList);
+
+        log.info("memberId = {}", save.getMember().getId()); // 이것조차 이상 없음 memberId 는 잘 저장됨
+
+        assertThat(ordersList.size()).isEqualTo(1);
+        assertThat(ordersList.get(0).getDeliveryStatus()).isEqualTo(DeliveryStatus.READY);
+        assertThat(ordersList.get(0).getMember().getUsername()).isEqualTo("test");
     }
 
 
