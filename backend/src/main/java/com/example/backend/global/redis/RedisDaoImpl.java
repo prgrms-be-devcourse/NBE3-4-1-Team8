@@ -3,23 +3,19 @@ package com.example.backend.global.redis;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class RedisDaoImpl implements RedisDao {
 	private final RedisTemplate<String, Object> redisTemplate;
-
-	@Autowired
-	public RedisDaoImpl(RedisTemplate<String, Object> redisTemplate) {
-		this.redisTemplate = redisTemplate;
-	}
 
 	@Override
 	public void setData(String key, String data, long timeout) {
