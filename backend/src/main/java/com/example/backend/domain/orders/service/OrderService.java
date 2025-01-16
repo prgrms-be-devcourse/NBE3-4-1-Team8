@@ -23,7 +23,7 @@ public class OrderService {
 
     public OrderResponse findOne(Long id) {
         Orders orders = orderRepository.findOrderById(id)
-                .orElseThrow(() -> new OrdersException(OrdersErrorCode.NULL_POINT));
+                .orElseThrow(() -> new OrdersException(OrdersErrorCode.NOT_FOUND));
 
         // map 으로 돌려서 <List>ProductInfoDto 로 변환 후 Response 에 저장
         List<ProductInfoDto> productInfoDtoList = toProductInfoDtos(orders);
