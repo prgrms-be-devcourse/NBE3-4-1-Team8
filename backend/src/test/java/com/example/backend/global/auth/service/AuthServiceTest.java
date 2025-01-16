@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.example.backend.domain.common.Address;
@@ -193,22 +194,6 @@ class AuthServiceTest {
 
         verify(memberRepository).findByUsername("user@gmail.com");
         verify(passwordEncoder).matches("pw", "password");
-    }
-
-    @Test
-    @DisplayName("로그아웃 성공 시 리프레시 토큰 레디스에서 삭제")
-    void logoutSuccess() {
-        //given
-        String accessToken = "accessToken";
-        String username = "user@gmail.com";
-        when(jwtProvider.getUsernameFromToken(any(String.class))).thenReturn(username);
-
-        //when
-        authService.logout(accessToken);
-
-        //then
-        verify(jwtProvider).getUsernameFromToken(accessToken);
-        verify(refreshTokenService).deleteRefreshToken(username);
     }
 
 	@DisplayName("이메일 인증 성공 테스트")
@@ -520,5 +505,22 @@ class AuthServiceTest {
 			givenEmailCertificationForm.certificationCode(), givenEmailCertificationForm.verifyType()))
 			.isInstanceOf(AuthException.class)
 			.hasMessage(AuthErrorCode.ALREADY_CERTIFIED.getMessage());
+	}
+
+
+    @Test
+    @DisplayName("로그아웃 성공 시 리프레시 토큰 레디스에서 삭제")
+    void logoutSuccess() {
+        //given
+        String accessToken = "accessToken";
+        String username = "user@gmail.com";
+        when(jwtProvider.getUsernameFromToken(any(String.class))).thenReturn(username);
+
+		//when
+		authService.logout(accessToken);
+
+		//then
+		verify(jwtProvider).getUsernameFromToken(accessToken);
+		verify(refreshTokenService).deleteRefreshToken(username);
 	}
 }
