@@ -1,6 +1,7 @@
 package com.example.backend.global.auth.jwt;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -57,6 +58,8 @@ public class JwtProvider {
                 .build()
                 .parseClaimsJws(token);
             return true;
+        } catch (ExpiredJwtException e) {
+            logger.info("토큰의 유효기간이 만료 되었습니다.", e);
         } catch (JwtException | IllegalArgumentException e) {
             logger.error("유효하지 않은 토큰입니다.", e);
         }
