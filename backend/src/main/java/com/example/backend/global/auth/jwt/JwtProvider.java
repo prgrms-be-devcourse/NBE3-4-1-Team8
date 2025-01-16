@@ -10,7 +10,6 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
 import com.example.backend.domain.member.entity.Role;
 
 @Component
@@ -18,7 +17,7 @@ public class JwtProvider {
 
     private final Key SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     private static final long ACCESS_TOKEN_EXPIRATION_TIME = 30 * 60 * 1000; // 30분
-    public static final long REFRESH_TOKEN_EXPIRATION_TIME = 7 * 24 * 60 * 60 * 1000;  // 7일
+    private static final long REFRESH_TOKEN_EXPIRATION_TIME = 7 * 24 * 60 * 60 * 1000;  // 7일
     private final Logger logger = LoggerFactory.getLogger(JwtProvider.class);
 
     public String generateAccessToken(Long id, String username, Role role) {

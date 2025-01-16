@@ -1,11 +1,10 @@
 package com.example.backend.global.auth.controller;
 
-import static com.example.backend.global.auth.jwt.JwtProvider.REFRESH_TOKEN_EXPIRATION_TIME;
-
 import com.example.backend.global.auth.dto.AuthForm;
 import com.example.backend.global.auth.dto.AuthResponse;
 import com.example.backend.global.auth.service.AuthService;
 import com.example.backend.global.response.GenericResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,21 +24,42 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<GenericResponse<AuthResponse>> login(@RequestBody @Valid AuthForm authForm, HttpServletResponse response) {
+    public ResponseEntity<GenericResponse<AuthResponse>> login(
+        @RequestBody @Valid AuthForm authForm, HttpServletResponse response) {
         String[] tokens = authService.login(authForm).split(" ");
 
-        ResponseCookie cookie = ResponseCookie.from("refreshToken", tokens[1])
+        setTokenCookie("accessToken", tokens[0], 30 * 60L, response);
+        setTokenCookie("refreshToken", tokens[1], 7 * 24 * 60 * 60L, response);
+
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(GenericResponse.of(AuthResponse.of(authForm.getUsername()), "로그인 성공"));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<GenericResponse<Void>> logout(HttpServletRequest request, HttpServletResponse response) {
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
+
+        authService.logout(token);
+        setTokenCookie("refreshToken", token, 0L, response);
+
+        return ResponseEntity.status(HttpStatus.OK).body(GenericResponse.of());
+    }
+
+    /**
+     * 토큰을 Set-Cookie로 response에 추가하는 메서드
+     * @param response
+     * @param token
+     * @param expirationTime
+     */
+    private void setTokenCookie(String type, String token, Long expirationTime, HttpServletResponse response) {
+        ResponseCookie cookie = ResponseCookie.from(type, token)
             .httpOnly(true)
             .secure(true)
             .path("/")
             .sameSite("Strict")
-            .maxAge(REFRESH_TOKEN_EXPIRATION_TIME)
+            .maxAge(expirationTime)
             .build();
 
-        // Set-Cookie 헤더로 쿠키를 응답에 추가
         response.addHeader("Set-Cookie", cookie.toString());
-        response.addHeader("Authorization", "Bearer " + tokens[0]);
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(GenericResponse.of(AuthResponse.of(authForm.getUsername()), "로그인 성공"));
     }
 }
