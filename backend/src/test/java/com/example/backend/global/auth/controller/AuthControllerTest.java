@@ -231,4 +231,28 @@ public class AuthControllerTest {
 			.andExpect(jsonPath("$.errorDetails[0].field").value("username"))
 			.andExpect(jsonPath("$.errorDetails[0].reason").value("유효하지 않은 이메일 입니다."));
 	}
+
+	@DisplayName("이메일 인증시 인증 코드가 비었을 때 실패 테스트")
+	@Test
+	void verify_code_not_blank_fail() throws Exception {
+		//given
+		EmailCertificationForm givenEmailCertificationForm = EmailCertificationForm.builder()
+			.username("testEmail@naver.com")
+			.certificationCode("")
+			.verifyType(VerifyType.SIGNUP)
+			.build();
+
+		//when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/auth/verify")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(givenEmailCertificationForm)));
+
+		//then
+		resultActions
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value(GlobalErrorCode.NOT_VALID.getCode()))
+			.andExpect(jsonPath("$.message").value(GlobalErrorCode.NOT_VALID.getMessage()))
+			.andExpect(jsonPath("$.errorDetails[0].field").value("certificationCode"))
+			.andExpect(jsonPath("$.errorDetails[0].reason").value("인증 코드는 필수 항목 입니다."));
+	}
 }
