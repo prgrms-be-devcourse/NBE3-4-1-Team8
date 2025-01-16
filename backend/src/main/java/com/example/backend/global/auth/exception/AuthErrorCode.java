@@ -12,14 +12,15 @@ import lombok.Getter;
  */
 @Getter
 public enum AuthErrorCode {
-	USER_NOT_FOUND(HttpStatus.NOT_FOUND, "404", "해당 유저가 존재하지 않습니다."),
-	PASSWORD_NOT_MATCH(HttpStatus.UNAUTHORIZED, "401", "비밀번호가 일치하지 않습니다."),
-	TOKEN_NOT_VALID(HttpStatus.UNAUTHORIZED, "401", "유효하지 않은 토큰입니다."),
-	TOKEN_MISSING(HttpStatus.UNAUTHORIZED, "401", "토큰이 없습니다."),
-	CERTIFICATION_CODE_NOT_FOUND(HttpStatus.NOT_FOUND, "404-1", "해당 이메일의 인증 코드 정보가 존재하지 않습니다."),
-	VERIFY_TYPE_NOT_MATCH(HttpStatus.UNAUTHORIZED, "401-1", "인증 타입이 일치하지 않습니다."),
-	CERTIFICATION_CODE_NOT_MATCH(HttpStatus.UNAUTHORIZED, "401-2", "인증 코드가 일치하지 않습니다."),
-	NOT_CERTIFICATION(HttpStatus.UNAUTHORIZED, "401-2", "이메일 인증을 하지 않았습니다.");
+	USER_NOT_FOUND(HttpStatus.NOT_FOUND, "404-1", "해당 유저가 존재하지 않습니다."),
+	CERTIFICATION_CODE_NOT_FOUND(HttpStatus.NOT_FOUND, "404-2", "해당 이메일의 인증 코드 정보가 존재하지 않습니다."),
+
+	PASSWORD_NOT_MATCH(HttpStatus.UNAUTHORIZED, "401-1", "비밀번호가 일치하지 않습니다."),
+	TOKEN_NOT_VALID(HttpStatus.UNAUTHORIZED, "401-2", "유효하지 않은 토큰입니다."),
+	TOKEN_MISSING(HttpStatus.UNAUTHORIZED, "401-3", "토큰이 없습니다."),
+	VERIFY_TYPE_NOT_MATCH(HttpStatus.UNAUTHORIZED, "401-4", "인증 타입이 일치하지 않습니다."),
+	CERTIFICATION_CODE_NOT_MATCH(HttpStatus.UNAUTHORIZED, "401-5", "인증 코드가 일치하지 않습니다."),
+	NOT_CERTIFICATION(HttpStatus.UNAUTHORIZED, "401-6", "이메일 인증을 하지 않았습니다.");
 
 	final HttpStatus httpStatus;
 	final String code;
