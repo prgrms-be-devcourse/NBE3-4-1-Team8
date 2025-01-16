@@ -33,8 +33,7 @@ public class ProductController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<GenericResponse<Void>> create(@RequestBody @Validated(ValidationSequence.class) ProductForm productForm) {
+    public ResponseEntity<GenericResponse<String>> create(@RequestBody @Validated(ValidationSequence.class) ProductForm productForm) {
 
         productService.create(productForm);
 
