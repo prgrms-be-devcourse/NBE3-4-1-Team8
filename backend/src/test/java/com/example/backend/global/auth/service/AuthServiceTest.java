@@ -90,6 +90,7 @@ class AuthServiceTest {
 			.username("user@gmail.com")
 			.password("password")
 			.role(Role.ROLE_USER)
+			.memberStatus(MemberStatus.ACTIVE)
 			.build();
 		Member member = Member.from(memberDto);
 
@@ -116,6 +117,34 @@ class AuthServiceTest {
 
 		// saveRefreshToken이 호출되었는지 검증
 		verify(refreshTokenService).saveRefreshToken("user@gmail.com", "refresh_token");
+	}
+	@Test
+	@DisplayName("로그인 실패 - 이메일 미인증일 때")
+	void loginFail_memberStatus_pending() {
+		// given
+		MemberDto memberDto = MemberDto.builder()
+			.id(1L)
+			.username("user@gmail.com")
+			.password("password")
+			.role(Role.ROLE_USER)
+			.memberStatus(MemberStatus.PENDING)
+			.build();
+		Member member = Member.from(memberDto);
+
+		when(passwordEncoder.matches(any(String.class), any(String.class))).thenReturn(true);
+		when(memberRepository.findByUsername("user@gmail.com"))
+			.thenReturn(Optional.of(member));
+
+		AuthForm authForm = new AuthForm();
+		authForm.setUsername("user@gmail.com");
+		authForm.setPassword("password");
+
+		// when & then
+		assertThatThrownBy(() -> authService.login(authForm))
+			.isInstanceOf(AuthException.class)
+			.hasMessage(AuthErrorCode.NOT_CERTIFICATION.getMessage());
+
+		verify(memberRepository).findByUsername("user@gmail.com");
 	}
 
 	@Test
