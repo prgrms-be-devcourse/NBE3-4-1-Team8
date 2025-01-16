@@ -181,4 +181,29 @@ public class AuthControllerTest {
 			.andExpect(jsonPath("$.message").value(MemberErrorCode.MEMBER_NOT_FOUND.getMessage()));
 	}
 
+	@DisplayName("이메일 인증시 이미 인증이 되어 있을 때 실패 테스트")
+	@Test
+	void verify_already_certified_fail() throws Exception {
+		//given
+		EmailCertificationForm givenEmailCertificationForm = EmailCertificationForm.builder()
+			.username("testEmail@naver.com")
+			.certificationCode("testCode")
+			.verifyType(VerifyType.SIGNUP)
+			.build();
+
+		doThrow(new AuthException(AuthErrorCode.ALREADY_CERTIFIED))
+			.when(authService).verify(givenEmailCertificationForm.username(),
+				givenEmailCertificationForm.certificationCode(), givenEmailCertificationForm.verifyType());
+
+		//when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/auth/verify")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(givenEmailCertificationForm)));
+
+		//then
+		resultActions
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.code").value(AuthErrorCode.ALREADY_CERTIFIED.getCode()))
+			.andExpect(jsonPath("$.message").value(AuthErrorCode.ALREADY_CERTIFIED.getMessage()));
+	}
 }
