@@ -1,7 +1,5 @@
 package com.example.backend.global.auth.controller;
 
-import static com.example.backend.global.auth.jwt.JwtProvider.REFRESH_TOKEN_EXPIRATION_TIME;
-
 import com.example.backend.global.auth.dto.AuthForm;
 import com.example.backend.global.auth.dto.AuthResponse;
 import com.example.backend.global.auth.service.AuthService;
@@ -30,8 +28,9 @@ public class AuthController {
         @RequestBody @Valid AuthForm authForm, HttpServletResponse response) {
         String[] tokens = authService.login(authForm).split(" ");
 
-        setRefreshTokenCookie(response, tokens[1], REFRESH_TOKEN_EXPIRATION_TIME);
-        response.addHeader("Authorization", "Bearer " + tokens[0]);
+        setTokenCookie("accessToken", tokens[0], 30 * 60L, response);
+        setTokenCookie("refreshToken", tokens[1], 7 * 24 * 60 * 60L, response);
+
         return ResponseEntity.status(HttpStatus.OK)
             .body(GenericResponse.of(AuthResponse.of(authForm.getUsername()), "로그인 성공"));
     }
@@ -39,20 +38,21 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<GenericResponse<Void>> logout(HttpServletRequest request, HttpServletResponse response) {
         String token = request.getHeader("Authorization").replace("Bearer ", "");
-        authService.logout(token);
 
-        setRefreshTokenCookie(response, token, 0L);
+        authService.logout(token);
+        setTokenCookie("refreshToken", token, 0L, response);
+
         return ResponseEntity.status(HttpStatus.OK).body(GenericResponse.of());
     }
 
     /**
-     * 리프레시 토큰 Set-Cookie로 response에 추가하는 메서드
+     * 토큰을 Set-Cookie로 response에 추가하는 메서드
      * @param response
      * @param token
      * @param expirationTime
      */
-    private void setRefreshTokenCookie(HttpServletResponse response, String token, Long expirationTime) {
-        ResponseCookie cookie = ResponseCookie.from("refreshToken", token)
+    private void setTokenCookie(String type, String token, Long expirationTime, HttpServletResponse response) {
+        ResponseCookie cookie = ResponseCookie.from(type, token)
             .httpOnly(true)
             .secure(true)
             .path("/")
