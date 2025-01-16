@@ -1,6 +1,7 @@
 package com.example.backend.global.config;
 
 import com.example.backend.global.auth.jwt.JwtAuthorizationFilter;
+import com.example.backend.global.auth.jwt.JwtProvider;
 import com.example.backend.global.auth.service.CustomUserDetailsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final CorsConfig corsConfig;
+    private final JwtProvider jwtProvider;
     private final ObjectMapper objectMapper;
     private final CustomUserDetailsService customUserDetailsService;
 
@@ -43,7 +45,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/products/**").hasAnyRole("ADMIN")
                 .requestMatchers("/api/v1/orders/**").hasAnyRole("USER", "ADMIN")
                 .requestMatchers("/api/v1/cart/**").hasAnyRole("USER", "ADMIN"))
-            .addFilterBefore(new JwtAuthorizationFilter(objectMapper, customUserDetailsService),
+            .addFilterBefore(new JwtAuthorizationFilter(jwtProvider, objectMapper, customUserDetailsService),
                 UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

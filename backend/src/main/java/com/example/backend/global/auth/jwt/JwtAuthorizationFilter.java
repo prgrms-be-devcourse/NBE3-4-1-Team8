@@ -1,15 +1,10 @@
 package com.example.backend.global.auth.jwt;
 
-import static com.example.backend.global.auth.jwt.JwtProvider.SECRET_KEY;
-
 import com.example.backend.global.auth.exception.AuthErrorCode;
 import com.example.backend.global.auth.model.CustomUserDetails;
 import com.example.backend.global.auth.service.CustomUserDetailsService;
 import com.example.backend.global.response.HttpErrorInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,6 +20,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
+    private final JwtProvider jwtProvider;
     private final ObjectMapper objectMapper;
     private final CustomUserDetailsService customUserDetailsService;
 
@@ -42,12 +38,12 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         if (token == null) {
             createErrorInfo(AuthErrorCode.TOKEN_MISSING, request, response);
             return;
-        } else if (!validateToken(token)) {
+        } else if (!jwtProvider.validateToken(token)) {
             createErrorInfo(AuthErrorCode.TOKEN_NOT_VALID, request, response);
             return;
         } else {
             CustomUserDetails customUserDetails = (CustomUserDetails) customUserDetailsService.loadUserByUsername(
-                getUsernameFromToken(token));
+                jwtProvider.getUsernameFromToken(token));
 
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 customUserDetails, null, customUserDetails.getAuthorities());
@@ -83,27 +79,5 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         return path.equals("/api/v1/auth/login") || path.equals("/api/v1/members/join")
             || path.equals("/api/v1/auth/refresh");
-    }
-
-    private boolean validateToken(String token) {
-        try {
-            Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY)
-                .build()
-                .parseClaimsJws(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            logger.error("Invalid JWT token", e);
-        }
-        return false;
-    }
-
-    private String getUsernameFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-            .setSigningKey(SECRET_KEY)
-            .build()
-            .parseClaimsJws(token)
-            .getBody();
-        return claims.getSubject();
     }
 }
