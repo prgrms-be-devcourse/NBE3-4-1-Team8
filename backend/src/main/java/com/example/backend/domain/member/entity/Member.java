@@ -43,7 +43,7 @@ public class Member extends BaseEntity {
 	@Embedded
 	private Address address;
 
-	@Builder
+	@Builder(toBuilder = true)
 	protected Member(Long id, String username, String nickname, String password, Role role, Address address, ZonedDateTime createdAt,
 		ZonedDateTime modifiedAt) {
 		this.id = id;

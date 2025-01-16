@@ -1,5 +1,9 @@
 package com.example.backend.global.config;
 
+import com.example.backend.global.auth.jwt.JwtAuthorizationFilter;
+import com.example.backend.global.auth.jwt.JwtProvider;
+import com.example.backend.global.auth.service.CustomUserDetailsService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +15,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
@@ -18,6 +25,9 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final CorsConfig corsConfig;
+    private final JwtProvider jwtProvider;
+    private final ObjectMapper objectMapper;
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -35,8 +45,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
                 .requestMatchers("/api/v1/products/**").hasAnyRole("ADMIN")
                 .requestMatchers("/api/v1/orders/**").hasAnyRole("USER", "ADMIN")
-                .requestMatchers("/api/v1/cart/**").hasAnyRole("USER", "ADMIN")
-            );
+                .requestMatchers("/api/v1/cart/**").hasAnyRole("USER", "ADMIN"))
+            .addFilterBefore(new JwtAuthorizationFilter(jwtProvider, objectMapper, customUserDetailsService),
+                UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
