@@ -18,8 +18,8 @@ public class CartController {
     private final CartService cartService;
 
     @PostMapping
-    public ResponseEntity<GenericResponse<Long>> addCartItem(@RequestBody @Valid CartForm cartDto) {
-        Long cartId = cartService.addCartItem(cartDto);
+    public ResponseEntity<GenericResponse<Long>> addCartItem(@RequestBody @Valid CartForm cartForm) {
+        Long cartId = cartService.addCartItem(cartForm);
         return ResponseEntity.ok(GenericResponse.of(cartId));
     }
 }
