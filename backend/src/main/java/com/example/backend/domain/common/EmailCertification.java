@@ -5,6 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+/**
+ * EmailCertification
+ * <p>인증 코드와 타입, 전송 횟수를 저장하는 객체 입니다.</p>
+ * @author Kim Dong O
+ */
 @Getter
 @NoArgsConstructor
 @ToString
