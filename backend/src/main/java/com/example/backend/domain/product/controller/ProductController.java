@@ -6,8 +6,9 @@ import com.example.backend.domain.product.service.ProductService;
 import com.example.backend.global.response.GenericResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -30,11 +31,13 @@ public class ProductController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<GenericResponse<Void>> create(@RequestBody @Valid ProductForm productForm) {
 
         productService.create(productForm);
 
-        return ResponseEntity.ok().body(GenericResponse.of("상품이 정상적으로 등록되었습니다."));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(GenericResponse.of("상품이 정상적으로 등록되었습니다."));
     }
 
 }
