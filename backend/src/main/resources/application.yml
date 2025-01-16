@@ -24,6 +24,7 @@ logging:
     org.springframework.security: DEBUG
 
 mail:
+  verify-url: ${VERIFY_URL}
   host: ${MAIL_HOST}
   port: ${MAIL_PORT}
   username: ${MAIL_USERNAME}
