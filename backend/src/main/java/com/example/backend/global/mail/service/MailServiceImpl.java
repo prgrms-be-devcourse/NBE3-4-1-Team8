@@ -42,9 +42,4 @@ public class MailServiceImpl implements MailService{
 
 		mailSender.send(mimeMessage);
 	}
-
-	private String generateCertificationUrl(String to, String certificationCode, String verifyType) {
-		return "http://localhost:3000" + "/verify?" + "email=" + to + "&certificationCode="
-			+ certificationCode + "&verifyType=" + verifyType.toUpperCase();
-	}
 }
