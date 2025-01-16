@@ -235,5 +235,44 @@ class AuthServiceTest {
 		verify(redisService, times(1)).delete(givenRedisPrefix + givenEmailCertificationForm.username());
 	}
 
+    @DisplayName("이메일 인증시 인증 정보 없을 때 실패 테스트")
+	@Test
+	void verify_emailCertification_not_found_fail() {
+		//given
+		String givenRedisPrefix = "certification_email:";
+
+		Address givenAddress = Address.builder()
+			.city("testCity")
+			.detail("testDetail")
+			.country("testCountry")
+			.district("testDistrict")
+			.build();
+
+		MemberDto givenMember = MemberDto.builder()
+			.username("testEmail@naver.com")
+			.nickname("testNickName")
+			.password("!testPassword1234")
+			.address(givenAddress)
+			.memberStatus(MemberStatus.PENDING)
+			.role(Role.ROLE_USER)
+			.build();
+
+		MemberDto verifyMember = givenMember.verify();
+
+		EmailCertificationForm givenEmailCertificationForm = EmailCertificationForm.builder()
+			.certificationCode("testCode")
+			.verifyType(VerifyType.SIGNUP)
+			.username("testEmail@naver.com")
+			.build();
+        
+		given(redisService.getHashDataAll(givenRedisPrefix + givenEmailCertificationForm.username()))
+			.willReturn(Map.of());
+
+		//when & then
+		assertThatThrownBy(() -> authService.verify(givenEmailCertificationForm.username(),
+            givenEmailCertificationForm.certificationCode(), givenEmailCertificationForm.verifyType()))
+            .isInstanceOf(AuthException.class)
+            .hasMessage(AuthErrorCode.CERTIFICATION_CODE_NOT_FOUND.getMessage());
+	}
 
 }
