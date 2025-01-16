@@ -25,9 +25,6 @@ public record MemberSignupRequest(
 	@ValidPassword(groups = PatternGroup.class)
 	String passwordCheck,
 
-	@NotBlank(message = "인증 코드는 필수 항목 입니다.", groups = NotBlankGroup.class)
-	String verifyCode,
-
 	@NotBlank(message = "도시는 필수 항목 입니다.", groups = NotBlankGroup.class)
 	String city,
 
@@ -43,12 +40,11 @@ public record MemberSignupRequest(
 
 	@Builder
 	public MemberSignupRequest(String username, String nickname, String password, String passwordCheck,
-		String verifyCode, String city, String district, String country, String detail) {
+		String city, String district, String country, String detail) {
 		this.username = username;
 		this.nickname = nickname;
 		this.password = password;
 		this.passwordCheck = passwordCheck;
-		this.verifyCode = verifyCode;
 		this.city = city;
 		this.district = district;
 		this.country = country;
