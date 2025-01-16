@@ -33,17 +33,21 @@ public class AuthService {
 	private final RedisService redisService;
 	private final ObjectMapper objectMapper;
 
-	public String login(AuthForm authForm) {
-		Member member = memberRepository.findByUsername(authForm.getUsername())
-			.orElseThrow(() -> new AuthException(AuthErrorCode.USER_NOT_FOUND));
+    public String login(AuthForm authForm) {
+        MemberDto findMember = memberRepository.findByUsername(authForm.getUsername())
+            .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND)).toModel();
 
-		if (!member.checkPassword(authForm.getPassword(), passwordEncoder)) {
-			throw new AuthException(AuthErrorCode.PASSWORD_NOT_MATCH);
-		}
+        if (!passwordEncoder.matches(authForm.getPassword(), findMember.password())) {
+            throw new AuthException(AuthErrorCode.PASSWORD_NOT_MATCH);
+        }
 
-		String accessToken = jwtProvider.generateAccessToken(member.getId(), member.getUsername(), member.getRole());
-		String refreshToken = jwtProvider.generateRefreshToken(member.getId(), member.getUsername());
-		refreshTokenService.saveRefreshToken(member.getUsername(), refreshToken);
+        if (MemberStatus.PENDING.equals(findMember.memberStatus())) {
+            throw new AuthException(AuthErrorCode.NOT_CERTIFICATION);
+        }
+
+        String accessToken = jwtProvider.generateAccessToken(findMember.id(), findMember.username(), findMember.role());
+        String refreshToken = jwtProvider.generateRefreshToken(findMember.id(), findMember.username());
+        refreshTokenService.saveRefreshToken(findMember.username(), refreshToken);
 
 		return accessToken + " " + refreshToken;
 	}

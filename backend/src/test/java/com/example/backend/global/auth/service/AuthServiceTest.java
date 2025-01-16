@@ -131,8 +131,8 @@ class AuthServiceTest {
 
 		// when & then
 		assertThatThrownBy(() -> authService.login(authForm))
-			.isInstanceOf(AuthException.class)
-			.hasMessage(AuthErrorCode.USER_NOT_FOUND.getMessage());
+			.isInstanceOf(MemberException.class)
+			.hasMessage(MemberErrorCode.MEMBER_NOT_FOUND.getMessage());
 
 		verify(memberRepository).findByUsername("user@gmail.com");
 	}
