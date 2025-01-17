@@ -26,7 +26,11 @@ public class CookieService {
         cookieUtils.addTokenToCookie("refreshToken", refreshToken, jwtConfig.getRefreshTokenExpirationTimeInSeconds(), response);
     }
 
-    public void deleteRefreshTokenFromCookie(String refreshToken, HttpServletResponse response) {
-        cookieUtils.addTokenToCookie("refreshToken", refreshToken, 0L, response);
+    public void deleteAccessTokenFromCookie(HttpServletResponse response) {
+        cookieUtils.addTokenToCookie("accessToken", null, 0L, response);
+    }
+
+    public void deleteRefreshTokenFromCookie(HttpServletResponse response) {
+        cookieUtils.addTokenToCookie("refreshToken", null, 0L, response);
     }
 }

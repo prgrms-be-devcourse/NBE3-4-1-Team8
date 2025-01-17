@@ -58,7 +58,7 @@ public class AuthController {
         String accessToken = cookieService.getAccessTokenFromRequest(request);
 
         authService.logout(accessToken);
-        cookieService.deleteRefreshTokenFromCookie(null, response);
+        cookieService.deleteRefreshTokenFromCookie(response);
 
         return ResponseEntity.status(HttpStatus.OK).body(GenericResponse.of());
     }
