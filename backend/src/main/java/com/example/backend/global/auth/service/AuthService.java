@@ -10,6 +10,8 @@ import com.example.backend.domain.common.EmailCertification;
 import com.example.backend.domain.common.VerifyType;
 import com.example.backend.domain.member.dto.MemberDto;
 import com.example.backend.domain.member.entity.Member;
+import com.example.backend.domain.member.exception.MemberErrorCode;
+import com.example.backend.domain.member.exception.MemberException;
 import com.example.backend.domain.member.repository.MemberRepository;
 import com.example.backend.global.auth.dto.AuthForm;
 import com.example.backend.global.auth.exception.AuthErrorCode;
@@ -49,8 +51,8 @@ public class AuthService {
 	public void verify(String username, String certificationCode, VerifyType verifyType) {
 		handleVerify(username, certificationCode, verifyType);
 
-		MemberDto findMember = memberRepository.findByUsername(username)
-			.orElseThrow(() -> new AuthException(AuthErrorCode.USER_NOT_FOUND)).toModel();
+        MemberDto findMember = memberRepository.findByUsername(username)
+            .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND)).toModel();
 
 		MemberDto verifyMember = findMember.verify();
 
@@ -77,7 +79,6 @@ public class AuthService {
 		if (!emailCertification.getCertificationCode().equals(certificationCode)) {
 			throw new AuthException(AuthErrorCode.CERTIFICATION_CODE_NOT_MATCH);
 		}
-		;
 
 		redisService.delete(REDIS_EMAIL_PREFIX + username);
 	}
