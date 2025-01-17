@@ -88,15 +88,15 @@ class AuthServiceTest {
 		when(jwtProvider.generateRefreshToken(any(Long.class), any(String.class), any(Role.class))).thenReturn("refresh_token");
 		doNothing().when(refreshTokenService).saveRefreshToken(any(String.class), any(String.class));
 
-		AuthForm authForm = new AuthForm();
-		authForm.setUsername("user@gmail.com");
-		authForm.setPassword("password");
+		AuthForm authForm = AuthForm.builder()
+			.username("user@gmail.com")
+			.password("password")
+			.build();
 
         //when
         AuthResponse result = authService.login(authForm);
 
         //then
-        assertThat(result.getId()).isEqualTo(1L);
         assertThat(result.getUsername()).isEqualTo("user@gmail.com");
         assertThat(result.getAccessToken()).isEqualTo("access_token");
         assertThat(result.getRefreshToken()).isEqualTo("refresh_token");
@@ -104,8 +104,6 @@ class AuthServiceTest {
         verify(passwordEncoder).matches("password", "password");
         verify(jwtProvider).generateAccessToken(1L, "user@gmail.com", Role.ROLE_USER);
         verify(jwtProvider).generateRefreshToken(1L, "user@gmail.com", Role.ROLE_USER);
-
-		// saveRefreshToken이 호출되었는지 검증
 		verify(refreshTokenService).saveRefreshToken("user@gmail.com", "refresh_token");
 	}
 
@@ -126,9 +124,10 @@ class AuthServiceTest {
 		when(memberRepository.findByUsername("user@gmail.com"))
 			.thenReturn(Optional.of(member));
 
-		AuthForm authForm = new AuthForm();
-		authForm.setUsername("user@gmail.com");
-		authForm.setPassword("password");
+		AuthForm authForm = AuthForm.builder()
+			.username("user@gmail.com")
+			.password("password")
+			.build();
 
 		// when & then
 		assertThatThrownBy(() -> authService.login(authForm))
@@ -145,9 +144,10 @@ class AuthServiceTest {
 		when(memberRepository.findByUsername("user@gmail.com"))
 			.thenReturn(Optional.empty());
 
-		AuthForm authForm = new AuthForm();
-		authForm.setUsername("user@gmail.com");
-		authForm.setPassword("password");
+		AuthForm authForm = AuthForm.builder()
+			.username("user@gmail.com")
+			.password("password")
+			.build();
 
 		// when & then
 		assertThatThrownBy(() -> authService.login(authForm))
@@ -172,9 +172,10 @@ class AuthServiceTest {
 		when(memberRepository.findByUsername("user@gmail.com")).thenReturn(Optional.of(member));
 		when(passwordEncoder.matches("pw", "password")).thenReturn(false);
 
-		AuthForm authForm = new AuthForm();
-		authForm.setUsername("user@gmail.com");
-		authForm.setPassword("pw");
+		AuthForm authForm = AuthForm.builder()
+			.username("user@gmail.com")
+			.password("pw")
+			.build();
 
 		// when & then
 		assertThatThrownBy(() -> authService.login(authForm))

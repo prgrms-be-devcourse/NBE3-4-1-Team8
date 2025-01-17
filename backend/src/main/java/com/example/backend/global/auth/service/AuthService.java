@@ -40,10 +40,10 @@ public class AuthService {
 	private final ObjectMapper objectMapper;
 
     public AuthResponse login(AuthForm authForm) {
-        MemberDto findMember = memberRepository.findByUsername(authForm.getUsername())
+        MemberDto findMember = memberRepository.findByUsername(authForm.username())
             .orElseThrow(() -> new AuthException(AuthErrorCode.MEMBER_NOT_FOUND)).toModel();
 
-        if (!passwordEncoder.matches(authForm.getPassword(), findMember.password())) {
+        if (!passwordEncoder.matches(authForm.password(), findMember.password())) {
             throw new AuthException(AuthErrorCode.PASSWORD_NOT_MATCH);
         }
 
@@ -55,7 +55,7 @@ public class AuthService {
         String refreshToken = jwtProvider.generateRefreshToken(findMember.id(), findMember.username(), findMember.role());
         refreshTokenService.saveRefreshToken(findMember.username(), refreshToken);
 
-        return AuthResponse.of(findMember.id(), findMember.username(), accessToken, refreshToken);
+        return AuthResponse.of(findMember.username(), accessToken, refreshToken);
     }
 
 	public void logout(String accessToken) {
