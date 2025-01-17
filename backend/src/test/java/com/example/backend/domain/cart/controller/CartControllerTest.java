@@ -2,6 +2,7 @@ package com.example.backend.domain.cart.controller;
 
 import com.example.backend.domain.cart.dto.CartForm;
 import com.example.backend.domain.cart.service.CartService;
+import com.example.backend.domain.member.entity.Member;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,7 +39,7 @@ class CartControllerTest {
     void addCartItem() throws Exception {
         // Given
         CartForm cartForm = new CartForm(1L, 1L, 1); // 테스트 데이터
-        when(cartService.addCartItem(any(CartForm.class))).thenReturn(1L); // 서비스 메서드 Mocking
+        when(cartService.addCartItem(any(CartForm.class), any(Member.class))).thenReturn(1L); // 서비스 메서드 Mocking
 
         // When & Then
         MvcResult result = mockMvc.perform(post("/api/v1/cart")

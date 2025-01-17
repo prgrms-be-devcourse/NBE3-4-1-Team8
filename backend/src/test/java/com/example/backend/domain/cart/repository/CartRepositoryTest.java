@@ -52,8 +52,8 @@ class CartRepositoryTest {
 
         // Cart 객체 생성 후 저장
         cart = Cart.builder()
-                .memberId(member)  // Member 객체 설정
-                .productId(product)  // Product 객체 설정
+                .member(member)  // Member 객체 설정
+                .product(product)  // Product 객체 설정
                 .quantity(1)  // 수량 설정
                 .build();
 
