@@ -1,15 +1,5 @@
 package com.example.backend.global.auth.controller;
 
-import static com.example.backend.global.auth.jwt.JwtProvider.*;
-
-import com.example.backend.global.auth.dto.AuthForm;
-import com.example.backend.global.auth.dto.AuthResponse;
-import com.example.backend.global.auth.service.AuthService;
-import com.example.backend.global.response.GenericResponse;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +16,7 @@ import com.example.backend.global.auth.service.AuthService;
 import com.example.backend.global.response.GenericResponse;
 import com.example.backend.global.validation.ValidationSequence;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -2,8 +2,9 @@ package com.example.backend.global.auth.service;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
@@ -14,11 +15,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.example.backend.domain.common.Address;
+import com.example.backend.domain.common.EmailCertification;
+import com.example.backend.domain.common.VerifyType;
 import com.example.backend.domain.member.dto.MemberDto;
 import com.example.backend.domain.member.entity.Member;
+import com.example.backend.domain.member.entity.MemberStatus;
 import com.example.backend.domain.member.entity.Role;
+import com.example.backend.domain.member.exception.MemberErrorCode;
+import com.example.backend.domain.member.exception.MemberException;
 import com.example.backend.domain.member.repository.MemberRepository;
 import com.example.backend.global.auth.dto.AuthForm;
+import com.example.backend.global.auth.dto.EmailCertificationForm;
 import com.example.backend.global.auth.exception.AuthErrorCode;
 import com.example.backend.global.auth.exception.AuthException;
 import com.example.backend.global.auth.jwt.JwtProvider;
@@ -373,5 +381,61 @@ class AuthServiceTest {
             givenEmailCertificationForm.certificationCode(), givenEmailCertificationForm.verifyType()))
             .isInstanceOf(AuthException.class)
             .hasMessage(AuthErrorCode.CERTIFICATION_CODE_NOT_MATCH.getMessage());
+	}
+
+    @DisplayName("이메일 인증시 회원 조회 실패 테스트")
+	@Test
+	void verify_member_not_found_fail() {
+		//given
+		String givenRedisPrefix = "certification_email:";
+
+		Address givenAddress = Address.builder()
+			.city("testCity")
+			.detail("testDetail")
+			.country("testCountry")
+			.district("testDistrict")
+			.build();
+
+		MemberDto givenMember = MemberDto.builder()
+			.username("testEmail@naver.com")
+			.nickname("testNickName")
+			.password("!testPassword1234")
+			.address(givenAddress)
+			.memberStatus(MemberStatus.PENDING)
+			.role(Role.ROLE_USER)
+			.build();
+
+		MemberDto verifyMember = givenMember.verify();
+
+		EmailCertificationForm givenEmailCertificationForm = EmailCertificationForm.builder()
+			.certificationCode("testCode")
+			.verifyType(VerifyType.SIGNUP)
+			.username("testEmail@naver.com")
+			.build();
+
+		EmailCertification givenEmailCertification = EmailCertification.builder()
+			.certificationCode(givenEmailCertificationForm.certificationCode())
+			.verifyType(givenEmailCertificationForm.verifyType().toString())
+			.sendCount("1")
+			.build();
+
+		Map<Object, Object> givenConvertMap = testObjectMapper.convertValue(givenEmailCertification, Map.class);
+
+		given(redisService.getHashDataAll(givenRedisPrefix + givenEmailCertificationForm.username()))
+			.willReturn(givenConvertMap);
+
+		given(objectMapper.convertValue(givenConvertMap, EmailCertification.class)).willReturn(givenEmailCertification);
+
+		given(memberRepository.findByUsername(givenEmailCertificationForm.username()))
+			.willReturn(Optional.empty());
+
+		doNothing().when(redisService).delete(givenRedisPrefix + givenEmailCertificationForm.username());
+
+		//when & then
+        assertThatThrownBy(() -> authService.verify(givenEmailCertificationForm.username(),
+			givenEmailCertificationForm.certificationCode(), givenEmailCertificationForm.verifyType()))
+            .isInstanceOf(MemberException.class)
+			.hasMessage(MemberErrorCode.MEMBER_NOT_FOUND.getMessage());
+
 	}
 }
