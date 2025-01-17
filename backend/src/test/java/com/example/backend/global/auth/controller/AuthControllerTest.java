@@ -27,7 +27,7 @@ import com.example.backend.global.auth.jwt.JwtProvider;
 import com.example.backend.global.auth.service.AuthService;
 import com.example.backend.global.auth.service.CustomUserDetailsService;
 import com.example.backend.global.config.CorsConfig;
-import com.example.backend.global.config.SecurityConfig;
+import com.example.backend.global.config.TestSecurityConfig;
 import com.example.backend.global.exception.GlobalErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(AuthController.class)
-@Import({SecurityConfig.class, CorsConfig.class})
+@Import({TestSecurityConfig.class, CorsConfig.class})
 @Slf4j
 public class AuthControllerTest {
 	@MockitoBean
