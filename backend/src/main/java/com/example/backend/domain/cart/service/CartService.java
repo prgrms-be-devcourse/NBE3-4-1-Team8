@@ -6,29 +6,27 @@ import com.example.backend.domain.cart.exception.CartErrorCode;
 import com.example.backend.domain.cart.exception.CartException;
 import com.example.backend.domain.cart.repository.CartRepository;
 import com.example.backend.domain.member.entity.Member;
-import com.example.backend.domain.member.repository.MemberRepository;
-import com.example.backend.domain.product.entity.Product;
-import com.example.backend.domain.product.repository.ProductRepository;
-import com.example.backend.global.auth.model.CustomUserDetails;
+import com.example.backend.domain.product.service.ProductService;
+import com.example.backend.global.auth.exception.AuthErrorCode;
+import com.example.backend.global.auth.exception.AuthException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
+//Long memberId = customUserDetails.getMember().getId();
 @Service
 @RequiredArgsConstructor
 public class CartService {
 
     private final CartRepository cartRepository;
-    private final ProductRepository productRepository;
-    private final MemberRepository memberRepository;
+    private final ProductService productService;
 
     @Transactional
-    public Long addCartItem(CartForm cartForm) {
+    public Long addCartItem(CartForm cartForm, Member member) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long memberId = ((CustomUserDetails) authentication.getPrincipal()).getMember().getId();
+        if (member.getId() != cartForm.getMemberId()) {
+            throw new AuthException(AuthErrorCode.MEMBER_NOT_FOUND);
+        }
+
         Long productId = cartForm.getProductId();
         int quantity = cartForm.getQuantity();
 
@@ -38,20 +36,14 @@ public class CartService {
         }
 
         // 장바구니에 상품 존재 여부 확인(존재하면 exception 발생)
-        if (cartRepository.existsByProductId_IdAndMemberId_Id(productId, memberId)) {
+        if (cartRepository.existsByProductId_IdAndMemberId_Id(productId, member.getId())) {
             throw new CartException(CartErrorCode.ALREADY_EXISTS_IN_CART);
         }
 
-        // 회원 및 상품 조회
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CartException(CartErrorCode.INVALID_MEMBER_ID));
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new CartException(CartErrorCode.INVALID_PRODUCT_ID));
-
         // 장바구니에 새로운 상품 추가
         Cart cart = Cart.builder()
-                .memberId(member)
-                .productId(product)
+                .member(member)
+                .product(productService.findById(productId))
                 .quantity(quantity)
                 .build();
 
