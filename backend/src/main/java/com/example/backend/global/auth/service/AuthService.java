@@ -38,7 +38,7 @@ public class AuthService {
 
     public String login(AuthForm authForm) {
         MemberDto findMember = memberRepository.findByUsername(authForm.getUsername())
-            .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND)).toModel();
+            .orElseThrow(() -> new AuthException(AuthErrorCode.MEMBER_NOT_FOUND)).toModel();
 
         if (!passwordEncoder.matches(authForm.getPassword(), findMember.password())) {
             throw new AuthException(AuthErrorCode.PASSWORD_NOT_MATCH);

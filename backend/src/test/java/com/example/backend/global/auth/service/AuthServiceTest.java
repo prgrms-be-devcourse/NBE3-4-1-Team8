@@ -31,25 +31,6 @@ import com.example.backend.global.auth.dto.EmailCertificationForm;
 import com.example.backend.global.auth.exception.AuthErrorCode;
 import com.example.backend.global.auth.exception.AuthException;
 import com.example.backend.global.auth.jwt.JwtProvider;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.*;
-
-import java.util.Map;
-import java.util.Optional;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
-import com.example.backend.domain.common.Address;
-import com.example.backend.domain.common.EmailCertification;
-import com.example.backend.domain.common.VerifyType;
-import com.example.backend.domain.member.entity.MemberStatus;
-import com.example.backend.global.auth.dto.EmailCertificationForm;
 import com.example.backend.global.redis.service.RedisService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -162,8 +143,8 @@ class AuthServiceTest {
 
 		// when & then
 		assertThatThrownBy(() -> authService.login(authForm))
-			.isInstanceOf(MemberException.class)
-			.hasMessage(MemberErrorCode.MEMBER_NOT_FOUND.getMessage());
+			.isInstanceOf(AuthException.class)
+			.hasMessage(AuthErrorCode.MEMBER_NOT_FOUND.getMessage());
 
 		verify(memberRepository).findByUsername("user@gmail.com");
 	}

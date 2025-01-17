@@ -54,7 +54,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 authentication.setDetails(new WebAuthenticationDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (UsernameNotFoundException e) {
-                createErrorInfo(AuthErrorCode.USER_NOT_FOUND, request, response);
+                createErrorInfo(AuthErrorCode.MEMBER_NOT_FOUND, request, response);
                 return;
             }
 
