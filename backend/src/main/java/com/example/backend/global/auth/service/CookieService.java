@@ -18,6 +18,10 @@ public class CookieService {
         return cookieUtils.getTokenFromRequest(request, "accessToken");
     }
 
+    public String getRefreshTokenFromRequest(HttpServletRequest request) {
+        return cookieUtils.getTokenFromRequest(request, "refreshToken");
+    }
+
     public void addAccessTokenToCookie(String accessToken, HttpServletResponse response) {
         cookieUtils.addTokenToCookie("accessToken", accessToken, jwtConfig.getAccessTokenExpirationTimeInSeconds(), response);
     }
