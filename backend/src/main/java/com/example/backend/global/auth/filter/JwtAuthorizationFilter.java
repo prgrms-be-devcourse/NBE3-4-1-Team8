@@ -39,10 +39,12 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         if (accessToken == null) {
             String refreshToken = cookieService.getRefreshTokenFromRequest(request);
             if(refreshToken == null) {
-                filterUtils.createErrorInfo(AuthErrorCode.ACCESS_TOKEN_NOT_FOUND, request, response);
+                filterUtils.createErrorInfo(AuthErrorCode.REFRESH_TOKEN_NOT_FOUND, request, response);
                 return;
             }
             // TODO: 액세스 토큰이 쿠키에 없을 때, 리프레시 토큰 필터 처리
+            System.out.println("JwtAuthorizationFilter.doFilterInternal => 액세스 토큰 값이 null 이고, 리프레시 토큰이 null이 아닐때 다음 필터 진행");
+            filterChain.doFilter(request, response);
             return;
         }
 
@@ -51,7 +53,9 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             filterUtils.createErrorInfo(AuthErrorCode.TOKEN_NOT_VALID, request, response);
             return;
         } else if(validationResult.equals("expired")) {
-            // TODO: 액세스 토큰이 만료 되었을 때, 리프레시 토큰 필터 처리
+            // TODO: 쿠키에 값이 있는데, 액세스 토큰이 만료 되었을 때, 리프레시 토큰 필터 처리
+            System.out.println("JwtAuthorizationFilter.doFilterInternal => 액세스 토큰이 만료일 때, 다음 필터로 넘김");
+            filterChain.doFilter(request, response);
             return;
         }
 
