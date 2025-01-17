@@ -39,7 +39,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         if (accessToken == null) {
             String refreshToken = cookieService.getRefreshTokenFromRequest(request);
             if(refreshToken == null) {
-                filterUtils.createErrorInfo(AuthErrorCode.TOKEN_MISSING, request, response);
+                filterUtils.createErrorInfo(AuthErrorCode.ACCESS_TOKEN_NOT_FOUND, request, response);
                 return;
             }
             // TODO: 액세스 토큰이 쿠키에 없을 때, 리프레시 토큰 필터 처리
