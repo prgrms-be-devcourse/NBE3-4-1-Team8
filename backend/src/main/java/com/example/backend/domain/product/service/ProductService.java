@@ -7,6 +7,8 @@ import com.example.backend.domain.product.exception.ProductErrorCode;
 import com.example.backend.domain.product.exception.ProductException;
 import com.example.backend.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +34,12 @@ public class ProductService {
 
         return productRepository.findProductResponseById(id).orElseThrow(()
                 -> new ProductException(ProductErrorCode.NOT_FOUND));
+    }
+
+    public Page<ProductResponse> findAllPage(int page) {
+
+        PageRequest pageRequest = PageRequest.of(page, 10);
+        return productRepository.findAllPaged(pageRequest);
     }
 
     @Transactional

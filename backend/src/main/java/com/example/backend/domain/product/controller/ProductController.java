@@ -5,11 +5,10 @@ import com.example.backend.domain.product.dto.ProductResponse;
 import com.example.backend.domain.product.service.ProductService;
 import com.example.backend.global.response.GenericResponse;
 import com.example.backend.global.validation.ValidationSequence;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,6 +29,15 @@ public class ProductController {
         ProductResponse productResponse = productService.findProductResponseById(id);
 
         return ResponseEntity.ok().body(GenericResponse.of(productResponse));
+    }
+
+    @GetMapping
+    public ResponseEntity<GenericResponse<Page<ProductResponse>>> findAllPage(
+            @RequestParam(value = "page", defaultValue = "0") int page) {
+
+        Page<ProductResponse> productResponsePage = productService.findAllPage(page);
+
+        return ResponseEntity.ok().body(GenericResponse.of(productResponsePage));
     }
 
     @PostMapping
