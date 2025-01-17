@@ -46,11 +46,10 @@ public class OrdersService {
 
     }
 
-    public List<OrdersResponse> current(String username) {
-        Member member = getMember(username);
+    public List<OrdersResponse> current(Long id) {
 
         List<Orders> ordersList = Optional.ofNullable(
-                ordersRepository.findByMemberIdAndDeliveryStatus(member.getId(), DeliveryStatus.READY)
+                ordersRepository.findByMemberIdAndDeliveryStatus(id, DeliveryStatus.READY)
         ).orElseThrow(() -> new OrdersException(OrdersErrorCode.NOT_FOUND));
 
         List<OrdersResponse> responseList = ordersList.stream().map(

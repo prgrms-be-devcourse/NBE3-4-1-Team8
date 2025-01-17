@@ -1,6 +1,7 @@
 package com.example.backend.domain.orders.controller;
 
 
+import com.example.backend.domain.member.entity.Member;
 import com.example.backend.domain.orders.dto.OrdersResponse;
 import com.example.backend.domain.orders.service.OrdersService;
 import com.example.backend.global.auth.model.CustomUserDetails;
@@ -37,8 +38,8 @@ public class OrdersController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
 
-        String username = customUserDetails.getUsername();
-        List<OrdersResponse> responseList = ordersService.current(username);
+        Long memberId = customUserDetails.getMember().getId();
+        List<OrdersResponse> responseList = ordersService.current(memberId);
 
         return ResponseEntity.ok()
                 .body(GenericResponse.of(responseList));
