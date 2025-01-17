@@ -1,10 +1,7 @@
 package com.example.backend.domain.product.repository;
 
-import com.example.backend.domain.product.dto.ProductForm;
 import com.example.backend.domain.product.dto.ProductResponse;
 import com.example.backend.domain.product.entity.Product;
-import com.example.backend.domain.product.repository.ProductRepository;
-import com.example.backend.global.config.JpaAuditingConfig;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +9,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
