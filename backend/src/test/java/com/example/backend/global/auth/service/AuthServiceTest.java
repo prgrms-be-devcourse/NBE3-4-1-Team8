@@ -523,5 +523,4 @@ class AuthServiceTest {
 		verify(jwtProvider).getUsernameFromToken(accessToken);
 		verify(refreshTokenService).deleteRefreshToken(username);
 	}
-
 }
