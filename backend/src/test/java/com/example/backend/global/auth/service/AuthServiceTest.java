@@ -97,9 +97,9 @@ class AuthServiceTest {
         AuthResponse result = authService.login(authForm);
 
         //then
-        assertThat(result.getUsername()).isEqualTo("user@gmail.com");
-        assertThat(result.getAccessToken()).isEqualTo("access_token");
-        assertThat(result.getRefreshToken()).isEqualTo("refresh_token");
+        assertThat(result.username()).isEqualTo("user@gmail.com");
+        assertThat(result.accessToken()).isEqualTo("access_token");
+        assertThat(result.refreshToken()).isEqualTo("refresh_token");
         verify(memberRepository).findByUsername("user@gmail.com");
         verify(passwordEncoder).matches("password", "password");
         verify(jwtProvider).generateAccessToken(1L, "user@gmail.com", Role.ROLE_USER);

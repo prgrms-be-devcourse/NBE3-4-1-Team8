@@ -33,11 +33,11 @@ public class AuthController {
         @RequestBody @Validated(ValidationSequence.class) AuthForm authForm, HttpServletResponse response) {
         AuthResponse authResponse = authService.login(authForm);
 
-        cookieService.addAccessTokenToCookie(authResponse.getAccessToken(), response);
-        cookieService.addRefreshTokenToCookie(authResponse.getRefreshToken(), response);
+        cookieService.addAccessTokenToCookie(authResponse.accessToken(), response);
+        cookieService.addRefreshTokenToCookie(authResponse.refreshToken(), response);
 
         return ResponseEntity.status(HttpStatus.OK).body(GenericResponse.of(
-            AuthLoginResponse.of(authResponse.getUsername()), "로그인 성공"));
+			AuthLoginResponse.of(authResponse.username()), "로그인 성공"));
     }
 
     @PostMapping("/logout")
