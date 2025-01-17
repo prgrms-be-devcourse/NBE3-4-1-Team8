@@ -32,10 +32,10 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<GenericResponse<Page<ProductResponse>>> findAllPage(
+    public ResponseEntity<GenericResponse<Page<ProductResponse>>> findAllPaged(
             @RequestParam(value = "page", defaultValue = "0") int page) {
 
-        Page<ProductResponse> productResponsePage = productService.findAllPage(page);
+        Page<ProductResponse> productResponsePage = productService.findAllPaged(page);
 
         return ResponseEntity.ok().body(GenericResponse.of(productResponsePage));
     }
