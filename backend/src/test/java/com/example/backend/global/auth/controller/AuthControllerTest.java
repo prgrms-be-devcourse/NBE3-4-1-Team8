@@ -30,6 +30,7 @@ import com.example.backend.global.auth.dto.AuthResponse;
 import com.example.backend.global.config.CorsConfig;
 import com.example.backend.global.config.TestSecurityConfig;
 import com.example.backend.global.exception.GlobalErrorCode;
+import com.example.backend.global.exception.GlobalException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
@@ -309,5 +310,103 @@ public class AuthControllerTest {
 			any(HttpServletResponse.class));
 	}
 
+	@Test
+	@DisplayName("로그인 실패 - 입력한 이메일 유저가 존재하지 않을 경우")
+	void login_fail_member_not_found() throws Exception {
+		// given
+		AuthForm authForm = new AuthForm("user@gmail.com", "Password123!");
 
+		when(authService.login(any(AuthForm.class))).thenThrow(new AuthException(AuthErrorCode.MEMBER_NOT_FOUND));
+
+		// when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/auth/login")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(authForm)));
+
+		// then
+		resultActions
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.code").value(AuthErrorCode.MEMBER_NOT_FOUND.getCode()))
+			.andExpect(jsonPath("$.message").value(AuthErrorCode.MEMBER_NOT_FOUND.getMessage()));
+
+		verify(authService, times(1)).login(any(AuthForm.class));
+		verify(cookieService, times(0)).addAccessTokenToCookie(any(String.class), any(HttpServletResponse.class));
+		verify(cookieService, times(0)).addRefreshTokenToCookie(any(String.class), any(HttpServletResponse.class));
+	}
+
+	@Test
+	@DisplayName("로그인 실패 - 비밀번호가 일치하지 않는 경우")
+	void login_fail_password_not_match() throws Exception {
+		// given
+		AuthForm authForm = new AuthForm("user@gmail.com", "Password123!");
+
+		when(authService.login(any(AuthForm.class))).thenThrow(new AuthException(AuthErrorCode.PASSWORD_NOT_MATCH));
+
+		// when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/auth/login")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(authForm)));
+
+		// then
+		resultActions
+			.andExpect(status().isUnauthorized())
+			.andExpect(jsonPath("$.code").value(AuthErrorCode.PASSWORD_NOT_MATCH.getCode()))
+			.andExpect(jsonPath("$.message").value(AuthErrorCode.PASSWORD_NOT_MATCH.getMessage()));
+
+		verify(authService, times(1)).login(any(AuthForm.class));
+		verify(cookieService, times(0)).addAccessTokenToCookie(any(String.class), any(HttpServletResponse.class));
+		verify(cookieService, times(0)).addRefreshTokenToCookie(any(String.class), any(HttpServletResponse.class));
+	}
+
+	@Test
+	@DisplayName("로그인 실패 - 이메일이 빈 값일 경우")
+	void login_fail_email_empty() throws Exception {
+		// given
+		AuthForm authForm = new AuthForm("", "Password123!");
+
+		when(authService.login(any(AuthForm.class))).thenThrow(new GlobalException(GlobalErrorCode.NOT_VALID));
+
+		// when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/auth/login")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(authForm)));
+
+		// then
+		resultActions
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value(GlobalErrorCode.NOT_VALID.getCode()))
+			.andExpect(jsonPath("$.message").value(GlobalErrorCode.NOT_VALID.getMessage()))
+			.andExpect(jsonPath("$.errorDetails[0].field").value("username"))
+			.andExpect(jsonPath("$.errorDetails[0].reason").value("유효하지 않은 이메일 입니다."));
+
+		verify(authService, times(0)).login(any(AuthForm.class));
+		verify(cookieService, times(0)).addAccessTokenToCookie(any(String.class), any(HttpServletResponse.class));
+		verify(cookieService, times(0)).addRefreshTokenToCookie(any(String.class), any(HttpServletResponse.class));
+	}
+
+	@Test
+	@DisplayName("로그인 실패 - 이메일 형식이 아닐 경우")
+	void login_fail_not_email() throws Exception {
+		// given
+		AuthForm authForm = new AuthForm("", "Password123!");
+
+		when(authService.login(any(AuthForm.class))).thenThrow(new GlobalException(GlobalErrorCode.NOT_VALID));
+
+		// when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/auth/login")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(authForm)));
+
+		// then
+		resultActions
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value(GlobalErrorCode.NOT_VALID.getCode()))
+			.andExpect(jsonPath("$.message").value(GlobalErrorCode.NOT_VALID.getMessage()))
+			.andExpect(jsonPath("$.errorDetails[0].field").value("username"))
+			.andExpect(jsonPath("$.errorDetails[0].reason").value("유효하지 않은 이메일 입니다."));
+
+		verify(authService, times(0)).login(any(AuthForm.class));
+		verify(cookieService, times(0)).addAccessTokenToCookie(any(String.class), any(HttpServletResponse.class));
+		verify(cookieService, times(0)).addRefreshTokenToCookie(any(String.class), any(HttpServletResponse.class));
+	}
 }
