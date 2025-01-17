@@ -22,3 +22,21 @@ spring:
 logging:
   level:
     org.springframework.security: DEBUG
+
+mail:
+  verify-url: ${VERIFY_URL}
+  host: ${MAIL_HOST}
+  port: ${MAIL_PORT}
+  username: ${MAIL_USERNAME}
+  password: ${MAIL_PASSWORD}
+  properties:
+    mail:
+      smtp:
+        auth: true
+        stattls:
+          enable: true
+  templates:
+    path: mail-templates/
+    password-reset: password-reset-template
+    email-verify: email-verify-template
+    signup-verify: signup-verify-template
