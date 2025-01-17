@@ -13,13 +13,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -266,5 +269,67 @@ public class ProductControllerTest {
                 .andExpect(jsonPath("$.message").value("상품을 찾을 수 없습니다."));
     }
 
+    @Test
+    @DisplayName("상품 다건 조회 테스트")
+    @WithAnonymousUser
+    void findAllPagedTest() throws Exception {
+        // given
+        List<ProductResponse> productResponseList = new ArrayList<>();
+        int page = 1;
 
+        for (int i = 1; i <= 5; i++) {
+            productResponseList.add(ProductResponse.of(Product.builder()
+                    .name("Test Name_" + i)
+                    .build()));
+        }
+
+        Sort sortByNameAsc = Sort.by(Sort.Order.asc("name"));
+        Pageable pageable = PageRequest.of(page, 10, sortByNameAsc);
+        Page<ProductResponse> mockPage = new PageImpl<>(productResponseList, pageable, 15);
+
+        when(productService.findAllPaged(pageable)).thenReturn(mockPage);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(get("/api/v1/products" )
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("page", page+"")
+        );
+
+        //then
+        verify(productService, times(1)).findAllPaged(pageable);
+
+        resultActions
+                .andExpect(handler().handlerType(ProductController.class))
+                .andExpect(handler().methodName("findAllPaged"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[2].name").value("Test Name_3"));
+    }
+
+    @Test
+    @DisplayName("상품 다건 조회 빈 페이지 반환 시 404반환 테스트")
+    @WithAnonymousUser
+    void findAllPagedButIsEmptyTest() throws Exception {
+        // given
+        int inValidPage = 999;  // 빈 페이지
+
+        Sort sortByNameAsc = Sort.by(Sort.Order.asc("name"));
+        Pageable pageable = PageRequest.of(inValidPage, 10, sortByNameAsc);
+
+        doThrow(new ProductException(ProductErrorCode.NOT_FOUND)).when(productService).findAllPaged(pageable);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(get("/api/v1/products" )
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("page", inValidPage+"")
+        );
+
+        //then
+        verify(productService, times(1)).findAllPaged(pageable);
+
+        resultActions
+                .andExpect(handler().handlerType(ProductController.class))
+                .andExpect(handler().methodName("findAllPaged"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("상품을 찾을 수 없습니다."));
+    }
 }
