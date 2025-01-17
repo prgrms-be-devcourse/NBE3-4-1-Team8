@@ -18,7 +18,6 @@ import com.example.backend.global.validation.ValidationSequence;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -30,7 +29,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<GenericResponse<AuthResponse>> login(
-        @RequestBody @Valid AuthForm authForm, HttpServletResponse response) {
+        @RequestBody @Validated(ValidationSequence.class) AuthForm authForm, HttpServletResponse response) {
         String[] tokens = authService.login(authForm).split(" ");
 
         setTokenCookie("accessToken", tokens[0], 30 * 60L, response);
