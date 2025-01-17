@@ -1,10 +1,18 @@
 package com.example.backend.global.auth.service;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import java.util.Optional;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.example.backend.domain.member.dto.MemberDto;
 import com.example.backend.domain.member.entity.Member;
@@ -14,6 +22,10 @@ import com.example.backend.global.auth.dto.AuthForm;
 import com.example.backend.global.auth.exception.AuthErrorCode;
 import com.example.backend.global.auth.exception.AuthException;
 import com.example.backend.global.auth.jwt.JwtProvider;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.*;
+
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,104 +33,125 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import com.example.backend.domain.common.Address;
+import com.example.backend.domain.common.EmailCertification;
+import com.example.backend.domain.common.VerifyType;
+import com.example.backend.domain.member.entity.MemberStatus;
+import com.example.backend.global.auth.dto.EmailCertificationForm;
+import com.example.backend.global.redis.service.RedisService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
-    @Mock
-    private JwtProvider jwtProvider;
+	@Mock
+	private JwtProvider jwtProvider;
 
-    @Mock
-    private PasswordEncoder passwordEncoder;
+	@Mock
+	private PasswordEncoder passwordEncoder;
 
-    @Mock
-    private MemberRepository memberRepository;
+	@Mock
+	private MemberRepository memberRepository;
 
-    @Mock
-    private RefreshTokenService refreshTokenService;
+	@Mock
+	private RefreshTokenService refreshTokenService;
 
-    @InjectMocks
-    private AuthService authService;
+	@Mock
+	private RedisService redisService;
 
-    @Test
-    @DisplayName("로그인 성공")
-    void loginSuccess() {
-        //given
-        MemberDto memberDto = MemberDto.builder()
-            .id(1L)
-            .username("user@gmail.com")
-            .password("password")
-            .role(Role.ROLE_USER)
-            .build();
-        Member member = Member.from(memberDto);
+	@Mock
+	private ObjectMapper objectMapper;
 
-        when(memberRepository.findByUsername(any(String.class))).thenReturn(Optional.of(member));
-        when(passwordEncoder.matches(any(String.class), any(String.class))).thenReturn(true);
-        when(jwtProvider.generateAccessToken(any(Long.class), any(String.class), any(Role.class))).thenReturn("access_token");
-        when(jwtProvider.generateRefreshToken(any(Long.class), any(String.class))).thenReturn("refresh_token");
-        doNothing().when(refreshTokenService).saveRefreshToken(any(String.class), any(String.class));
+	private ObjectMapper testObjectMapper = Jackson2ObjectMapperBuilder
+		.json().build()
+		.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
-        AuthForm authForm = new AuthForm();
-        authForm.setUsername("user@gmail.com");
-        authForm.setPassword("password");
+	@InjectMocks
+	private AuthService authService;
 
-        //when
-        String result = authService.login(authForm);
+	@Test
+	@DisplayName("로그인 성공")
+	void loginSuccess() {
+		//given
+		MemberDto memberDto = MemberDto.builder()
+			.id(1L)
+			.username("user@gmail.com")
+			.password("password")
+			.role(Role.ROLE_USER)
+			.build();
+		Member member = Member.from(memberDto);
 
-        //then
-        assertThat(result).isEqualTo("access_token refresh_token");
-        verify(memberRepository).findByUsername("user@gmail.com");
-        verify(passwordEncoder).matches("password", "password");
-        verify(jwtProvider).generateAccessToken(1L, "user@gmail.com", Role.ROLE_USER);
-        verify(jwtProvider).generateRefreshToken(1L, "user@gmail.com");
+		when(memberRepository.findByUsername(any(String.class))).thenReturn(Optional.of(member));
+		when(passwordEncoder.matches(any(String.class), any(String.class))).thenReturn(true);
+		when(jwtProvider.generateAccessToken(any(Long.class), any(String.class), any(Role.class))).thenReturn(
+			"access_token");
+		when(jwtProvider.generateRefreshToken(any(Long.class), any(String.class))).thenReturn("refresh_token");
+		doNothing().when(refreshTokenService).saveRefreshToken(any(String.class), any(String.class));
 
-        // saveRefreshToken이 호출되었는지 검증
-        verify(refreshTokenService).saveRefreshToken("user@gmail.com", "refresh_token");
-    }
+		AuthForm authForm = new AuthForm();
+		authForm.setUsername("user@gmail.com");
+		authForm.setPassword("password");
 
-    @Test
-    @DisplayName("로그인 실패 - 해당 유저가 없음")
-    void loginFail_UserNotFound() {
-        // given
-        when(memberRepository.findByUsername("user@gmail.com"))
-            .thenReturn(Optional.empty());
+		//when
+		String result = authService.login(authForm);
 
-        AuthForm authForm = new AuthForm();
-        authForm.setUsername("user@gmail.com");
-        authForm.setPassword("password");
+		//then
+		assertThat(result).isEqualTo("access_token refresh_token");
+		verify(memberRepository).findByUsername("user@gmail.com");
+		verify(passwordEncoder).matches("password", "password");
+		verify(jwtProvider).generateAccessToken(1L, "user@gmail.com", Role.ROLE_USER);
+		verify(jwtProvider).generateRefreshToken(1L, "user@gmail.com");
 
-        // when & then
-        assertThatThrownBy(() -> authService.login(authForm))
-            .isInstanceOf(AuthException.class)
-            .hasMessage(AuthErrorCode.USER_NOT_FOUND.getMessage());
+		// saveRefreshToken이 호출되었는지 검증
+		verify(refreshTokenService).saveRefreshToken("user@gmail.com", "refresh_token");
+	}
 
-        verify(memberRepository).findByUsername("user@gmail.com");
-    }
+	@Test
+	@DisplayName("로그인 실패 - 해당 유저가 없음")
+	void loginFail_UserNotFound() {
+		// given
+		when(memberRepository.findByUsername("user@gmail.com"))
+			.thenReturn(Optional.empty());
 
-    @Test
-    @DisplayName("로그인 실패 - 비밀번호 불일치")
-    void loginFail_PasswordNotMatch() {
-        // given
-        MemberDto memberDto = MemberDto.builder()
-            .id(1L)
-            .username("user@gmail.com")
-            .password("password")
-            .role(Role.ROLE_USER)
-            .build();
-        Member member = Member.from(memberDto);
+		AuthForm authForm = new AuthForm();
+		authForm.setUsername("user@gmail.com");
+		authForm.setPassword("password");
 
-        when(memberRepository.findByUsername("user@gmail.com")).thenReturn(Optional.of(member));
-        when(passwordEncoder.matches("pw", "password")).thenReturn(false);
+		// when & then
+		assertThatThrownBy(() -> authService.login(authForm))
+			.isInstanceOf(AuthException.class)
+			.hasMessage(AuthErrorCode.USER_NOT_FOUND.getMessage());
 
-        AuthForm authForm = new AuthForm();
-        authForm.setUsername("user@gmail.com");
-        authForm.setPassword("pw");
+		verify(memberRepository).findByUsername("user@gmail.com");
+	}
 
-        // when & then
-        assertThatThrownBy(() -> authService.login(authForm))
-            .isInstanceOf(AuthException.class)
-            .hasMessage(AuthErrorCode.PASSWORD_NOT_MATCH.getMessage());
+	@Test
+	@DisplayName("로그인 실패 - 비밀번호 불일치")
+	void loginFail_PasswordNotMatch() {
+		// given
+		MemberDto memberDto = MemberDto.builder()
+			.id(1L)
+			.username("user@gmail.com")
+			.password("password")
+			.role(Role.ROLE_USER)
+			.build();
+		Member member = Member.from(memberDto);
+
+		when(memberRepository.findByUsername("user@gmail.com")).thenReturn(Optional.of(member));
+		when(passwordEncoder.matches("pw", "password")).thenReturn(false);
+
+		AuthForm authForm = new AuthForm();
+		authForm.setUsername("user@gmail.com");
+		authForm.setPassword("pw");
+
+		// when & then
+		assertThatThrownBy(() -> authService.login(authForm))
+			.isInstanceOf(AuthException.class)
+			.hasMessage(AuthErrorCode.PASSWORD_NOT_MATCH.getMessage());
 
         verify(memberRepository).findByUsername("user@gmail.com");
         verify(passwordEncoder).matches("pw", "password");
@@ -139,4 +172,68 @@ class AuthServiceTest {
         verify(jwtProvider).getUsernameFromToken(accessToken);
         verify(refreshTokenService).deleteRefreshToken(username);
     }
+
+	@DisplayName("이메일 인증 성공 테스트")
+	@Test
+	void verify_success() {
+		//given
+		String givenRedisPrefix = "certification_email:";
+
+		Address givenAddress = Address.builder()
+			.city("testCity")
+			.detail("testDetail")
+			.country("testCountry")
+			.district("testDistrict")
+			.build();
+
+		MemberDto givenMember = MemberDto.builder()
+			.username("testEmail@naver.com")
+			.nickname("testNickName")
+			.password("!testPassword1234")
+			.address(givenAddress)
+			.memberStatus(MemberStatus.PENDING)
+			.role(Role.ROLE_USER)
+			.build();
+
+		MemberDto verifyMember = givenMember.verify();
+
+		EmailCertificationForm givenEmailCertificationForm = EmailCertificationForm.builder()
+			.certificationCode("testCode")
+			.verifyType(VerifyType.SIGNUP)
+			.username("testEmail@naver.com")
+			.build();
+
+		EmailCertification givenEmailCertification = EmailCertification.builder()
+			.certificationCode(givenEmailCertificationForm.certificationCode())
+			.verifyType(givenEmailCertificationForm.verifyType().toString())
+			.sendCount("1")
+			.build();
+
+		Map<Object, Object> givenConvertMap = testObjectMapper.convertValue(givenEmailCertification, Map.class);
+
+		given(redisService.getHashDataAll(givenRedisPrefix + givenEmailCertificationForm.username()))
+			.willReturn(givenConvertMap);
+
+		given(objectMapper.convertValue(givenConvertMap, EmailCertification.class)).willReturn(givenEmailCertification);
+
+		given(memberRepository.findByUsername(givenEmailCertificationForm.username()))
+			.willReturn(Optional.of(Member.from(givenMember)));
+
+		given(memberRepository.save(any(Member.class))).willReturn(Member.from(verifyMember));
+
+		doNothing().when(redisService).delete(givenRedisPrefix + givenEmailCertificationForm.username());
+
+		//when
+		authService.verify(givenEmailCertificationForm.username(),
+			givenEmailCertificationForm.certificationCode(),
+			givenEmailCertificationForm.verifyType());
+
+		//then
+		verify(redisService, times(1)).getHashDataAll(givenRedisPrefix + givenEmailCertificationForm.username());
+		verify(memberRepository, times(1)).findByUsername(givenEmailCertificationForm.username());
+		verify(memberRepository, times(1)).save(any(Member.class));
+		verify(redisService, times(1)).delete(givenRedisPrefix + givenEmailCertificationForm.username());
+	}
+
+
 }
