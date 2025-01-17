@@ -1,36 +1,28 @@
 package com.example.backend.domain.orders.service;
 
-import com.example.backend.domain.member.entity.Member;
-import com.example.backend.domain.member.exception.MemberErrorCode;
-import com.example.backend.domain.member.exception.MemberException;
-import com.example.backend.domain.member.repository.MemberRepository;
-import com.example.backend.domain.orders.dto.OrdersResponse;
-import com.example.backend.domain.orders.entity.Orders;
-import com.example.backend.domain.orders.exception.OrdersErrorCode;
-import com.example.backend.domain.orders.exception.OrdersException;
-import com.example.backend.domain.orders.repository.OrdersRepository;
-
-import com.example.backend.domain.orders.status.DeliveryStatus;
-import com.example.backend.domain.product.entity.Product;
-
-import com.example.backend.domain.productOrders.entity.ProductOrders;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.example.backend.domain.member.entity.Member;
+import com.example.backend.domain.member.repository.MemberRepository;
+import com.example.backend.domain.orders.dto.OrdersResponse;
+import com.example.backend.domain.orders.entity.Orders;
+import com.example.backend.domain.orders.exception.OrdersException;
+import com.example.backend.domain.orders.repository.OrdersRepository;
+import com.example.backend.domain.orders.status.DeliveryStatus;
+import com.example.backend.domain.product.entity.Product;
+import com.example.backend.domain.productOrders.entity.ProductOrders;
 
 @ExtendWith(MockitoExtension.class)
 class OrdersServiceTest {
@@ -116,10 +108,6 @@ class OrdersServiceTest {
         Member member = mock(Member.class);
         when(member.getId()).thenReturn(1L);
 
-        // member 조회 mock
-        when(memberRepository.findByUsername(username))
-                .thenReturn(Optional.of(member));
-
         // orders 목록 mock
         List<Orders> ordersList = List.of(
                 mockOrder(1L,DeliveryStatus.READY),
@@ -132,7 +120,7 @@ class OrdersServiceTest {
         )).thenReturn(ordersList);
 
         // When
-        List<OrdersResponse> result = ordersService.current(username);
+        List<OrdersResponse> result = ordersService.current(member.getId());
 
         // Then
         assertThat(result).hasSize(2);
@@ -144,7 +132,6 @@ class OrdersServiceTest {
         assertThat(firstOrder.getProducts()).hasSize(1);
 
         // 메서드 호출 검증
-        verify(memberRepository).findByUsername(username);
         verify(ordersRepository).findByMemberIdAndDeliveryStatus(
                 member.getId(),
                 DeliveryStatus.READY

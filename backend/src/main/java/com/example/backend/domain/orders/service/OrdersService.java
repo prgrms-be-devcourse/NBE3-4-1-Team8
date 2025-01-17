@@ -1,5 +1,11 @@
 package com.example.backend.domain.orders.service;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.domain.member.entity.Member;
 import com.example.backend.domain.member.exception.MemberErrorCode;
@@ -12,13 +18,8 @@ import com.example.backend.domain.orders.exception.OrdersErrorCode;
 import com.example.backend.domain.orders.exception.OrdersException;
 import com.example.backend.domain.orders.repository.OrdersRepository;
 import com.example.backend.domain.orders.status.DeliveryStatus;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service
@@ -67,7 +68,7 @@ public class OrdersService {
 
     private Member getMember(String username) {
        return memberRepository.findByUsername(username)
-                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
     }
 
     private List<ProductInfoDto> toProductInfoDtos(Orders orders) {
