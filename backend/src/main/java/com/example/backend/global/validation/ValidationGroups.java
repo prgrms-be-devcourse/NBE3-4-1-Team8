@@ -9,6 +9,9 @@ public class ValidationGroups {
 	public interface NotNullGroup {
 	}
 
+	public interface NotEmptyGroup {
+	}
+
 	public interface NotBlankGroup {
 	}
 
