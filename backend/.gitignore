@@ -7,6 +7,7 @@ build/
 .DS_Store
 .idea/
 **/.idea
+**/resources/application.yml
 
 ### STS ###
 .apt_generated
