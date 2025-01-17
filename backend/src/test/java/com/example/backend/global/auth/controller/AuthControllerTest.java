@@ -203,7 +203,7 @@ public class AuthControllerTest {
 
 		//then
 		resultActions
-			.andExpect(status().isNotFound())
+			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.code").value(AuthErrorCode.ALREADY_CERTIFIED.getCode()))
 			.andExpect(jsonPath("$.message").value(AuthErrorCode.ALREADY_CERTIFIED.getMessage()));
 	}
