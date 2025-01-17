@@ -42,7 +42,7 @@ class CartControllerTest {
         when(cartService.addCartItem(any(CartForm.class), any(Member.class))).thenReturn(1L); // 서비스 메서드 Mocking
 
         // When & Then
-        MvcResult result = mockMvc.perform(post("/api/v1/cart")
+        MvcResult result = mockMvc.perform(post("/api/v1/carts")
                         .contentType("application/json")
                         .content(new ObjectMapper().writeValueAsString(cartForm)))
                 .andExpect(status().is(HttpStatus.OK.value())) // 상태 코드 확인
