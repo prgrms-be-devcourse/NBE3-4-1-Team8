@@ -2,6 +2,8 @@ package com.example.backend.domain.member.entity;
 
 import java.time.ZonedDateTime;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import com.example.backend.domain.common.Address;
 import com.example.backend.domain.member.dto.MemberDto;
 import com.example.backend.global.baseEntity.BaseEntity;
@@ -18,7 +20,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Entity
 @Getter
@@ -38,18 +39,25 @@ public class Member extends BaseEntity {
 	private String password;
 
 	@Enumerated(EnumType.STRING)
+	@Column(length = 20, nullable = false)
+	private MemberStatus memberStatus;
+
+	@Enumerated(EnumType.STRING)
+	@Column(length = 20, nullable = false)
 	private Role role;
 
 	@Embedded
 	private Address address;
 
 	@Builder(toBuilder = true)
-	protected Member(Long id, String username, String nickname, String password, Role role, Address address, ZonedDateTime createdAt,
+	protected Member(Long id, String username, String nickname, String password, MemberStatus memberStatus, Role role,
+		Address address, ZonedDateTime createdAt,
 		ZonedDateTime modifiedAt) {
 		this.id = id;
 		this.username = username;
 		this.nickname = nickname;
 		this.password = password;
+		this.memberStatus = memberStatus;
 		this.role = role;
 		this.address = address;
 		this.createdAt = createdAt;
@@ -62,6 +70,7 @@ public class Member extends BaseEntity {
 			.username(memberDto.username())
 			.nickname(memberDto.nickname())
 			.password(memberDto.password())
+			.memberStatus(memberDto.memberStatus())
 			.role(memberDto.role())
 			.address(memberDto.address())
 			.createdAt(memberDto.createdAt())
@@ -75,6 +84,7 @@ public class Member extends BaseEntity {
 			.username(this.username)
 			.nickname(this.nickname)
 			.password(this.password)
+			.memberStatus(this.memberStatus)
 			.role(this.role)
 			.address(this.address)
 			.createdAt(this.createdAt)

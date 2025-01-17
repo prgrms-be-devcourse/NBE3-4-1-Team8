@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Import;
 
 import com.example.backend.domain.common.Address;
 import com.example.backend.domain.member.entity.Member;
+import com.example.backend.domain.member.entity.MemberStatus;
 import com.example.backend.domain.member.entity.Role;
 import com.example.backend.global.config.JpaAuditingConfig;
 
@@ -38,6 +39,7 @@ class MemberRepositoryTest {
 			.username("testEmail@naver.com")
 			.nickname("testNickname")
 			.password("testPassword")
+			.memberStatus(MemberStatus.ACTIVE)
 			.address(givenAddress)
 			.role(Role.ROLE_USER)
 			.build();
@@ -72,6 +74,7 @@ class MemberRepositoryTest {
 			.nickname("testNickname1")
 			.password("testPassword1")
 			.address(givenAddress)
+			.memberStatus(MemberStatus.ACTIVE)
 			.role(Role.ROLE_USER)
 			.build();
 
@@ -100,6 +103,7 @@ class MemberRepositoryTest {
 			.nickname("testNickname2")
 			.password("testPassword1")
 			.address(givenAddress)
+			.memberStatus(MemberStatus.ACTIVE)
 			.role(Role.ROLE_USER)
 			.build();
 
@@ -128,6 +132,7 @@ class MemberRepositoryTest {
 			.nickname("testNickname3")
 			.password("testPassword1")
 			.address(givenAddress)
+			.memberStatus(MemberStatus.ACTIVE)
 			.role(Role.ROLE_USER)
 			.build();
 

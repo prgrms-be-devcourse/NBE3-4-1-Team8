@@ -1,31 +1,35 @@
 package com.example.backend.global.auth.controller;
 
-import com.example.backend.global.auth.dto.AuthForm;
-import com.example.backend.global.auth.dto.AuthResponse;
-import com.example.backend.global.auth.service.AuthService;
-import com.example.backend.global.response.GenericResponse;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.example.backend.global.auth.dto.AuthForm;
+import com.example.backend.global.auth.dto.AuthResponse;
+import com.example.backend.global.auth.dto.EmailCertificationForm;
+import com.example.backend.global.auth.service.AuthService;
+import com.example.backend.global.response.GenericResponse;
+import com.example.backend.global.validation.ValidationSequence;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthService authService;
+	private final AuthService authService;
 
     @PostMapping("/login")
     public ResponseEntity<GenericResponse<AuthResponse>> login(
-        @RequestBody @Valid AuthForm authForm, HttpServletResponse response) {
+        @RequestBody @Validated(ValidationSequence.class) AuthForm authForm, HttpServletResponse response) {
         String[] tokens = authService.login(authForm).split(" ");
 
         setTokenCookie("accessToken", tokens[0], 30 * 60L, response);
@@ -60,6 +64,16 @@ public class AuthController {
             .maxAge(expirationTime)
             .build();
 
-        response.addHeader("Set-Cookie", cookie.toString());
-    }
+		// Set-Cookie 헤더로 쿠키를 응답에 추가
+		response.addHeader("Set-Cookie", cookie.toString());
+	}
+
+	@PostMapping("/verify")
+	public ResponseEntity<GenericResponse<Void>> verify(@RequestBody @Validated(ValidationSequence.class)
+	EmailCertificationForm emailCertificationForm) {
+		authService.verify(emailCertificationForm.username(), emailCertificationForm.certificationCode(),
+			emailCertificationForm.verifyType());
+
+		return ResponseEntity.ok().body(GenericResponse.of());
+	}
 }
