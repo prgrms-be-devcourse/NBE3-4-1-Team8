@@ -70,7 +70,7 @@ class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("상품 조회(Entity) 성공 테스트")
+    @DisplayName("상품 단건 조회(Entity) 성공 테스트")
     void findByIdSuccessTest() {
         // given
         Long id = 1L;
@@ -88,7 +88,7 @@ class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("상품 조회(Entity) 실패 테스트")
+    @DisplayName("상품 단건 조회(Entity) 실패 테스트")
     void findByIdFailTest() {
         // given
         Long invalidId = 999L; // 존재하지 않는 상품 ID
@@ -105,7 +105,7 @@ class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("상품 조회(DTO) 테스트")
+    @DisplayName("상품 단건 조회(DTO) 테스트")
     void findProductResponseByIdSuccessTest() {
         // given
         Long id = 1L;
@@ -122,7 +122,7 @@ class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("상품 조회(DTO) 실패 테스트")
+    @DisplayName("상품 단건 조회(DTO) 실패 테스트")
     void findProductResponseByIdFailTest() {
         // given
         Long invalidId = 999L; // 존재하지 않는 상품 ID
@@ -137,4 +137,5 @@ class ProductServiceTest {
         // then
         assertThat(exception.getCode()).isEqualTo("404");
     }
+
 }
