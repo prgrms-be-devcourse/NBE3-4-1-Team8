@@ -12,7 +12,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -135,6 +141,52 @@ class ProductServiceTest {
         );
 
         // then
+        assertThat(exception.getCode()).isEqualTo("404");
+    }
+
+    @Test
+    @DisplayName("상품 다건 조회 테스트")
+    void findAllPagedTest() {
+        // given
+        List<ProductResponse> productResponseList = new ArrayList<>();
+
+        for (int i = 1; i <= 5; i++) {
+            productResponseList.add(ProductResponse.of(Product.builder()
+                    .name("Test Name_" + i)
+                    .build()));
+        }
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<ProductResponse> mockPage = new PageImpl<>(productResponseList, pageable, 5);
+        when(productRepository.findAllPaged(any())).thenReturn(mockPage);
+
+        // when
+        Page<ProductResponse> productResponsePage = productService.findAllPaged(pageable);
+
+        //then
+        verify(productRepository, times(1)).findAllPaged(pageable);
+
+        assertThat(productResponsePage.getTotalPages()).isEqualTo(1);
+        assertThat(productResponsePage.getNumberOfElements()).isEqualTo(5);
+        assertThat(productResponsePage.getContent().get(3).name()).isEqualTo("Test Name_4");
+    }
+
+    @Test
+    @DisplayName("상품 다건 조회 빈 페이지 반환 시 404반환 테스트")
+    void findAllPagedButIsEmptyTest() {
+        // given
+        Pageable inValidPageable = PageRequest.of(0, 999);  //빈 페이지 요청
+        when(productRepository.findAllPaged(inValidPageable)).thenReturn(Page.empty());
+
+        // when
+        ProductException exception = assertThrows(
+                ProductException.class,
+                () -> productService.findAllPaged(inValidPageable)
+        );
+
+        //then
+        verify(productRepository, times(1)).findAllPaged(inValidPageable);
+
         assertThat(exception.getCode()).isEqualTo("404");
     }
 
