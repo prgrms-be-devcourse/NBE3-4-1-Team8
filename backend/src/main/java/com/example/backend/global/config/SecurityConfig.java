@@ -22,13 +22,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.example.backend.global.auth.jwt.JwtAuthorizationFilter;
-import com.example.backend.global.auth.jwt.JwtProvider;
-import com.example.backend.global.auth.service.CustomUserDetailsService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import lombok.RequiredArgsConstructor;
-
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor

@@ -6,8 +6,6 @@ import org.springframework.stereotype.Service;
 
 import com.example.backend.global.redis.service.RedisService;
 
-import lombok.RequiredArgsConstructor;
-
 @Service
 @RequiredArgsConstructor
 public class RefreshTokenService {
@@ -28,6 +26,6 @@ public class RefreshTokenService {
     }
 
     public boolean isValidRefreshToken(String username, String refreshToken) {
-        return Objects.equals(redisTemplate.opsForValue().get(username), refreshToken);
+        return Objects.equals(getRefreshToken(username), refreshToken);
     }
 }

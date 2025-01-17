@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
+import com.example.backend.global.auth.dto.AuthResponse;
+import com.example.backend.global.auth.jwt.JwtUtils;
 import java.util.Map;
 import java.util.Optional;
 
@@ -47,9 +49,6 @@ class AuthServiceTest {
     @Mock
     private JwtUtils jwtUtils;
 
-    @Mock
-    private PasswordEncoder passwordEncoder;
-
 	@Mock
 	private MemberRepository memberRepository;
 
@@ -86,7 +85,7 @@ class AuthServiceTest {
 		when(passwordEncoder.matches(any(String.class), any(String.class))).thenReturn(true);
 		when(jwtProvider.generateAccessToken(any(Long.class), any(String.class), any(Role.class))).thenReturn(
 			"access_token");
-		when(jwtProvider.generateRefreshToken(any(Long.class), any(String.class))).thenReturn("refresh_token");
+		when(jwtProvider.generateRefreshToken(any(Long.class), any(String.class), any(Role.class))).thenReturn("refresh_token");
 		doNothing().when(refreshTokenService).saveRefreshToken(any(String.class), any(String.class));
 
 		AuthForm authForm = new AuthForm();
@@ -504,13 +503,13 @@ class AuthServiceTest {
         //given
         String accessToken = "accessToken";
         String username = "user@gmail.com";
-        when(jwtProvider.getUsernameFromToken(any(String.class))).thenReturn(username);
+        when(jwtUtils.getUsernameFromToken(any(String.class))).thenReturn(username);
 
 		//when
 		authService.logout(accessToken);
 
 		//then
-		verify(jwtProvider).getUsernameFromToken(accessToken);
+		verify(jwtUtils).getUsernameFromToken(accessToken);
 		verify(refreshTokenService).deleteRefreshToken(username);
 	}
 }

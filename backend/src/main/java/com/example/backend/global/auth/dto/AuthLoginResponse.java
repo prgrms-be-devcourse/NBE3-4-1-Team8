@@ -7,12 +7,10 @@ import lombok.Getter;
 @Builder
 public class AuthLoginResponse {
 
-    private Long id;
     private String username;
 
-    public static AuthLoginResponse of(Long id, String username) {
+    public static AuthLoginResponse of(String username) {
         return AuthLoginResponse.builder()
-            .id(id)
             .username(username)
             .build();
     }
