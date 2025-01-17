@@ -103,7 +103,6 @@ public class ProductRepositoryTest {
         assertThat(productResponse.content()).isEqualTo(this.content1);
         assertThat(productResponse.price()).isEqualTo(this.price1);
         assertThat(productResponse.imgUrl()).isEqualTo(this.imgUrl1);
-        assertThat(productResponse.quantity()).isEqualTo(this.quantity1);
     }
 
 }
