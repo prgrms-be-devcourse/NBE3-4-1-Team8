@@ -26,7 +26,7 @@ public class FilterUtils {
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json");
         response.getWriter().write(objectMapper.writeValueAsString(httpErrorInfo));
-        response.setStatus(Integer.parseInt(httpErrorInfo.code()));
+        response.setStatus(authErrorCode.getHttpStatus().value());
     }
 
     // 권한 체크가 필요 없는 URL인지 확인하는 메서드
