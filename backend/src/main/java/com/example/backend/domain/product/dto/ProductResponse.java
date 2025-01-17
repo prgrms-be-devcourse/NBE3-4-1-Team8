@@ -12,8 +12,7 @@ public record ProductResponse(
         String name,
         String content,
         int price,
-        String imgUrl,
-        int quantity
+        String imgUrl
 ) {
 
     public static ProductResponse of(Product product) {
@@ -22,8 +21,7 @@ public record ProductResponse(
                 product.getName(),
                 product.getContent(),
                 product.getPrice(),
-                product.getImgUrl(),
-                product.getQuantity()
+                product.getImgUrl()
         );
     }
 }
