@@ -28,4 +28,10 @@ public class FilterUtils {
         response.getWriter().write(objectMapper.writeValueAsString(httpErrorInfo));
         response.setStatus(Integer.parseInt(httpErrorInfo.code()));
     }
+
+    // 권한 체크가 필요 없는 URL인지 확인하는 메서드
+    public boolean isUnprotectedUrl(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.equals("/api/v1/auth/login") || path.equals("/api/v1/members/join");
+    }
 }

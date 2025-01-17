@@ -30,7 +30,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
         FilterChain filterChain) throws ServletException, IOException {
 
-        if(isUnprotectedUrl(request)) {
+        if(filterUtils.isUnprotectedUrl(request)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -67,11 +67,5 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
-    }
-
-    // 권한 체크가 필요 없는 URL인지 확인하는 메서드
-    private boolean isUnprotectedUrl(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        return path.equals("/api/v1/auth/login") || path.equals("/api/v1/members/join");
     }
 }
