@@ -1,6 +1,7 @@
 package com.example.backend.domain.orders.entity;
 
 
+import com.example.backend.domain.common.Address;
 import com.example.backend.domain.member.entity.Member;
 import com.example.backend.domain.orders.status.DeliveryStatus;
 import com.example.backend.domain.productOrders.entity.ProductOrders;
@@ -34,6 +35,9 @@ public class Orders extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(length = 50, nullable = false)
     private DeliveryStatus deliveryStatus;
+
+    @Embedded
+    private Address address;
 
 
     @Builder(builderMethodName = "create")
