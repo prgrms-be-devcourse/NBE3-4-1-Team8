@@ -8,8 +8,7 @@ import com.example.backend.domain.product.exception.ProductException;
 import com.example.backend.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,12 +36,15 @@ public class ProductService {
                 -> new ProductException(ProductErrorCode.NOT_FOUND));
     }
 
-    public Page<ProductResponse> findAllPaged(int page) {
+    public Page<ProductResponse> findAllPaged(Pageable pageable) {
 
-        Sort sortByNameAsc = Sort.by(Sort.Order.asc("name"));
+        Page<ProductResponse> productResponsePage = productRepository.findAllPaged(pageable);
 
-        PageRequest pageRequest = PageRequest.of(page, 10, sortByNameAsc);
-        return productRepository.findAllPaged(pageRequest);
+        if(productResponsePage.isEmpty()) {
+            throw new ProductException(ProductErrorCode.NOT_FOUND);
+        }
+
+        return productResponsePage;
     }
 
     @Transactional
