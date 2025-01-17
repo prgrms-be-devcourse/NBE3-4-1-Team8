@@ -2,8 +2,8 @@ package com.example.backend.global.config;
 
 import com.example.backend.global.auth.filter.JwtAuthorizationFilter;
 import com.example.backend.global.auth.jwt.JwtUtils;
+import com.example.backend.global.auth.service.CookieService;
 import com.example.backend.global.auth.service.CustomUserDetailsService;
-import com.example.backend.global.auth.util.CookieUtils;
 import com.example.backend.global.auth.util.FilterUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -33,9 +33,9 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
     private final CorsConfig corsConfig;
-    private final CookieUtils cookieUtils;
     private final JwtUtils jwtUtils;
     private final FilterUtils filterUtils;
+    private final CookieService cookieService;
     private final CustomUserDetailsService customUserDetailsService;
 
     @Bean
@@ -55,7 +55,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/products/**").hasAnyRole("ADMIN")
                 .requestMatchers("/api/v1/orders/**").hasAnyRole("USER", "ADMIN")
                 .requestMatchers("/api/v1/cart/**").hasAnyRole("USER", "ADMIN"))
-            .addFilterBefore(new JwtAuthorizationFilter(cookieUtils, jwtUtils, filterUtils, customUserDetailsService),
+            .addFilterBefore(new JwtAuthorizationFilter(jwtUtils, filterUtils, cookieService, customUserDetailsService),
                 UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

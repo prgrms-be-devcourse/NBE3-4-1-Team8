@@ -3,8 +3,8 @@ package com.example.backend.global.auth.filter;
 import com.example.backend.global.auth.exception.AuthErrorCode;
 import com.example.backend.global.auth.jwt.JwtUtils;
 import com.example.backend.global.auth.model.CustomUserDetails;
+import com.example.backend.global.auth.service.CookieService;
 import com.example.backend.global.auth.service.CustomUserDetailsService;
-import com.example.backend.global.auth.util.CookieUtils;
 import com.example.backend.global.auth.util.FilterUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -21,9 +21,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
-    private final CookieUtils cookieUtils;
     private final JwtUtils jwtUtils;
     private final FilterUtils filterUtils;
+    private final CookieService cookieService;
     private final CustomUserDetailsService customUserDetailsService;
 
     @Override
@@ -35,9 +35,9 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String accessToken = cookieUtils.getTokenFromRequest(request, "accessToken");
+        String accessToken = cookieService.getAccessTokenFromRequest(request);
         if (accessToken == null) {
-            String refreshToken = cookieUtils.getTokenFromRequest(request, "refreshToken");
+            String refreshToken = cookieService.getRefreshTokenFromRequest(request);
             if(refreshToken == null) {
                 filterUtils.createErrorInfo(AuthErrorCode.TOKEN_MISSING, request, response);
                 return;
