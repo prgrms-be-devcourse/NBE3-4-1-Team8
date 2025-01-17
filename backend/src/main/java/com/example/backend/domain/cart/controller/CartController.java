@@ -7,6 +7,7 @@ import com.example.backend.global.auth.model.CustomUserDetails;
 import com.example.backend.global.response.GenericResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,7 +30,7 @@ public class CartController {
 
         Long cartId = cartService.addCartItem(cartForm, member);
 
-        return ResponseEntity.status(201).body(GenericResponse.of(cartId));
+        return ResponseEntity.status(HttpStatus.CREATED).body(GenericResponse.of(cartId));
 
     }
 }
