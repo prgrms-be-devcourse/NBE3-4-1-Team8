@@ -1,74 +1,62 @@
 package com.example.backend.domain.orders.service;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.example.backend.domain.member.entity.Member;
+import com.example.backend.domain.member.repository.MemberRepository;
 import com.example.backend.domain.orders.dto.OrdersResponse;
 import com.example.backend.domain.orders.entity.Orders;
 import com.example.backend.domain.orders.exception.OrdersException;
 import com.example.backend.domain.orders.repository.OrdersRepository;
-
 import com.example.backend.domain.orders.status.DeliveryStatus;
 import com.example.backend.domain.product.entity.Product;
-
 import com.example.backend.domain.productOrders.entity.ProductOrders;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-@Transactional
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class OrdersServiceTest {
 
     @Mock
     OrdersRepository ordersRepository;
-
+    @Mock
+    MemberRepository memberRepository;
+    @InjectMocks
     OrdersService ordersService;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        ordersService = new OrdersService(ordersRepository);
-    }
-
-    private Orders mockOrder(Long id) {
-        // Orders 객체를 mock
+    private Orders mockOrder(Long id, DeliveryStatus status) {
         Orders orders = mock(Orders.class);
+        ZonedDateTime now = ZonedDateTime.now();
+        List<ProductOrders> productOrders = mockProductOrders();
+
         when(orders.getId()).thenReturn(id);
         when(orders.getTotalPrice()).thenReturn(1000);
-        when(orders.getDeliveryStatus()).thenReturn(DeliveryStatus.READY);
-
-        // ProductOrders mock
-        List<ProductOrders> productOrders = mockProductOrders(orders);
+        lenient().when(orders.getDeliveryStatus()).thenReturn(status);
+        when(orders.getCreatedAt()).thenReturn(now);
+        when(orders.getModifiedAt()).thenReturn(now);
         when(orders.getProductOrders()).thenReturn(productOrders);
 
         return orders;
     }
 
-    private List<ProductOrders> mockProductOrders(Orders orders) {
-        // ProductOrders 객체 mock
+    private List<ProductOrders> mockProductOrders() {
         ProductOrders productOrder = mock(ProductOrders.class);
         Product product = mock(Product.class);
 
-        when(product.getId()).thenReturn(1L);
+        // OrdersResponse에서 실제로 사용하는 필드만 stub
         when(product.getName()).thenReturn("A");
         when(product.getImgUrl()).thenReturn("http://example.com/productA.jpg");
-
-        when(productOrder.getId()).thenReturn(1L);
-        when(productOrder.getPrice()).thenReturn(5000);
-        when(productOrder.getQuantity()).thenReturn(3);
         when(productOrder.getProduct()).thenReturn(product);
-
-        // 양방향 관계 설정 반드시 해줘야 한다
-        when(productOrder.getOrders()).thenReturn(orders);  // ProductOrders에서 Orders 참조
 
         return List.of(productOrder);
     }
@@ -78,24 +66,24 @@ class OrdersServiceTest {
     void findOne() {
         // Given
         Long orderId = 1L;
-        Orders orders = mockOrder(orderId);  // Mock or create an Orders object
-
+        Orders orders = mockOrder(orderId, DeliveryStatus.READY);
         when(ordersRepository.findOrderById(orderId)).thenReturn(Optional.of(orders));
 
         // When
         OrdersResponse ordersResponse = ordersService.findOne(orderId);
 
         // Then
-
         assertThat(orderId).isEqualTo(ordersResponse.getId());
         assertThat(orders.getTotalPrice()).isEqualTo(ordersResponse.getTotalPrice());
         assertThat(orders.getDeliveryStatus()).isEqualTo(ordersResponse.getStatus());
         assertThat(orders.getCreatedAt()).isEqualTo(ordersResponse.getCreateAt());
         assertThat(orders.getModifiedAt()).isEqualTo(ordersResponse.getModifiedAt());
-        assertThat(orders.getProductOrders().size()).isEqualTo(1);
-        assertThat(orders.getProductOrders().get(0).getProduct().getName()).isEqualTo("A");
-        assertThat(orders.getProductOrders().get(0).getProduct().getImgUrl()).isEqualTo("http://example.com/productA.jpg");
 
+        ProductOrders firstProductOrder = orders.getProductOrders().get(0);
+        assertThat(firstProductOrder.getProduct().getName()).isEqualTo("A");
+        assertThat(firstProductOrder.getProduct().getImgUrl()).isEqualTo("http://example.com/productA.jpg");
+
+        verify(ordersRepository).findOrderById(orderId);
     }
 
     @Test
@@ -112,4 +100,41 @@ class OrdersServiceTest {
 
     }
 
+    @Test
+    @DisplayName("현재 진행중인 주문 목록 조회 성공")
+    void current() {
+        // Given
+        String username = "testUser";
+        Member member = mock(Member.class);
+        when(member.getId()).thenReturn(1L);
+
+        // orders 목록 mock
+        List<Orders> ordersList = List.of(
+                mockOrder(1L,DeliveryStatus.READY),
+                mockOrder(2L,DeliveryStatus.READY)
+        );
+
+        when(ordersRepository.findByMemberIdAndDeliveryStatus(
+                member.getId(),
+                DeliveryStatus.READY
+        )).thenReturn(ordersList);
+
+        // When
+        List<OrdersResponse> result = ordersService.current(member.getId());
+
+        // Then
+        assertThat(result).hasSize(2);
+
+        // 첫 번째 주문 검증
+        OrdersResponse firstOrder = result.get(0);
+        assertThat(firstOrder.getId()).isEqualTo(1L);
+        assertThat(firstOrder.getTotalPrice()).isEqualTo(1000);
+        assertThat(firstOrder.getProducts()).hasSize(1);
+
+        // 메서드 호출 검증
+        verify(ordersRepository).findByMemberIdAndDeliveryStatus(
+                member.getId(),
+                DeliveryStatus.READY
+        );
+    }
 }
