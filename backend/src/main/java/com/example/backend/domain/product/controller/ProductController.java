@@ -7,6 +7,9 @@ import com.example.backend.global.response.GenericResponse;
 import com.example.backend.global.validation.ValidationSequence;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -35,7 +38,10 @@ public class ProductController {
     public ResponseEntity<GenericResponse<Page<ProductResponse>>> findAllPaged(
             @RequestParam(value = "page", defaultValue = "0") int page) {
 
-        Page<ProductResponse> productResponsePage = productService.findAllPaged(page);
+        Sort sortByNameAsc = Sort.by(Sort.Order.asc("name"));
+        Pageable pageable = PageRequest.of(page, 10, sortByNameAsc);
+
+        Page<ProductResponse> productResponsePage = productService.findAllPaged(pageable);
 
         return ResponseEntity.ok().body(GenericResponse.of(productResponsePage));
     }
