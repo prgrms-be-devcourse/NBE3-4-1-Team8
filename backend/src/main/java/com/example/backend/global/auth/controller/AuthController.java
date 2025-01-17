@@ -47,7 +47,7 @@ public class AuthController {
         authService.logout(accessToken);
         cookieService.deleteRefreshTokenFromCookie(response);
 
-        return ResponseEntity.status(HttpStatus.OK).body(GenericResponse.of());
+        return ResponseEntity.status(HttpStatus.OK).body(GenericResponse.of("로그아웃 성공"));
     }
 
 	@PostMapping("/verify")

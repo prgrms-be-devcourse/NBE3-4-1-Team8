@@ -4,6 +4,8 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -408,5 +411,31 @@ public class AuthControllerTest {
 		verify(authService, times(0)).login(any(AuthForm.class));
 		verify(cookieService, times(0)).addAccessTokenToCookie(any(String.class), any(HttpServletResponse.class));
 		verify(cookieService, times(0)).addRefreshTokenToCookie(any(String.class), any(HttpServletResponse.class));
+	}
+
+	@Test
+	@DisplayName("로그아웃 성공 테스트")
+	@WithMockUser
+	void logout_success() throws Exception {
+		// given
+		String accessToken = "accessToken";
+		when(cookieService.getAccessTokenFromRequest(any(HttpServletRequest.class))).thenReturn(accessToken);
+		doNothing().when(authService).logout(accessToken);
+		doNothing().when(cookieService).deleteRefreshTokenFromCookie(any(HttpServletResponse.class));
+
+		// when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/auth/logout")
+			.cookie(new Cookie("accessToken", accessToken)));
+
+		// then
+		resultActions
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.success").value(true))
+			.andExpect(jsonPath("$.message").value("로그아웃 성공"))
+			.andExpect(jsonPath("$.data").isEmpty());
+
+		verify(cookieService, times(1)).getAccessTokenFromRequest(any(HttpServletRequest.class));
+		verify(authService, times(1)).logout(accessToken);
+		verify(cookieService, times(1)).deleteRefreshTokenFromCookie(any(HttpServletResponse.class));
 	}
 }
