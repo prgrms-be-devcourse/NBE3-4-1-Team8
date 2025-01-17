@@ -1,13 +1,11 @@
 package com.example.backend.domain.product.controller;
 
-import com.example.backend.domain.product.dto.ProductForm;
-import com.example.backend.domain.product.dto.ProductResponse;
-import com.example.backend.domain.product.entity.Product;
-import com.example.backend.domain.product.exception.ProductErrorCode;
-import com.example.backend.domain.product.exception.ProductException;
-import com.example.backend.domain.product.service.ProductService;
-import com.example.backend.global.auth.service.config.TestSecurityConfig;
-import com.example.backend.global.config.CorsConfig;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,16 +14,18 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import com.example.backend.domain.product.dto.ProductForm;
+import com.example.backend.domain.product.dto.ProductResponse;
+import com.example.backend.domain.product.entity.Product;
+import com.example.backend.domain.product.exception.ProductErrorCode;
+import com.example.backend.domain.product.exception.ProductException;
+import com.example.backend.domain.product.service.ProductService;
+import com.example.backend.global.config.CorsConfig;
+import com.example.backend.global.config.TestSecurityConfig;
 
 /**
  * ProductControllerTest
