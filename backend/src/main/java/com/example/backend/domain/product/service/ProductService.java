@@ -36,7 +36,7 @@ public class ProductService {
                 -> new ProductException(ProductErrorCode.NOT_FOUND));
     }
 
-    public Page<ProductResponse> findAllPage(int page) {
+    public Page<ProductResponse> findAllPaged(int page) {
 
         PageRequest pageRequest = PageRequest.of(page, 10);
         return productRepository.findAllPaged(pageRequest);
