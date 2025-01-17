@@ -25,7 +25,7 @@ public class Orders extends BaseEntity {
     @JoinColumn(name = "member_id") // 외래 키 매핑
     private Member member;
 
-    @OneToMany(mappedBy = "orders")
+    @OneToMany(mappedBy = "orders", cascade = CascadeType.ALL)
     private List<ProductOrders> productOrders = new ArrayList<>();
 
     @Column(name = "total_price", nullable = false)
@@ -37,8 +37,7 @@ public class Orders extends BaseEntity {
 
 
     @Builder(builderMethodName = "create")
-    public Orders(Long id, Member member, List<ProductOrders> productOrders, int totalPrice) {
-        this.id = id;
+    public Orders(Member member, List<ProductOrders> productOrders, int totalPrice) {
         this.member = member;
         addProductOrder(productOrders);
         this.totalPrice = totalPrice;
@@ -63,5 +62,9 @@ public class Orders extends BaseEntity {
         return productOrders.stream()
                 .mapToInt(ProductOrders::getTotalPrice)
                 .sum();
+    }
+
+    public void changeStatus(DeliveryStatus status){
+        this.deliveryStatus = status;
     }
 }

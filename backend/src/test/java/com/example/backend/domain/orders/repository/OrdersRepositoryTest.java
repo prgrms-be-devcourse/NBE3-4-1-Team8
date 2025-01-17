@@ -11,6 +11,7 @@ import com.example.backend.domain.product.entity.Product;
 import com.example.backend.domain.product.repository.ProductRepository;
 import com.example.backend.domain.productOrders.entity.ProductOrders;
 import com.example.backend.domain.productOrders.repository.ProductOrdersRepository;
+import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -38,8 +39,10 @@ public class OrdersRepositoryTest {
     ProductRepository productRepository;
     @Autowired
     ProductOrdersRepository productOrdersRepository;
+    @Autowired
+    EntityManager entityManager;
 
-    Member createMember() {
+    private Member createMember() {
         return Member.builder()
                 .username("test")
                 .nickname("test")
@@ -51,7 +54,7 @@ public class OrdersRepositoryTest {
                 .build();
     }
 
-    Product createProduct() {
+    private Product createProduct() {
         return Product.builder()
                 .name("test")
                 .content("test")
@@ -61,7 +64,7 @@ public class OrdersRepositoryTest {
                 .build();
     }
 
-    ProductOrders createProductOrders(Product product) {
+    private ProductOrders createProductOrders(Product product) {
         return ProductOrders.create()
                 .product(product)
                 .quantity(2)
@@ -135,5 +138,41 @@ public class OrdersRepositoryTest {
         assertThat(ordersList.get(0).getMember().getUsername()).isEqualTo("test");
     }
 
+    @Test
+    @DisplayName("주문 상태가 READY 인 주문만 조회")
+    void getOnlyStatusReady() {
+
+        Member savedMember = memberRepository.save(createMember());
+        Product savedProduct = productRepository.save(createProduct());
+
+        Orders orders1 = Orders.create()
+                .member(savedMember)
+                .productOrders(List.of(createProductOrders(savedProduct)))
+                .totalPrice(200)
+                .build();
+
+        Orders orders2 = Orders.create()
+                .member(savedMember)
+                .productOrders(List.of(createProductOrders(savedProduct)))
+                .totalPrice(300)
+                .build();
+
+        orders2.changeStatus(DeliveryStatus.SHIPPED);
+
+        ordersRepository.save(orders1);
+        ordersRepository.save(orders2);
+
+        ordersRepository.flush();
+        entityManager.clear();
+
+        List<Orders> ordersList = ordersRepository.findByMemberIdAndDeliveryStatus(
+                savedMember.getId(),
+                DeliveryStatus.READY
+        );
+
+
+        assertThat(ordersList.size()).isEqualTo(1);
+        assertThat(ordersList.get(0).getDeliveryStatus()).isEqualTo(DeliveryStatus.READY);
+    }
 
 }

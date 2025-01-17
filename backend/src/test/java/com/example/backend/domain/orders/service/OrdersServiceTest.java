@@ -42,14 +42,14 @@ class OrdersServiceTest {
     @InjectMocks
     OrdersService ordersService;
 
-    private Orders mockOrder(Long id) {
+    private Orders mockOrder(Long id, DeliveryStatus status) {
         Orders orders = mock(Orders.class);
         ZonedDateTime now = ZonedDateTime.now();
         List<ProductOrders> productOrders = mockProductOrders();
 
         when(orders.getId()).thenReturn(id);
         when(orders.getTotalPrice()).thenReturn(1000);
-        lenient().when(orders.getDeliveryStatus()).thenReturn(DeliveryStatus.READY);
+        lenient().when(orders.getDeliveryStatus()).thenReturn(status);
         when(orders.getCreatedAt()).thenReturn(now);
         when(orders.getModifiedAt()).thenReturn(now);
         when(orders.getProductOrders()).thenReturn(productOrders);
@@ -74,7 +74,7 @@ class OrdersServiceTest {
     void findOne() {
         // Given
         Long orderId = 1L;
-        Orders orders = mockOrder(orderId);
+        Orders orders = mockOrder(orderId, DeliveryStatus.READY);
         when(ordersRepository.findOrderById(orderId)).thenReturn(Optional.of(orders));
 
         // When
@@ -122,8 +122,8 @@ class OrdersServiceTest {
 
         // orders 목록 mock
         List<Orders> ordersList = List.of(
-                mockOrder(1L),
-                mockOrder(2L)
+                mockOrder(1L,DeliveryStatus.READY),
+                mockOrder(2L,DeliveryStatus.READY)
         );
 
         when(ordersRepository.findByMemberIdAndDeliveryStatus(
@@ -150,5 +150,4 @@ class OrdersServiceTest {
                 DeliveryStatus.READY
         );
     }
-
 }
