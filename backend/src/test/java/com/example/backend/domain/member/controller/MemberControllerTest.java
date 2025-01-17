@@ -24,14 +24,14 @@ import com.example.backend.domain.member.service.MemberService;
 import com.example.backend.global.auth.jwt.JwtProvider;
 import com.example.backend.global.auth.service.CustomUserDetailsService;
 import com.example.backend.global.config.CorsConfig;
-import com.example.backend.global.config.SecurityConfig;
+import com.example.backend.global.config.TestSecurityConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(MemberController.class)
-@Import({SecurityConfig.class, CorsConfig.class})
+@Import({TestSecurityConfig.class, CorsConfig.class})
 @Slf4j
 class MemberControllerTest {
 	@MockitoBean
