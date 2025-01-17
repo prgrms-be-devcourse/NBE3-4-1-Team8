@@ -1,9 +1,6 @@
 package com.example.backend.global.auth.service.config;
 
-import com.example.backend.global.auth.jwt.JwtProvider;
-import com.example.backend.global.auth.service.CustomUserDetailsService;
 import com.example.backend.global.config.CorsConfig;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,7 +40,7 @@ public class TestSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
                         .requestMatchers("/api/v1/products/**").hasAnyRole("ADMIN")
                         .requestMatchers("/api/v1/orders/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers("/api/v1/cart/**").hasAnyRole("USER", "ADMIN"))
+                        .requestMatchers("/api/v1/carts/**").hasAnyRole("USER", "ADMIN"))
                 ;
         return http.build();
     }
