@@ -9,7 +9,7 @@ build/
 **/.idea
 **/main/resources/application.yml
 **/test/resources/application.yml
-
+../.idea
 ### STS ###
 .apt_generated
 .classpath
