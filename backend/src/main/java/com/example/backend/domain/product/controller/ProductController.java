@@ -1,10 +1,16 @@
 package com.example.backend.domain.product.controller;
 
+import com.example.backend.domain.product.dto.ProductForm;
 import com.example.backend.domain.product.dto.ProductResponse;
 import com.example.backend.domain.product.service.ProductService;
 import com.example.backend.global.response.GenericResponse;
+import com.example.backend.global.validation.ValidationSequence;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -19,11 +25,20 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<GenericResponse<ProductResponse>> findById(@PathVariable Long id) {
+    public ResponseEntity<GenericResponse<ProductResponse>> findById(@PathVariable("id") Long id) {
 
         ProductResponse productResponse = productService.findProductResponseById(id);
 
         return ResponseEntity.ok().body(GenericResponse.of(productResponse));
+    }
+
+    @PostMapping
+    public ResponseEntity<GenericResponse<String>> create(@RequestBody @Validated(ValidationSequence.class) ProductForm productForm) {
+
+        productService.create(productForm);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(GenericResponse.of("상품이 정상적으로 등록되었습니다."));
     }
 
 }

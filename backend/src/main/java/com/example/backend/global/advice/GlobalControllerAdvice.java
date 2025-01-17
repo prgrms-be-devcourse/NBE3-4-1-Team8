@@ -1,5 +1,6 @@
 package com.example.backend.global.advice;
 
+import com.example.backend.domain.product.exception.ProductException;
 import com.example.backend.global.auth.exception.AuthException;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.Set;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
@@ -122,5 +124,30 @@ public class GlobalControllerAdvice {
 	public ResponseEntity<HttpErrorInfo> handlerAuthException(AuthException ex, HttpServletRequest request) {
 		return ResponseEntity.status(ex.getStatus())
 			.body(HttpErrorInfo.of(ex.getCode(), request.getRequestURI(), ex.getMessage()));
+	}
+
+	/**
+	 * Product 예외 발생시 처리하는 핸들러
+	 * @param ex ProductException
+	 * @param request HttpServletRequest
+	 * @return {@link ResponseEntity<HttpErrorInfo>}
+	 */
+	@ExceptionHandler(ProductException.class)
+	public ResponseEntity<HttpErrorInfo> handlerProductException(ProductException ex, HttpServletRequest request) {
+		log.info("GlobalControllerAdvice={}", ex);
+		return ResponseEntity.status(ex.getStatus())
+				.body(HttpErrorInfo.of(ex.getCode(), request.getRequestURI(), ex.getMessage()));
+	}
+
+	/**
+	 * @RequestBody에서 파싱할 수 없는 값 들어올 시 발생하는 예외 처리 핸들러
+	 * @param ex HttpMessageNotReadableException
+	 * @param request HttpServletRequest
+	 * @return {@link ResponseEntity<HttpErrorInfo>}
+	 */
+	@ExceptionHandler(HttpMessageNotReadableException.class)
+	public ResponseEntity<HttpErrorInfo> handlerHttpMessageNotReadableException(HttpMessageNotReadableException ex, HttpServletRequest request) {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+				.body(HttpErrorInfo.of("400", request.getRequestURI(), ex.getMessage()));
 	}
 }
