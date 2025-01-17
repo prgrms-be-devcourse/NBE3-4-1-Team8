@@ -4,6 +4,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,17 +20,18 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.example.backend.domain.common.VerifyType;
 import com.example.backend.domain.member.exception.MemberErrorCode;
 import com.example.backend.domain.member.exception.MemberException;
-import com.example.backend.domain.member.repository.MemberRepository;
 import com.example.backend.global.auth.dto.EmailCertificationForm;
 import com.example.backend.global.auth.exception.AuthErrorCode;
 import com.example.backend.global.auth.exception.AuthException;
-import com.example.backend.global.auth.jwt.JwtProvider;
 import com.example.backend.global.auth.service.AuthService;
-import com.example.backend.global.auth.service.CustomUserDetailsService;
+import com.example.backend.global.auth.service.CookieService;
+import com.example.backend.global.auth.dto.AuthForm;
+import com.example.backend.global.auth.dto.AuthResponse;
 import com.example.backend.global.config.CorsConfig;
 import com.example.backend.global.config.TestSecurityConfig;
 import com.example.backend.global.exception.GlobalErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,13 +44,7 @@ public class AuthControllerTest {
 	AuthService authService;
 
 	@MockitoBean
-	CustomUserDetailsService customUserDetailsService;
-
-	@MockitoBean
-	JwtProvider jwtProvider;
-
-	@MockitoBean
-	MemberRepository memberRepository;
+	CookieService cookieService;
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -279,4 +275,39 @@ public class AuthControllerTest {
 			.andExpect(jsonPath("$.errorDetails[0].field").value("verifyType"))
 			.andExpect(jsonPath("$.errorDetails[0].reason").value("인증 타입은 필수 항목 입니다."));
 	}
+
+	@Test
+	@DisplayName("로그인 성공")
+	void login_success() throws Exception {
+		//given
+		AuthForm authForm = AuthForm.builder()
+			.username("user@gmail.com")
+			.password("Password123!")
+			.build();
+
+		AuthResponse authResponse = AuthResponse.of("user@gmail.com", "accessToken", "refreshToken");
+		when(authService.login(any(AuthForm.class))).thenReturn(authResponse);
+		doNothing().when(cookieService).addAccessTokenToCookie(any(String.class), any(HttpServletResponse.class));
+		doNothing().when(cookieService).addRefreshTokenToCookie(any(String.class), any(HttpServletResponse.class));
+
+		//when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/auth/login")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(authForm)));
+
+		//then
+		resultActions
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.success").value(true))
+			.andExpect(jsonPath("$.message").value("로그인 성공"))
+			.andExpect(jsonPath("$.data.username").value("user@gmail.com"));
+
+		verify(authService, times(1)).login(any(AuthForm.class));
+		verify(cookieService, times(1)).addAccessTokenToCookie(eq("accessToken"),
+			any(HttpServletResponse.class));
+		verify(cookieService, times(1)).addRefreshTokenToCookie(eq("refreshToken"),
+			any(HttpServletResponse.class));
+	}
+
+
 }
