@@ -44,7 +44,9 @@ dependencies {
 	testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
 
-    // 메일 템플릿 설정을 위한 thymeleaf
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.1'
+
+	// 메일 템플릿 설정을 위한 thymeleaf
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 }
 
