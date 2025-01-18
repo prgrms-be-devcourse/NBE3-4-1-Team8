@@ -42,7 +42,7 @@ public class JwtUtils {
             parseClaims(token);
             return "valid";
         } catch (ExpiredJwtException e) {
-            logger.info("토큰의 유효기간이 만료되었습니다.", e);
+            logger.error("토큰의 유효기간이 만료되었습니다.", e);
             return "expired";
         } catch (JwtException | IllegalArgumentException e) {
             logger.error("유효하지 않은 토큰입니다.", e);
