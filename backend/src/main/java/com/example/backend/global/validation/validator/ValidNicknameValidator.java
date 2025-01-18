@@ -14,11 +14,9 @@ import jakarta.validation.ConstraintValidatorContext;
  */
 public class ValidNicknameValidator implements ConstraintValidator<ValidNickname, String> {
 	private static final String NICKNAME_REGEX = "^[가-힣a-zA-Z0-9]{2,}$";
-	private ValidNickname validNickname;
 
 	@Override
 	public void initialize(ValidNickname constraintAnnotation) {
-		this.validNickname = constraintAnnotation;
 	}
 
 	@Override
