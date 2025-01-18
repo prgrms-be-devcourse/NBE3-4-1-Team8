@@ -33,14 +33,13 @@ public class CartController {
         return ResponseEntity.status(HttpStatus.CREATED).body(GenericResponse.of(cartId));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping
     public ResponseEntity<GenericResponse<List<CartResponse>>> getCarts(
-            @PathVariable("id") Long memberId,
             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
         Member member = customUserDetails.getMember();
 
-        List<CartResponse> cartResponses = cartService.getCartsByMember(memberId, member);
+        List<CartResponse> cartResponses = cartService.getCartsByMember(member);
 
         return ResponseEntity.status(HttpStatus.OK).body(GenericResponse.of(cartResponses));
     }
