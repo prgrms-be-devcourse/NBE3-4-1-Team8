@@ -25,7 +25,7 @@ public record OrdersForm(
 
         @NotEmpty(message = "상품 주문 리스트는 비어 있을 수 없습니다.")
         @Size(min = 1, max = 20, message = "상품 리스트는 1 ~ 20개 사이여야 합니다.", groups = SizeGroup.class)
-        List<@Valid ProductOrdersRequest> productOrders
+        List<@Valid ProductOrdersRequest> productOrdersRequestList
 ) {
     public record ProductOrdersRequest(
             @NotNull(message = "상품 ID는 필수입니다.", groups = NotNullGroup.class)

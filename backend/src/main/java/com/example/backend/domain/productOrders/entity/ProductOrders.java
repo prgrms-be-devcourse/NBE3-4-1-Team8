@@ -30,14 +30,15 @@ public class ProductOrders extends BaseEntity {
     @Column(name = "price", nullable = false)
     private int price;
 
-
+    /**
+     * 생성 메서드
+     */
     @Builder(builderMethodName = "create")
-    public ProductOrders(Long id, Orders orders, Product product, int quantity, int price) {
-        this.id = id;
-        this.orders = orders;
+    public ProductOrders(Product product, int quantity, int price) {
         this.product = product;
         this.quantity = quantity;
         this.price = price;
+        // todo 주문 수량 만큼 제거 product.removeQauntity(quantity);
     }
 
     /**
@@ -53,7 +54,5 @@ public class ProductOrders extends BaseEntity {
     public int getTotalPrice() {
         return getPrice() * getQuantity();
     }
-
-
 
 }

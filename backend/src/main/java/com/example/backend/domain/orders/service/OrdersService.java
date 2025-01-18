@@ -4,6 +4,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.example.backend.domain.common.Address;
+import com.example.backend.domain.orders.dto.OrdersForm;
+import com.example.backend.domain.product.entity.Product;
+import com.example.backend.domain.product.exception.ProductErrorCode;
+import com.example.backend.domain.product.exception.ProductException;
+import com.example.backend.domain.product.repository.ProductRepository;
+import com.example.backend.domain.productOrders.entity.ProductOrders;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +35,7 @@ public class OrdersService {
 
     private final OrdersRepository ordersRepository;
     private final MemberRepository memberRepository;
+    private final ProductRepository productRepository;
 
     public OrdersResponse findOne(Long id) {
         Orders orders = ordersRepository.findOrderById(id)
@@ -66,14 +74,47 @@ public class OrdersService {
         return responseList;
     }
 
+    public Long create(OrdersForm ordersForm, Member member) {
+
+        List<ProductOrders> productOrdersList = ordersForm.productOrdersRequestList().stream().map(
+                po -> {
+                    Product product = productRepository.findById(po.productId())
+                            .orElseThrow(() -> new ProductException(ProductErrorCode.NOT_FOUND));
+
+                    return ProductOrders.create()
+                            .product(product)
+                            .price(product.getPrice())
+                            .quantity(po.quantity())
+                            .build();
+                }
+        ).toList();
+
+        Address address = Address.builder()
+                .city(ordersForm.city())
+                .district(ordersForm.district())
+                .country(ordersForm.country())
+                .detail(ordersForm.detail())
+                .build();
+
+        Orders orders = Orders.create()
+                .member(member)
+                .productOrdersList(productOrdersList)
+                .address(address)
+                .build();
+
+        return ordersRepository.save(orders).getId();
+
+    }
+
     private Member getMember(String username) {
        return memberRepository.findByUsername(username)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
     }
 
     private List<ProductInfoDto> toProductInfoDtos(Orders orders) {
-        List<ProductInfoDto> productInfoDtoList = orders.getProductOrders().stream()
-                .map(po -> ProductInfoDto.builder()
+        List<ProductInfoDto> productInfoDtoList = orders.getProductOrdersList().stream()
+                .map(po ->
+                        ProductInfoDto.builder()
                         .id(po.getId())
                         .name(po.getProduct().getName())
                         .price(po.getPrice())

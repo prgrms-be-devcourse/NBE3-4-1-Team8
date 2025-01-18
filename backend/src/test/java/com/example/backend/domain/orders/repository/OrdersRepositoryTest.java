@@ -96,7 +96,6 @@ public class OrdersRepositoryTest {
 		Orders orders = Orders.create()
 			.member(savedMember)
 			.productOrders(productOrdersList)
-			.totalPrice(200)
 			.build();
 
 		// 주문 저장
@@ -122,7 +121,6 @@ public class OrdersRepositoryTest {
 		Orders orders = Orders.create()
 			.member(savedMember)
 			.productOrders(List.of(savedProductOrders))
-			.totalPrice(200)
 			.build();
 
 		Orders save = ordersRepository.save(orders);
@@ -149,13 +147,11 @@ public class OrdersRepositoryTest {
 		Orders orders1 = Orders.create()
 			.member(savedMember)
 			.productOrders(List.of(createProductOrders(savedProduct)))
-			.totalPrice(200)
 			.build();
 
 		Orders orders2 = Orders.create()
 			.member(savedMember)
 			.productOrders(List.of(createProductOrders(savedProduct)))
-			.totalPrice(300)
 			.build();
 
 		orders2.changeStatus(DeliveryStatus.SHIPPED);
