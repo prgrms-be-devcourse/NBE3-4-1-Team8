@@ -7,6 +7,9 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.backend.domain.common.Address;
+import com.example.backend.domain.product.exception.ProductErrorCode;
+import com.example.backend.domain.product.exception.ProductException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,14 +26,13 @@ import com.example.backend.domain.orders.repository.OrdersRepository;
 import com.example.backend.domain.orders.status.DeliveryStatus;
 import com.example.backend.domain.product.entity.Product;
 import com.example.backend.domain.productOrders.entity.ProductOrders;
+import org.springframework.http.HttpStatus;
 
 @ExtendWith(MockitoExtension.class)
 class OrdersServiceTest {
 
     @Mock
     OrdersRepository ordersRepository;
-    @Mock
-    MemberRepository memberRepository;
     @InjectMocks
     OrdersService ordersService;
 
@@ -41,7 +43,7 @@ class OrdersServiceTest {
 
         when(orders.getId()).thenReturn(id);
         when(orders.getTotalPrice()).thenReturn(1000);
-        lenient().when(orders.getDeliveryStatus()).thenReturn(status);
+        when(orders.getDeliveryStatus()).thenReturn(status);
         when(orders.getCreatedAt()).thenReturn(now);
         when(orders.getModifiedAt()).thenReturn(now);
         when(orders.getProductOrdersList()).thenReturn(productOrders);
@@ -55,7 +57,7 @@ class OrdersServiceTest {
 
         // OrdersResponse에서 실제로 사용하는 필드만 stub
         when(product.getName()).thenReturn("A");
-        when(product.getImgUrl()).thenReturn("http://example.com/productA.jpg");
+        lenient().when(product.getImgUrl()).thenReturn("http://example.com/productA.jpg");
         when(productOrder.getProduct()).thenReturn(product);
 
         return List.of(productOrder);
@@ -73,11 +75,11 @@ class OrdersServiceTest {
         OrdersResponse ordersResponse = ordersService.findOne(orderId);
 
         // Then
-        assertThat(orderId).isEqualTo(ordersResponse.id());
-        assertThat(orders.getTotalPrice()).isEqualTo(ordersResponse.totalPrice());
-        assertThat(orders.getDeliveryStatus()).isEqualTo(ordersResponse.status());
-        assertThat(orders.getCreatedAt()).isEqualTo(ordersResponse.createAt());
-        assertThat(orders.getModifiedAt()).isEqualTo(ordersResponse.modifiedAt());
+        assertThat(ordersResponse.id()).isEqualTo(orderId);
+        assertThat(ordersResponse.totalPrice()).isEqualTo(orders.getTotalPrice());
+        assertThat(ordersResponse.status()).isEqualTo(DeliveryStatus.READY);  // READY를 기대
+        assertThat(ordersResponse.createAt()).isEqualTo(orders.getCreatedAt());
+        assertThat(ordersResponse.modifiedAt()).isEqualTo(orders.getModifiedAt());
 
         ProductOrders firstProductOrder = orders.getProductOrdersList().get(0);
         assertThat(firstProductOrder.getProduct().getName()).isEqualTo("A");
@@ -137,4 +139,100 @@ class OrdersServiceTest {
                 DeliveryStatus.READY
         );
     }
+
+    @Test
+    @DisplayName("주문 총 가격 계산 성공")
+    void calculateTotalPrice() {
+        // Given
+        Product product1 = mock(Product.class);
+        lenient().when(product1.getPrice()).thenReturn(1000);
+
+        Product product2 = mock(Product.class);
+        lenient().when(product2.getPrice()).thenReturn(2000);
+
+        ProductOrders productOrder1 = mock(ProductOrders.class);
+        lenient().when(productOrder1.getProduct()).thenReturn(product1);
+        lenient().when(productOrder1.getQuantity()).thenReturn(2);
+        lenient().when(productOrder1.getTotalPrice()).thenReturn(1000 * 2);
+
+        ProductOrders productOrder2 = mock(ProductOrders.class);
+        lenient().when(productOrder2.getProduct()).thenReturn(product2);
+        lenient().when(productOrder2.getQuantity()).thenReturn(3);
+        lenient().when(productOrder2.getTotalPrice()).thenReturn(2000 * 3);
+
+        Member member = mock(Member.class);
+        Address address = mock(Address.class);
+
+        // When
+        Orders orders = Orders.create()
+                .member(member)
+                .productOrdersList(List.of(productOrder1, productOrder2))
+                .address(address)
+                .build();
+
+        // Then
+        assertThat(orders.getTotalPrice()).isEqualTo(2000 + 6000);
+    }
+
+    @Test
+    @DisplayName("주문 시 수량 만큼 재고 감소")
+    void reduceQuantity() {
+        // Given
+        Product product1 = mock(Product.class);
+        lenient().when(product1.getPrice()).thenReturn(1000);
+        lenient().when(product1.getQuantity()).thenReturn(100);
+
+        ProductOrders productOrders1 = ProductOrders.create()
+                .product(product1)
+                .quantity(10)
+                .price(product1.getPrice())
+                .build();
+
+        Member member = mock(Member.class);
+        Address address = mock(Address.class);
+
+        // When
+        Orders.create()
+                .member(member)
+                .productOrdersList(List.of(productOrders1))
+                .address(address)
+                .build();
+
+        // Then
+        verify(product1).removeQuantity(10);
+    }
+
+    @Test
+    @DisplayName("재고 부족 시 에러 발생")
+    void notEnoughQuantity() {
+
+        // Given
+        Product product1 = mock(Product.class);
+        lenient().when(product1.getPrice()).thenReturn(1000);
+        lenient().when(product1.getQuantity()).thenReturn(100);
+
+        doThrow(new ProductException(ProductErrorCode.INSUFFICIENT_QUANTITY))
+                .when(product1).removeQuantity(101);
+
+        Member member = mock(Member.class);
+        Address address = mock(Address.class);
+
+        // When & Then
+        assertThatThrownBy(() -> {
+            ProductOrders productOrders1 = ProductOrders.create()
+                    .product(product1)
+                    .quantity(101)
+                    .price(product1.getPrice())
+                    .build();
+
+            Orders order = Orders.create()
+                    .member(member)
+                    .address(address)
+                    .productOrdersList(List.of(productOrders1))
+                    .build();
+        }).isInstanceOf(ProductException.class)
+                .hasMessage(ProductErrorCode.INSUFFICIENT_QUANTITY.getMessage());
+    }
+
+
 }

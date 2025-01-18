@@ -32,143 +32,157 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class OrdersRepositoryTest {
 
-	@Autowired
-	OrdersRepository ordersRepository;
-	@Autowired
-	MemberRepository memberRepository;
-	@Autowired
-	ProductRepository productRepository;
-	@Autowired
-	ProductOrdersRepository productOrdersRepository;
-	@Autowired
-	EntityManager entityManager;
+    @Autowired
+    OrdersRepository ordersRepository;
+    @Autowired
+    MemberRepository memberRepository;
+    @Autowired
+    ProductRepository productRepository;
+    @Autowired
+    ProductOrdersRepository productOrdersRepository;
+    @Autowired
+    EntityManager entityManager;
 
-	private Member createMember() {
-		return Member.builder()
-			.username("test")
-			.nickname("test")
-			.password("123")
-			.role(Role.ROLE_USER)
-			.memberStatus(MemberStatus.ACTIVE)
-			.address(new Address("123 Main St", "New York", "NY", "10001"))
-			.createdAt(ZonedDateTime.now())
-			.modifiedAt(ZonedDateTime.now())
-			.build();
-	}
+    private Member createMember() {
+        return Member.builder()
+                .username("test")
+                .nickname("test")
+                .password("123")
+                .role(Role.ROLE_USER)
+                .memberStatus(MemberStatus.ACTIVE)
+                .address(new Address("123 Main St", "New York", "NY", "10001"))
+                .createdAt(ZonedDateTime.now())
+                .modifiedAt(ZonedDateTime.now())
+                .build();
+    }
 
-	private Product createProduct() {
-		return Product.builder()
-			.name("test")
-			.content("test")
-			.price(100)
-			.imgUrl("test")
-			.quantity(10)
-			.build();
-	}
+    private Product createProduct() {
+        return Product.builder()
+                .name("test")
+                .content("test")
+                .price(100)
+                .imgUrl("test")
+                .quantity(10)
+                .build();
+    }
 
-	private ProductOrders createProductOrders(Product product) {
-		return ProductOrders.create()
-			.product(product)
-			.quantity(2)
-			.price(100)
-			.build();
-	}
+    private ProductOrders createProductOrders(Product product) {
+        return ProductOrders.create()
+                .product(product)
+                .quantity(2)
+                .price(100)
+                .build();
+    }
 
-	@Test
-	@DisplayName("주문 저장 성공")
-	void saveOrder() {
+    @Test
+    @DisplayName("주문 저장 성공")
+    void saveOrder() {
 
-		// Member 객체 생성
+        // Member 객체 생성
 
-		Member savedMember = memberRepository.save(createMember());
+        Member savedMember = memberRepository.save(createMember());
 
-		// Product 객체 생성
-		Product savedProduct = productRepository.save(createProduct());
+        // Product 객체 생성
+        Product savedProduct = productRepository.save(createProduct());
 
-		// ProductOrders 객체 생성
-		ProductOrders savedProductOrders = productOrdersRepository.save(createProductOrders(savedProduct));
+        // ProductOrders 객체 생성
+        ProductOrders savedProductOrders = productOrdersRepository.save(createProductOrders(savedProduct));
 
-		// ProductOrders 목록 준비
-		List<ProductOrders> productOrdersList = new ArrayList<>();
-		productOrdersList.add(savedProductOrders);
+        // ProductOrders 목록 준비
+        List<ProductOrders> productOrdersList = new ArrayList<>();
+        productOrdersList.add(savedProductOrders);
 
-		// Orders 객체 생성
-		Orders orders = Orders.create()
-			.member(savedMember)
-			.productOrdersList(productOrdersList)
-			.build();
+        // Orders 객체 생성
+        Orders orders = Orders.create()
+                .member(savedMember)
+                .productOrdersList(productOrdersList)
+                .address(savedMember.getAddress())
+                .build();
 
-		// 주문 저장
-		Orders savedOrder = ordersRepository.save(orders);
+        // 주문 저장
+        Orders savedOrder = ordersRepository.save(orders);
 
-		// 저장된 주문이 예상한 주문과 동일한지 검증
-		assertThat(orders).isEqualTo(savedOrder);
-		assertThat(orders.getMember()).isEqualTo(savedOrder.getMember());
-		assertThat(orders.getProductOrdersList()).isEqualTo(savedOrder.getProductOrdersList());
-		assertThat(200).isEqualTo(savedOrder.getTotalPrice());
-	}
+        Address address = new Address("123 Main St", "New York", "NY", "10001");
 
-	@Test
-	@DisplayName("현재 주문 조회 성공")
-	void findByMemberIdAndDeliveryStatus() {
-		Member savedMember = memberRepository.save(createMember());
-		log.info("memberId = {}", savedMember.getId()); // memberId: 1 반환
+        // 저장된 주문이 예상한 주문과 동일한지 검증
+        assertThat(orders).isEqualTo(savedOrder);
+        assertThat(orders.getMember()).isEqualTo(savedOrder.getMember());
+        assertThat(orders.getProductOrdersList()).isEqualTo(savedOrder.getProductOrdersList());
+        assertThat(200).isEqualTo(savedOrder.getTotalPrice());
+        assertThat(address.getCity()).isEqualTo(savedOrder.getAddress().getCity());
+        assertThat(address.getDistrict()).isEqualTo(savedOrder.getAddress().getDistrict());
+        assertThat(address.getCountry()).isEqualTo(savedOrder.getAddress().getCountry());
+        assertThat(address.getDetail()).isEqualTo(savedOrder.getAddress().getDetail());
 
-		Product savedProduct = productRepository.save(createProduct());
 
-		ProductOrders savedProductOrders = productOrdersRepository.save(createProductOrders(savedProduct));
+    }
 
-		Orders orders = Orders.create()
-			.member(savedMember)
-			.productOrdersList(List.of(savedProductOrders))
-			.build();
+    @Test
+    @DisplayName("현재 주문 조회 성공")
+    void findByMemberIdAndDeliveryStatus() {
+        Member savedMember = memberRepository.save(createMember());
+        log.info("memberId = {}", savedMember.getId()); // memberId: 1 반환
 
-		Orders save = ordersRepository.save(orders);
+        Product savedProduct = productRepository.save(createProduct());
 
-		List<Orders> ordersList =
-			ordersRepository.findByMemberIdAndDeliveryStatus(save.getMember().getId(), DeliveryStatus.READY);
+        ProductOrders savedProductOrders = productOrdersRepository.save(createProductOrders(savedProduct));
 
-		log.info("orderList = {}", ordersList);
 
-		log.info("memberId = {}", save.getMember().getId()); // 이것조차 이상 없음 memberId 는 잘 저장됨
+        Orders orders = Orders.create()
+                .member(savedMember)
+                .productOrdersList(List.of(savedProductOrders))
+                .address(savedMember.getAddress())
+                .build();
 
-		assertThat(ordersList.size()).isEqualTo(1);
-		assertThat(ordersList.get(0).getDeliveryStatus()).isEqualTo(DeliveryStatus.READY);
-		assertThat(ordersList.get(0).getMember().getUsername()).isEqualTo("test");
-	}
+        Orders save = ordersRepository.save(orders);
 
-	@Test
-	@DisplayName("주문 상태가 READY 인 주문만 조회")
-	void getOnlyStatusReady() {
+        List<Orders> ordersList =
+                ordersRepository.findByMemberIdAndDeliveryStatus(save.getMember().getId(), DeliveryStatus.READY);
 
-		Member savedMember = memberRepository.save(createMember());
-		Product savedProduct = productRepository.save(createProduct());
+        log.info("orderList = {}", ordersList);
 
-		Orders orders1 = Orders.create()
-			.member(savedMember)
-			.productOrdersList(List.of(createProductOrders(savedProduct)))
-			.build();
+        log.info("memberId = {}", save.getMember().getId()); // 이것조차 이상 없음 memberId 는 잘 저장됨
 
-		Orders orders2 = Orders.create()
-			.member(savedMember)
-			.productOrdersList(List.of(createProductOrders(savedProduct)))
-			.build();
+        assertThat(ordersList.size()).isEqualTo(1);
+        assertThat(ordersList.get(0).getDeliveryStatus()).isEqualTo(DeliveryStatus.READY);
+        assertThat(ordersList.get(0).getMember().getUsername()).isEqualTo("test");
+    }
 
-		orders2.changeStatus(DeliveryStatus.SHIPPED);
+    @Test
+    @DisplayName("주문 상태가 READY 인 주문만 조회")
+    void getOnlyStatusReady() {
 
-		ordersRepository.save(orders1);
-		ordersRepository.save(orders2);
+        Member savedMember = memberRepository.save(createMember());
+        Product savedProduct = productRepository.save(createProduct());
 
-		ordersRepository.flush();
-		entityManager.clear();
+        Orders orders1 = Orders.create()
+                .member(savedMember)
+                .productOrdersList(List.of(createProductOrders(savedProduct)))
+                .address(savedMember.getAddress())
+                .build();
 
-		List<Orders> ordersList = ordersRepository.findByMemberIdAndDeliveryStatus(
-			savedMember.getId(),
-			DeliveryStatus.READY
-		);
+        Orders orders2 = Orders.create()
+                .member(savedMember)
+                .productOrdersList(List.of(createProductOrders(savedProduct)))
+                .address(savedMember.getAddress())
+                .build();
 
-		assertThat(ordersList.size()).isEqualTo(1);
-		assertThat(ordersList.get(0).getDeliveryStatus()).isEqualTo(DeliveryStatus.READY);
-	}
+        orders2.changeStatus(DeliveryStatus.SHIPPED);
+
+        ordersRepository.save(orders1);
+        ordersRepository.save(orders2);
+
+        ordersRepository.flush();
+        entityManager.clear();
+
+        List<Orders> ordersList = ordersRepository.findByMemberIdAndDeliveryStatus(
+                savedMember.getId(),
+                DeliveryStatus.READY
+        );
+
+        assertThat(ordersList.size()).isEqualTo(1);
+        assertThat(ordersList.get(0).getDeliveryStatus()).isEqualTo(DeliveryStatus.READY);
+    }
+
 
 }

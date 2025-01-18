@@ -41,6 +41,7 @@ public class OrdersConverter {
                 .id(orders.getId())
                 .products(toProductInfoDtoList(orders))
                 .totalPrice(orders.getTotalPrice())
+                .status(orders.getDeliveryStatus())
                 .createAt(orders.getCreatedAt())
                 .modifiedAt(orders.getModifiedAt())
                 .build();

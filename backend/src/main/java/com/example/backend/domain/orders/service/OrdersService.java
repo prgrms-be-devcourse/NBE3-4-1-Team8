@@ -59,7 +59,7 @@ public class OrdersService {
         return ordersRepository.save(orders).getId();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<ProductOrders> createProductOrdersList(OrdersForm ordersForm) {
         return ordersForm.productOrdersRequestList().stream().map(
                 po -> {
@@ -67,6 +67,7 @@ public class OrdersService {
                         Product product = productRepository.findById(po.productId())
                                 .orElseThrow(() -> new ProductException(ProductErrorCode.NOT_FOUND));
 
+                        // 주문 상품 생성
                         return ProductOrders.create()
                                 .product(product)
                                 .price(product.getPrice())
