@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -58,5 +59,11 @@ public class MemberController {
 		@RequestBody @Validated(ValidationSequence.class) MemberModifyForm memberModifyForm) {
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GenericResponse.of(memberService.modify(customUserDetails.getMember().toModel(), memberModifyForm)));
+	}
+
+	@DeleteMapping
+	public ResponseEntity<GenericResponse<Void>> delete(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+		memberService.delete(customUserDetails.getMember().toModel());
+		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(GenericResponse.of());
 	}
 }
