@@ -79,7 +79,7 @@ class CartServiceTest {
         given(productService.findById(cartForm.productId())).willReturn(product);
         given(cartRepository.existsByProductId_IdAndMemberId_Id(cartForm.productId(), member.getId()))
                 .willReturn(false);
-        given(cartConverter.toCart(cartForm, member, product)).willReturn(cart);
+        given(cartConverter.from(cartForm, member, product)).willReturn(cart);
         given(cartRepository.save(cart)).willReturn(cart);  // 구체적인 cart 객체 지정
 
         // when

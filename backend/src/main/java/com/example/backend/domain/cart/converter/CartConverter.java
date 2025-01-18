@@ -18,7 +18,7 @@ public class CartConverter {
      * @param product  상품 엔티티
      * @return Cart 엔티티
      */
-    public Cart toCart(CartForm cartForm, Member member, Product product) {
+    public Cart from(CartForm cartForm, Member member, Product product) {
         return Cart.builder()
                 .member(member)
                 .product(product)
@@ -32,15 +32,13 @@ public class CartConverter {
      * @param cart Cart 엔티티
      * @return 응답 DTO
      */
-    public CartResponse toCartResponse(Cart cart) {
+    public CartResponse toResponse(Cart cart) {
         return CartResponse.builder()
                 .id(cart.getId())
-                .memberId(cart.getMember().getId())
-                .memberNickname(cart.getMember().getNickname())
-                .productId(cart.getProduct().getId())
                 .productName(cart.getProduct().getName())
                 .quantity(cart.getQuantity())
                 .productPrice(cart.getProduct().getPrice())
+                .totalPrice(cart.getProduct().getPrice() * cart.getQuantity())
                 .productImgUrl(cart.getProduct().getImgUrl())
                 .build();
     }

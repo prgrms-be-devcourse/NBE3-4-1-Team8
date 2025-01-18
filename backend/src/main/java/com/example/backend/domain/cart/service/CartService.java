@@ -43,7 +43,7 @@ public class CartService {
         }
 
         // 장바구니에 상품 추가
-        Cart cart = cartConverter.toCart(
+        Cart cart = cartConverter.from(
                 cartForm,
                 member,
                 productService.findById(productId)
