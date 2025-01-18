@@ -334,4 +334,62 @@ public class ProductControllerTest {
                 .andExpect(jsonPath("$.message").value("상품을 찾을 수 없습니다."));
     }
 
+    @Test
+    @DisplayName("상품 수정 성공 테스트")
+    void modifySuccessTest() throws Exception {
+        // given
+        doNothing().when(productService).modify(anyLong(), any(ProductForm.class));
+
+        // when
+        ResultActions resultActions = mockMvc.perform(post("/api/v1/products/1")
+                .content("""
+                                {
+                                    "name": "Test Product Name",
+                                    "content": "Test Product content",
+                                    "price": 1000,
+                                    "imgUrl": "Test Product Image URL",
+                                    "quantity": 10
+                                }
+                                """)
+                .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        resultActions
+                .andExpect(handler().handlerType(ProductController.class))
+                .andExpect(handler().methodName("modify"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("상품이 정상적으로 수정되었습니다."));
+    }
+
+    @Test
+    @DisplayName("상품 수정 실패(없는 상품 수정 시도) 테스트")
+    void modifyFailWhenProductNotFoundTest() throws Exception {
+        // given
+        Long notExistId = 999L;
+        doThrow(new ProductException(ProductErrorCode.NOT_FOUND)).when(productService)
+                .modify(eq(notExistId), any(ProductForm.class));
+
+        // when
+        ResultActions resultActions = mockMvc.perform(post("/api/v1/products/" + notExistId)
+                .content("""
+                                {
+                                    "name": "Test Product Name",
+                                    "content": "Test Product content",
+                                    "price": 1000,
+                                    "imgUrl": "Test Product Image URL",
+                                    "quantity": 10
+                                }
+                                """)
+                .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        resultActions
+                .andExpect(handler().handlerType(ProductController.class))
+                .andExpect(handler().methodName("modify"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("상품을 찾을 수 없습니다."));
+    }
+
 }
