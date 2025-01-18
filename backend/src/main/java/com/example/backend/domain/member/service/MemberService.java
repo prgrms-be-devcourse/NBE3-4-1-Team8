@@ -12,7 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.backend.domain.common.Address;
 import com.example.backend.domain.common.EmailCertification;
 import com.example.backend.domain.common.VerifyType;
+import com.example.backend.domain.member.conveter.MemberConverter;
 import com.example.backend.domain.member.dto.MemberDto;
+import com.example.backend.domain.member.dto.MemberInfoResponse;
+import com.example.backend.domain.member.dto.MemberModifyForm;
 import com.example.backend.domain.member.entity.Member;
 import com.example.backend.domain.member.entity.MemberStatus;
 import com.example.backend.domain.member.entity.Role;
@@ -100,5 +103,20 @@ public class MemberService {
 	private String generateCertificationUrl(String to, String certificationCode, VerifyType verifyType) {
 		return verifyUrl + "email=" + to + "&certificationCode="
 			+ certificationCode + "&verifyType=" + verifyType.toString();
+	}
+
+	public MemberInfoResponse modify(MemberDto memberDto, MemberModifyForm memberModifyForm) {
+		existsNickname(memberModifyForm.nickname());
+
+		return MemberConverter.from(
+			memberRepository.save(Member.from(MemberConverter.updateFrom(memberDto, memberModifyForm))));
+	}
+
+	private void existsNickname (String nickname) {
+		boolean nicknameExists = memberRepository.existsByNickname(nickname);
+
+		if (nicknameExists) {
+			throw new MemberException(MemberErrorCode.EXISTS_NICKNAME);
+		}
 	}
 }
