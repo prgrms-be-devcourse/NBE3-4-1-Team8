@@ -42,7 +42,6 @@ public class RefreshTokenFilter extends OncePerRequestFilter {
         // Step 1: SecurityContextHolder 확인
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
             // 이미 인증된 사용자인 경우 다음 필터로 넘김
-            System.out.println("RefreshTokenFilter.doFilterInternal => 인증된 사용자, 다음 필터로 이동");
             filterChain.doFilter(request, response);
             return;
         }
@@ -51,14 +50,12 @@ public class RefreshTokenFilter extends OncePerRequestFilter {
         String refreshToken = cookieService.getRefreshTokenFromRequest(request);
         String username = jwtUtils.getUsernameFromToken(refreshToken);
         if(!refreshTokenService.isValidRefreshToken(username, refreshToken)) {
-            System.out.println("RefreshTokenFilter.doFilterInternal => 레디스에서 리프레시 토큰 조회후 일치하는지 확인");
             logout(response);
             filterUtils.createErrorInfo(AuthErrorCode.REFRESH_TOKEN_NOT_MATCH, request, response);
             return;
         }
 
         // step3: 새로운 액세스 토큰, 리프레시 토큰 생성
-        System.out.println("RefreshTokenFilter.doFilterInternal => 토큰 재발급, 둘다");
         Long id = jwtUtils.getUserIdFromToken(refreshToken);
         Role role = Role.valueOf(jwtUtils.getRoleFromToken(refreshToken));
         String newAccessToken = jwtProvider.generateAccessToken(id, username, role);
@@ -82,7 +79,6 @@ public class RefreshTokenFilter extends OncePerRequestFilter {
         refreshTokenService.saveRefreshToken(username, newRefreshToken);
 
         // step7: 다음 필터로 요청 전달
-        System.out.println("RefreshTokenFilter.doFilterInternal => 필터 마지막 까지 타서 모든 처리 후 다음 필터로 넘김");
         filterChain.doFilter(request, response);
     }
 
