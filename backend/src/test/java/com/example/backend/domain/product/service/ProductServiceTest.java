@@ -1,5 +1,6 @@
 package com.example.backend.domain.product.service;
 
+import com.example.backend.domain.product.converter.ProductConverter;
 import com.example.backend.domain.product.dto.ProductForm;
 import com.example.backend.domain.product.dto.ProductResponse;
 import com.example.backend.domain.product.entity.Product;
@@ -46,14 +47,14 @@ class ProductServiceTest {
     private final String imgUrl1 = "Test Product Image";
     private final int quantity1 = 10;
 
-    ProductForm productForm1 = new ProductForm(name1, content1, price1, imgUrl1, quantity1);
-    Product product1 = Product.builder()
+    ProductForm productForm1 = ProductForm.builder()
             .name(name1)
             .content(content1)
             .price(price1)
             .imgUrl(imgUrl1)
             .quantity(quantity1)
             .build();
+    Product product1 = ProductConverter.from(productForm1);
 
     @Test
     @DisplayName("상품 등록 테스트")
@@ -115,7 +116,7 @@ class ProductServiceTest {
     void findProductResponseByIdSuccessTest() {
         // given
         Long id = 1L;
-        when(productRepository.findProductResponseById(id)).thenReturn(Optional.of(ProductResponse.of(product1)));
+        when(productRepository.findProductResponseById(id)).thenReturn(Optional.of(ProductConverter.from(product1)));
 
         // when
         ProductResponse productResponse = productService.findProductResponseById(1L);
@@ -151,7 +152,7 @@ class ProductServiceTest {
         List<ProductResponse> productResponseList = new ArrayList<>();
 
         for (int i = 1; i <= 5; i++) {
-            productResponseList.add(ProductResponse.of(Product.builder()
+            productResponseList.add(ProductConverter.from(Product.builder()
                     .name("Test Name_" + i)
                     .build()));
         }
