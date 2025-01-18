@@ -204,7 +204,7 @@ class MemberServiceTest {
 			.detail("updatedDetail")
 			.build();
 
-		Member member = Member.from(MemberConverter.from(memberDto, memberModifyForm));
+		Member member = Member.from(MemberConverter.of(memberDto, memberModifyForm));
 		when(memberRepository.existsByNickname(memberModifyForm.nickname())).thenReturn(false);
 		when(memberRepository.save(any(Member.class))).thenReturn(member);
 

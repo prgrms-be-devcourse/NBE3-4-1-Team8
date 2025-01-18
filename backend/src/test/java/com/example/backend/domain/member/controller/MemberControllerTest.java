@@ -473,7 +473,7 @@ class MemberControllerTest {
 			.detail("updatedDetail")
 			.build();
 
-		MemberDto memberDto = MemberConverter.from(member.toModel(), memberModifyForm);
+		MemberDto memberDto = MemberConverter.of(member.toModel(), memberModifyForm);
 		Member updatedMember = Member.from(memberDto);
 		MemberInfoResponse response = MemberConverter.from(updatedMember);
 		when(memberService.modify(any(MemberDto.class), any(MemberModifyForm.class))).thenReturn(response);

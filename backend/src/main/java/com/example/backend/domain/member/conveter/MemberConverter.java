@@ -16,7 +16,7 @@ public final class MemberConverter {
 			.build();
 	}
 
-	public static MemberDto from(MemberDto memberDto, MemberModifyForm memberModifyForm){
+	public static MemberDto of(MemberDto memberDto, MemberModifyForm memberModifyForm){
 		return MemberDto.builder()
 			.id(memberDto.id())
 			.username(memberDto.username())
@@ -24,13 +24,13 @@ public final class MemberConverter {
 			.password(memberDto.password())
 			.memberStatus(memberDto.memberStatus())
 			.role(memberDto.role())
-			.address(from(memberModifyForm))
+			.address(toAddress(memberModifyForm))
 			.createdAt(memberDto.createdAt())
 			.modifiedAt(memberDto.modifiedAt())
 			.build();
 	}
 
-	private static Address from(MemberModifyForm memberModifyForm) {
+	private static Address toAddress(MemberModifyForm memberModifyForm) {
 		return Address.builder()
 			.city(memberModifyForm.city())
 			.district(memberModifyForm.district())
