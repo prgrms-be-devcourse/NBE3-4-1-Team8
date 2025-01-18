@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -118,5 +119,11 @@ public class MemberService {
 		if (nicknameExists) {
 			throw new MemberException(MemberErrorCode.EXISTS_NICKNAME);
 		}
+	}
+
+	public void delete(MemberDto memberDto) {
+		redisService.delete(memberDto.username());
+		SecurityContextHolder.clearContext();
+		memberRepository.delete(Member.from(memberDto));
 	}
 }
