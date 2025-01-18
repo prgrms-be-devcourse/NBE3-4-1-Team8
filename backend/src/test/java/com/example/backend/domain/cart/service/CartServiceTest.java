@@ -1,6 +1,7 @@
 package com.example.backend.domain.cart.service;
 
 import com.example.backend.domain.cart.dto.CartForm;
+import com.example.backend.domain.cart.dto.CartResponse;
 import com.example.backend.domain.cart.entity.Cart;
 import com.example.backend.domain.cart.exception.CartException;
 import com.example.backend.domain.cart.repository.CartRepository;
@@ -18,9 +19,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.ArgumentMatchers.any;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -69,6 +72,13 @@ class CartServiceTest {
                 .build();
     }
 
+    /**
+     * addCartItem() 메서드 테스트
+     * - 장바구니에 상품 추가 성공
+     * - 회원 정보가 일치하지 않으면 예외 발생
+     * - 수량이 0 이하면 예외 발생
+     * - 이미 장바구니에 존재하는 상품이면 예외 발생
+     */
     @Test
     @DisplayName("장바구니에 상품 추가 성공")
     void addCartItem_Success() {
@@ -123,5 +133,52 @@ class CartServiceTest {
         assertThatThrownBy(() -> cartService.addCartItem(cartForm, member))
                 .isInstanceOf(CartException.class)
                 .hasMessage("이미 장바구니에 추가된 상품입니다.");
+    }
+
+    /**
+     * getCartsByMember() 메서드 테스트
+     * - 회원의 장바구니 목록 조회 성공
+     * - 회원이 null이면 예외 발생
+     * - 로그인한 회원과 요청한 회원이 다르면 예외 발생
+     */
+
+    @Test
+    @DisplayName("회원의 장바구니 목록 조회 성공")
+    void getCartsByMember_Success() {
+        // given
+        List<Cart> cartList = List.of(cart);
+        given(cartRepository.findAllByMemberWithProducts(member)).willReturn(cartList);
+
+        // when
+        List<CartResponse> result = cartService.getCartsByMember(member.getId(), member);
+
+        // then
+        assertThat(result).isNotEmpty();
+        assertThat(result.size()).isEqualTo(1);
+        verify(cartRepository).findAllByMemberWithProducts(member);
+    }
+
+    @Test
+    @DisplayName("회원이 null이면 예외 발생")
+    void getCartsByMember_WithNullMember_ThrowsAuthException() {
+        // given
+        Member nullMember = null;
+
+        // when & then
+        assertThatThrownBy(() -> cartService.getCartsByMember(1L, nullMember))
+                .isInstanceOf(AuthException.class)
+                .hasMessage("해당 유저가 존재하지 않습니다.");
+    }
+
+    @Test
+    @DisplayName("로그인한 회원과 요청한 회원이 다르면 예외 발생")
+    void getCartsByMember_WithDifferentMember_ThrowsCartException() {
+        // given
+        Long differentMemberId = 2L;
+
+        // when & then
+        assertThatThrownBy(() -> cartService.getCartsByMember(differentMemberId, member))
+                .isInstanceOf(CartException.class)
+                .hasMessage("요청한 회원 ID와 로그인한 회원 ID가 다릅니다.");
     }
 }
