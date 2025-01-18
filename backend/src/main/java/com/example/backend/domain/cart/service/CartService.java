@@ -2,6 +2,7 @@ package com.example.backend.domain.cart.service;
 
 import com.example.backend.domain.cart.converter.CartConverter;
 import com.example.backend.domain.cart.dto.CartForm;
+import com.example.backend.domain.cart.dto.CartResponse;
 import com.example.backend.domain.cart.entity.Cart;
 import com.example.backend.domain.cart.exception.CartErrorCode;
 import com.example.backend.domain.cart.exception.CartException;
@@ -10,9 +11,11 @@ import com.example.backend.domain.member.entity.Member;
 import com.example.backend.domain.product.service.ProductService;
 import com.example.backend.global.auth.exception.AuthErrorCode;
 import com.example.backend.global.auth.exception.AuthException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -50,4 +53,22 @@ public class CartService {
 
         return cartRepository.save(cart).getId();
     }
+
+    @Transactional(readOnly = true)
+    public List<CartResponse> getCartsByMember(Long memberId, Member member) {
+        // 요청한 회원이 존재하지 않으면 exception 발생
+        if (member == null) {
+            throw new AuthException(AuthErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        // 로그인한 회원과 요청한 회원이 다르면 exception 발생
+        if (!member.getId().equals(memberId)) {
+            throw new CartException(CartErrorCode.INVALID_MEMBER);
+        }
+
+        List<Cart> cartList = cartRepository.findAllByMemberWithProducts(member);
+
+        return CartConverter.toResponseList(cartList);
+    }
+
 }
