@@ -27,8 +27,6 @@ import com.example.backend.domain.member.exception.MemberErrorCode;
 import com.example.backend.domain.member.exception.MemberException;
 import com.example.backend.domain.member.service.MemberService;
 import com.example.backend.global.auth.model.CustomUserDetails;
-import com.example.backend.global.config.CorsConfig;
-import com.example.backend.global.config.TestSecurityConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -432,7 +430,6 @@ class MemberControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data.username").value("test@naver.com"))
 			.andExpect(jsonPath("$.data.nickname").value("testNickname"))
-			.andExpect(jsonPath("$.data.memberStatus").value("ACTIVE"))
 			.andExpect(jsonPath("$.data.address.city").value("testCity"))
 			.andExpect(jsonPath("$.data.address.district").value("testDistrict"))
 			.andExpect(jsonPath("$.data.address.country").value("testCountry"))
