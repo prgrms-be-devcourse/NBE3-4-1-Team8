@@ -904,4 +904,52 @@ class MemberControllerTest {
 				.value("공백 없이 비밀번호는 최소 8자리, 최대 20자리이며 대소문자, 숫자, 특수문자 1개씩 필수 입력해야 합니다."));
 	}
 
+	@DisplayName("비밀번호 변경시 비밀번호 매치 실패 테스트")
+	@Test
+	void password_not_match_success() throws Exception {
+		//given
+		Address address = Address.builder()
+			.city("testCity")
+			.district("testDistrict")
+			.country("testCountry")
+			.detail("testDetail")
+			.build();
+
+		Member givenMember = Member.builder()
+			.username("test@naver.com")
+			.nickname("testNickname")
+			.password("!testPassword1234")
+			.memberStatus(MemberStatus.ACTIVE)
+			.role(Role.ROLE_USER)
+			.address(address)
+			.build();
+
+		CustomUserDetails customUserDetails = new CustomUserDetails(givenMember);
+
+		// Authentication 설정
+		UsernamePasswordAuthenticationToken authenticationToken =
+			new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+
+		PasswordChangeForm givenPasswordChangeForm = PasswordChangeForm.builder()
+			.originalPassword(givenMember.getPassword())
+			.password("!changePassword12345")
+			.passwordCheck("!changePassword1234")
+			.build();
+
+		doNothing().when(memberService)
+			.passwordChange(givenMember.getPassword(), givenPasswordChangeForm.password(), givenMember);
+
+		//when
+		ResultActions resultActions = mockMvc.perform(patch("/api/v1/members/password")
+			.with(SecurityMockMvcRequestPostProcessors.authentication(authenticationToken))
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(givenPasswordChangeForm)));
+
+		//then
+		resultActions.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("400-1"))
+			.andExpect(jsonPath("$.errorDetails[0].field").value("passwordChangeForm"))
+			.andExpect(jsonPath("$.errorDetails[0].reason")
+				.value("비밀번호와 비밀번호 확인이 일치하지 않습니다."));
+	}
 }
