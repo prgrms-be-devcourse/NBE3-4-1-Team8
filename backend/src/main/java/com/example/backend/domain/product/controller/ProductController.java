@@ -38,10 +38,7 @@ public class ProductController {
     public ResponseEntity<GenericResponse<Page<ProductResponse>>> findAllPaged(
             @RequestParam(value = "page", defaultValue = "0") int page) {
 
-        Sort sortByNameAsc = Sort.by(Sort.Order.asc("name"));
-        Pageable pageable = PageRequest.of(page, 10, sortByNameAsc);
-
-        Page<ProductResponse> productResponsePage = productService.findAllPaged(pageable);
+        Page<ProductResponse> productResponsePage = productService.findAllPaged(page);
 
         return ResponseEntity.ok().body(GenericResponse.of(productResponsePage));
     }
