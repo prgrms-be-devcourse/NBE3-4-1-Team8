@@ -1,12 +1,17 @@
 package com.example.backend.domain.cart.service;
 
+import com.example.backend.domain.cart.converter.CartConverter;
 import com.example.backend.domain.cart.dto.CartForm;
 import com.example.backend.domain.cart.entity.Cart;
 import com.example.backend.domain.cart.exception.CartException;
 import com.example.backend.domain.cart.repository.CartRepository;
 import com.example.backend.domain.member.entity.Member;
+import com.example.backend.domain.member.entity.MemberStatus;
+import com.example.backend.domain.member.entity.Role;
 import com.example.backend.domain.product.entity.Product;
 import com.example.backend.domain.product.service.ProductService;
+import com.example.backend.global.auth.exception.AuthException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,94 +21,126 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class CartServiceTest {
 
-    @Mock
-    CartRepository cartRepository;
-    @Mock
-    ProductService productService;
     @InjectMocks
-    CartService cartService;
+    private CartService cartService;
 
-    private Member mockMember(Long id) {
-        Member member = mock(Member.class);
-        when(member.getId()).thenReturn(id);
-        return member;
-    }
+    @Mock
+    private CartRepository cartRepository;
 
-    private CartForm mockCartForm(Long productId, int quantity) {
-        CartForm cartForm = mock(CartForm.class);
-        when(cartForm.getProductId()).thenReturn(productId);
-        when(cartForm.getQuantity()).thenReturn(quantity);
-        return cartForm;
-    }
+    @Mock
+    private ProductService productService;
 
-    private Product mockProduct(Long productId) {
-        Product product = mock(Product.class);
-        when(product.getId()).thenReturn(productId);
-        return product;
+    @Mock
+    private CartConverter cartConverter;
+
+    private Member member;
+    private Product product;
+    private CartForm cartForm;
+    private Cart cart;
+
+    @BeforeEach
+    void setUp() {
+        member = Member.builder()
+                .id(1L)
+                .username("testUser")
+                .password("!testPassword1234")
+                .role(Role.ROLE_USER)
+                .memberStatus(MemberStatus.ACTIVE)
+                .build();
+
+        product = Product.builder()
+                .name("Test Product")
+                .content("Test Content")
+                .price(1000)
+                .imgUrl("test.jpg")
+                .quantity(10)
+                .build();
+
+        cartForm = new CartForm(1L, 1L, 5);
+
+        cart = Cart.builder()
+                .id(1L)
+                .member(member)
+                .product(product)
+                .quantity(5)
+                .build();
     }
 
     @Test
     @DisplayName("장바구니에 상품 추가 성공")
-    void addCartItem_success() {
-        // Given
-        Long memberId = 1L;
-        Long productId = 1L;
-        int quantity = 2;
+    void addCartItem_Success() {
+        // given
+        given(productService.findById(cartForm.productId())).willReturn(product);
+        given(cartRepository.existsByProductId_IdAndMemberId_Id(cartForm.productId(), member.getId()))
+                .willReturn(false);
+        given(cartConverter.toCart(cartForm, member, product)).willReturn(cart);
+        given(cartRepository.save(cart)).willReturn(cart);  // 구체적인 cart 객체 지정
 
-        Member member = mockMember(memberId);
-        CartForm cartForm = mockCartForm(productId, quantity);
-        Product product = mockProduct(productId);
+        // when
+        Long savedCartId = cartService.addCartItem(cartForm, member);
 
-        when(cartRepository.existsByProductId_IdAndMemberId_Id(productId, memberId)).thenReturn(false);
-        when(productService.findById(productId)).thenReturn(product);
-        when(cartRepository.save(any(Cart.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        // When
-        Long cartId = cartService.addCartItem(cartForm, member);
-
-        // Then
-        assertThat(cartId).isNotNull();
-        verify(cartRepository).save(any(Cart.class));
+        // then
+        assertThat(savedCartId).isEqualTo(cart.getId());
+        verify(cartRepository).save(cart);  // 구체적인 cart 객체로 검증
     }
 
     @Test
-    @DisplayName("장바구니에 이미 존재하는 상품 추가 시 예외 발생")
-    void addCartItem_alreadyExists() {
-        // Given
-        Long memberId = 1L;
-        Long productId = 1L;
-        int quantity = 2;
+    @DisplayName("회원 정보가 일치하지 않으면 예외 발생")
+    void addCartItem_WithInvalidMember_ThrowsAuthException() {
+        // given
+        Member differentMember = Member.builder()
+                .id(2L)
+                .build();
 
-        Member member = mockMember(memberId);
-        CartForm cartForm = mockCartForm(productId, quantity);
-
-        when(cartRepository.existsByProductId_IdAndMemberId_Id(productId, memberId)).thenReturn(true);
-
-        // When & Then
-        assertThatThrownBy(() -> cartService.addCartItem(cartForm, member))
-                .isInstanceOf(CartException.class)
-                .hasMessage("이미 장바구니에 존재하는 상품입니다.");
+        // when & then
+        assertThatThrownBy(() -> cartService.addCartItem(cartForm, differentMember))
+                .isInstanceOf(AuthException.class)
+                .hasMessage("해당 유저가 존재하지 않습니다.");
     }
 
     @Test
-    @DisplayName("장바구니에 유효하지 않은 수량으로 상품 추가 시 예외 발생")
-    void addCartItem_invalidQuantity() {
-        // Given
-        Long memberId = 1L;
-        Long productId = 1L;
-        int quantity = 0;
+    @DisplayName("수량이 0 이하면 예외 발생")
+    void addCartItem_WithInvalidQuantity_ThrowsCartException() {
+        // given
+        CartForm invalidCartForm = new CartForm(1L, 1L, 0);
 
-        Member member = mockMember(memberId);
-        CartForm cartForm = mockCartForm(productId, quantity);
+        // when & then
+        assertThatThrownBy(() -> cartService.addCartItem(invalidCartForm, member))
+                .isInstanceOf(CartException.class)
+                .hasMessage("상품을 최소 1개 이상 추가하여야 합니다.");
+    }
 
-        // When & Then
+    @Test
+    @DisplayName("이미 장바구니에 존재하는 상품이면 예외 발생")
+    void addCartItem_WithExistingProduct_ThrowsCartException() {
+        // given
+        given(cartRepository.existsByProductId_IdAndMemberId_Id(cartForm.productId(), member.getId()))
+                .willReturn(true);
+
+        // when & then
         assertThatThrownBy(() -> cartService.addCartItem(cartForm, member))
                 .isInstanceOf(CartException.class)
-                .hasMessage("수량은 0보다 커야 합니다.");
+                .hasMessage("이미 장바구니에 추가된 상품입니다.");
+    }
+
+    @Test
+    @DisplayName("상품의 재고가 부족하면 예외 발생")
+    void addCartItem_WithInsufficientStock_ThrowsCartException() {
+        // given
+        CartForm cartFormWithExcessiveQuantity = new CartForm(1L, 1L, 20);
+        given(productService.findById(cartFormWithExcessiveQuantity.productId())).willReturn(product);
+        given(cartRepository.existsByProductId_IdAndMemberId_Id(cartFormWithExcessiveQuantity.productId(), member.getId()))
+                .willReturn(false);
+
+        // when & then
+        assertThatThrownBy(() -> cartService.addCartItem(cartFormWithExcessiveQuantity, member))
+                .isInstanceOf(CartException.class)
+                .hasMessage("재고가 부족합니다.");
     }
 }

@@ -3,6 +3,8 @@ package com.example.backend.domain.cart.repository;
 import com.example.backend.domain.cart.entity.Cart;
 import com.example.backend.domain.common.Address;
 import com.example.backend.domain.member.entity.Member;
+import com.example.backend.domain.member.entity.MemberStatus;
+import com.example.backend.domain.member.entity.Role;
 import com.example.backend.domain.member.repository.MemberRepository;
 import com.example.backend.domain.product.entity.Product;
 import com.example.backend.domain.product.repository.ProductRepository;
@@ -12,8 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import static com.example.backend.domain.member.entity.Role.ROLE_USER;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
@@ -30,57 +30,56 @@ class CartRepositoryTest {
 
     private Member member;
     private Product product;
-    private Cart cart;
 
     @BeforeEach
-    void setUp() {
-        // Member 객체 생성
-        member = Member.builder()
-                .username("testUser@gmail.com")
-                .nickname("testNickname")
-                .password("testPassword")
-                .role(ROLE_USER)
-                .address(new Address("testCity", "testDistrict", "testCountry", "testDetail"))
+    void setup() {
+        // Given: 회원 및 상품 객체를 생성 후 DB에 저장
+        Address address = Address.builder()
+                .city("testCity")
+                .district("testDistrict")
+                .country("testCountry")
+                .detail("testDetail")
                 .build();
 
-        // Product 객체 생성
-        product = new Product("Product1", "content", 1000, "imageURL", 10);
-
-        // Member와 Product 저장
+        member = Member.builder()
+                .username("testUser")
+                .nickname("testNickname")
+                .password("!testPassword1234")
+                .role(Role.ROLE_USER)
+                .memberStatus(MemberStatus.ACTIVE)
+                .address(address)
+                .build();
         memberRepository.save(member);
-        productRepository.save(product);
 
-        // Cart 객체 생성 후 저장
-        cart = Cart.builder()
-                .member(member)  // Member 객체 설정
-                .product(product)  // Product 객체 설정
-                .quantity(1)  // 수량 설정
+        product = Product.builder()
+                .name("Test Product")
+                .content("Test Product Content")
+                .price(1000)
+                .quantity(1)
+                .imgUrl("http://test.com/image.jpg")
+                .build();
+        productRepository.save(product);
+    }
+
+    @Test
+    @DisplayName("장바구니에 해당 상품과 회원이 존재하는지 확인")
+    void existsByProductId_IdAndMemberId_Id() {
+        // Given
+        Cart cart = Cart.builder()
+                .member(member)
+                .product(product)
+                .quantity(1)
                 .build();
 
         cartRepository.save(cart);
-    }
 
-    @Test
-    @DisplayName("상품과 회원이 장바구니에 존재할 경우")
-    void testExistsByProductIdAndMemberId_whenExists() {
-        // 상품과 회원이 장바구니에 존재할 때
-        boolean exists = cartRepository.existsByProductId_IdAndMemberId_Id(product.getId(), member.getId());
-        assertTrue(exists, "주어진 상품과 회원에 대한 장바구니가 존재합니다.");
-    }
+        // When
+        boolean exists = cartRepository.existsByProductId_IdAndMemberId_Id(
+                product.getId(),
+                member.getId()
+        );
 
-    @Test
-    @DisplayName("상품과 회원이 장바구니에 존재하지 않을 경우")
-    void testExistsByProductIdAndMemberId_whenNotExists() {
-        Member newMember = Member.builder()
-                .username("newUsername")
-                .nickname("newNickname")
-                .password("newPassword")
-                .role(ROLE_USER)
-                .address(new Address("newCity", "newDistrict", "newCountry", "newDetail"))
-                .build();
-        memberRepository.save(newMember);
-
-        boolean exists = cartRepository.existsByProductId_IdAndMemberId_Id(product.getId(), newMember.getId());
-        assertFalse(exists, "주어진 상품과 회원에 대한 장바구니가 존재하지 않습니다.");
+        // Then
+        assertTrue(exists);
     }
 }
