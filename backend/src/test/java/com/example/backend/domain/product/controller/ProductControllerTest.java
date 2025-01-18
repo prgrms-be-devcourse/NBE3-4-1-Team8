@@ -1,5 +1,6 @@
 package com.example.backend.domain.product.controller;
 
+import com.example.backend.domain.product.converter.ProductConverter;
 import com.example.backend.domain.product.dto.ProductForm;
 import com.example.backend.domain.product.dto.ProductResponse;
 import com.example.backend.domain.product.entity.Product;
@@ -229,7 +230,7 @@ public class ProductControllerTest {
         Product product = Product.builder()
                 .name("Test Product Name")
                 .build();
-        ProductResponse productResponse = ProductResponse.of(product);
+        ProductResponse productResponse = ProductConverter.from(product);
         when(productService.findProductResponseById(id)).thenReturn(productResponse);
 
         //when
