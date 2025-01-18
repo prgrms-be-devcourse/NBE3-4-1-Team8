@@ -8,8 +8,6 @@ import lombok.*;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 public class Cart {
 
     @Id
@@ -25,4 +23,11 @@ public class Cart {
     private Product product;
 
     private int quantity;
+
+    @Builder
+    public Cart(Long id, Member member, Product product, int quantity) {
+        this.member = member;
+        this.product = product;
+        this.quantity = quantity;
+    }
 }
