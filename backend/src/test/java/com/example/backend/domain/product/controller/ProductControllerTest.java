@@ -288,7 +288,7 @@ public class ProductControllerTest {
         Pageable pageable = PageRequest.of(page, 10, sortByNameAsc);
         Page<ProductResponse> mockPage = new PageImpl<>(productResponseList, pageable, 15);
 
-        when(productService.findAllPaged(pageable)).thenReturn(mockPage);
+        when(productService.findAllPaged(page)).thenReturn(mockPage);
 
         //when
         ResultActions resultActions = mockMvc.perform(get("/api/v1/products" )
@@ -297,7 +297,7 @@ public class ProductControllerTest {
         );
 
         //then
-        verify(productService, times(1)).findAllPaged(pageable);
+        verify(productService, times(1)).findAllPaged(page);
 
         resultActions
                 .andExpect(handler().handlerType(ProductController.class))
@@ -316,7 +316,7 @@ public class ProductControllerTest {
         Sort sortByNameAsc = Sort.by(Sort.Order.asc("name"));
         Pageable pageable = PageRequest.of(inValidPage, 10, sortByNameAsc);
 
-        doThrow(new ProductException(ProductErrorCode.NOT_FOUND)).when(productService).findAllPaged(pageable);
+        doThrow(new ProductException(ProductErrorCode.NOT_FOUND)).when(productService).findAllPaged(inValidPage);
 
         //when
         ResultActions resultActions = mockMvc.perform(get("/api/v1/products" )
@@ -325,7 +325,7 @@ public class ProductControllerTest {
         );
 
         //then
-        verify(productService, times(1)).findAllPaged(pageable);
+        verify(productService, times(1)).findAllPaged(inValidPage);
 
         resultActions
                 .andExpect(handler().handlerType(ProductController.class))

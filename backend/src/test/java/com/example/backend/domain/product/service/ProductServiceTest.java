@@ -13,10 +13,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -149,6 +146,7 @@ class ProductServiceTest {
     @DisplayName("상품 다건 조회 테스트")
     void findAllPagedTest() {
         // given
+        Sort sortByNameAsc = Sort.by(Sort.Order.asc("name"));
         List<ProductResponse> productResponseList = new ArrayList<>();
 
         for (int i = 1; i <= 5; i++) {
@@ -157,12 +155,12 @@ class ProductServiceTest {
                     .build()));
         }
 
-        Pageable pageable = PageRequest.of(0, 10);
+        Pageable pageable = PageRequest.of(0, 10, sortByNameAsc);
         Page<ProductResponse> mockPage = new PageImpl<>(productResponseList, pageable, 5);
         when(productRepository.findAllPaged(any())).thenReturn(mockPage);
 
         // when
-        Page<ProductResponse> productResponsePage = productService.findAllPaged(pageable);
+        Page<ProductResponse> productResponsePage = productService.findAllPaged(0);
 
         //then
         verify(productRepository, times(1)).findAllPaged(pageable);
@@ -176,13 +174,14 @@ class ProductServiceTest {
     @DisplayName("상품 다건 조회 빈 페이지 반환 시 404반환 테스트")
     void findAllPagedButIsEmptyTest() {
         // given
-        Pageable inValidPageable = PageRequest.of(0, 999);  //빈 페이지 요청
+        Sort sortByNameAsc = Sort.by(Sort.Order.asc("name"));
+        Pageable inValidPageable = PageRequest.of(999, 10, sortByNameAsc);  //빈 페이지 요청
         when(productRepository.findAllPaged(inValidPageable)).thenReturn(Page.empty());
 
         // when
         ProductException exception = assertThrows(
                 ProductException.class,
-                () -> productService.findAllPaged(inValidPageable)
+                () -> productService.findAllPaged(999)
         );
 
         //then
