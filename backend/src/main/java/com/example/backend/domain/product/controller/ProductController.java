@@ -7,9 +7,6 @@ import com.example.backend.global.response.GenericResponse;
 import com.example.backend.global.validation.ValidationSequence;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -50,6 +47,15 @@ public class ProductController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(GenericResponse.of("상품이 정상적으로 등록되었습니다."));
+    }
+
+    @PostMapping("/{id}")
+    public ResponseEntity<GenericResponse<String>> modify(@PathVariable("id") Long id,
+                                                          @RequestBody @Validated(ValidationSequence.class) ProductForm productForm) {
+
+        productService.modify(id, productForm);
+
+        return ResponseEntity.ok().body(GenericResponse.of("상품이 정상적으로 수정되었습니다."));
     }
 
 }

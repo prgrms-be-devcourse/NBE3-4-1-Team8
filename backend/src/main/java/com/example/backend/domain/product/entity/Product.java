@@ -1,5 +1,6 @@
 package com.example.backend.domain.product.entity;
 
+import com.example.backend.domain.product.dto.ProductForm;
 import com.example.backend.global.baseEntity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -39,4 +40,14 @@ public class Product extends BaseEntity {
         this.imgUrl = imgUrl;
         this.quantity = quantity;
     }
+
+    public void modify(ProductForm productForm) {
+
+        this.name = productForm.name();
+        this.content = productForm.content();
+        this.price = productForm.price();
+        this.imgUrl = productForm.imgUrl();
+        this.quantity = productForm.quantity();
+    }
+
 }
