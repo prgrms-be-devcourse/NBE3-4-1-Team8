@@ -1,6 +1,5 @@
 package com.example.backend.domain.cart.service;
 
-import com.example.backend.domain.cart.converter.CartConverter;
 import com.example.backend.domain.cart.dto.CartForm;
 import com.example.backend.domain.cart.entity.Cart;
 import com.example.backend.domain.cart.exception.CartException;
@@ -19,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
@@ -35,9 +35,6 @@ class CartServiceTest {
 
     @Mock
     private ProductService productService;
-
-    @Mock
-    private CartConverter cartConverter;
 
     private Member member;
     private Product product;
@@ -79,15 +76,14 @@ class CartServiceTest {
         given(productService.findById(cartForm.productId())).willReturn(product);
         given(cartRepository.existsByProductId_IdAndMemberId_Id(cartForm.productId(), member.getId()))
                 .willReturn(false);
-        given(cartConverter.from(cartForm, member, product)).willReturn(cart);
-        given(cartRepository.save(cart)).willReturn(cart);  // 구체적인 cart 객체 지정
+        given(cartRepository.save(any(Cart.class))).willReturn(cart);
 
         // when
         Long savedCartId = cartService.addCartItem(cartForm, member);
 
         // then
         assertThat(savedCartId).isEqualTo(cart.getId());
-        verify(cartRepository).save(cart);  // 구체적인 cart 객체로 검증
+        verify(cartRepository).save(any(Cart.class));
     }
 
     @Test
