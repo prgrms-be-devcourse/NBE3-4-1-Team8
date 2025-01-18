@@ -89,4 +89,9 @@ public class Member extends BaseEntity {
 			.modifiedAt(this.modifiedAt)
 			.build();
 	}
+
+	public Member changePassword(String password) {
+		this.password = password;
+		return this;
+	}
 }

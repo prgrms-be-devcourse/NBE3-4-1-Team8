@@ -87,6 +87,17 @@ public class MemberService {
 		memberRepository.save(Member.from(saveMemberDto)).toModel();
 	}
 
+	public void passwordChange(String originalPassword, String changePassword, Member loginMember) {
+
+		if (!passwordEncoder.matches(originalPassword, loginMember.getPassword())) {
+			throw new MemberException(MemberErrorCode.PASSWORD_NOT_MATCH);
+		}
+
+		Member changedPasswordMember = loginMember.changePassword(passwordEncoder.encode(changePassword));
+
+		memberRepository.save(changedPasswordMember);
+	}
+
 	private void existsMember(String username, String nickname) {
 		boolean usernameExists = memberRepository.existsByUsername(username);
 		boolean nicknameExists = memberRepository.existsByNickname(nickname);

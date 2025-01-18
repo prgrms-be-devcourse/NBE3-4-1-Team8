@@ -1,8 +1,13 @@
 package com.example.backend.global.auth.util;
 
+import java.io.IOException;
+
+import org.springframework.stereotype.Component;
+
 import com.example.backend.global.auth.exception.AuthErrorCode;
 import com.example.backend.global.response.HttpErrorInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
