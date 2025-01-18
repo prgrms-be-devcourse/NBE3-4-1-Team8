@@ -43,7 +43,6 @@ import com.example.backend.global.config.CorsConfig;
 import com.example.backend.global.config.TestSecurityConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 @WebMvcTest(MemberController.class)
@@ -52,12 +51,6 @@ import lombok.extern.slf4j.Slf4j;
 class MemberControllerTest {
 	@MockitoBean
 	MemberService memberService;
-
-	@MockitoBean
-	MemberDeleteService memberDeleteService;
-
-	@MockitoBean
-	CookieService cookieService;
 
 	@Autowired
     private MockMvc mockMvc;
