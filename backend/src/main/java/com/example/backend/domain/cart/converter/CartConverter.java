@@ -5,9 +5,10 @@ import com.example.backend.domain.cart.dto.CartResponse;
 import com.example.backend.domain.cart.entity.Cart;
 import com.example.backend.domain.member.entity.Member;
 import com.example.backend.domain.product.entity.Product;
-import org.springframework.stereotype.Component;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
-@Component
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CartConverter {
 
     /**
@@ -18,7 +19,7 @@ public class CartConverter {
      * @param product  상품 엔티티
      * @return Cart 엔티티
      */
-    public Cart from(CartForm cartForm, Member member, Product product) {
+    public static Cart from(CartForm cartForm, Member member, Product product) {
         return Cart.builder()
                 .member(member)
                 .product(product)
@@ -32,7 +33,7 @@ public class CartConverter {
      * @param cart Cart 엔티티
      * @return 응답 DTO
      */
-    public CartResponse toResponse(Cart cart) {
+    public static CartResponse toResponse(Cart cart) {
         return CartResponse.builder()
                 .id(cart.getId())
                 .productName(cart.getProduct().getName())

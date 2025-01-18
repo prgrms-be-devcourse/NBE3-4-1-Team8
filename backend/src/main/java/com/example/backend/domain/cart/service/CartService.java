@@ -20,7 +20,6 @@ public class CartService {
 
     private final CartRepository cartRepository;
     private final ProductService productService;
-    private final CartConverter cartConverter;
 
     @Transactional
     public Long addCartItem(CartForm cartForm, Member member) {
@@ -43,7 +42,7 @@ public class CartService {
         }
 
         // 장바구니에 상품 추가
-        Cart cart = cartConverter.from(
+        Cart cart = CartConverter.from(
                 cartForm,
                 member,
                 productService.findById(productId)
