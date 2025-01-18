@@ -8,6 +8,8 @@ import com.example.backend.domain.product.entity.Product;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CartConverter {
 
@@ -42,5 +44,17 @@ public class CartConverter {
                 .totalPrice(cart.getProduct().getPrice() * cart.getQuantity())
                 .productImgUrl(cart.getProduct().getImgUrl())
                 .build();
+    }
+
+    /**
+     * Cart 엔티티 리스트 -> CartResponse 리스트 변환
+     *
+     * @param cartList Cart 엔티티 리스트
+     * @return 응답 DTO 리스트
+     */
+    public static List<CartResponse> toResponseList(List<Cart> cartList) {
+        return cartList.stream()
+                .map(CartConverter::toResponse)
+                .toList();
     }
 }
