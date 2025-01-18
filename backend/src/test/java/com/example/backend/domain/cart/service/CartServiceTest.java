@@ -138,8 +138,6 @@ class CartServiceTest {
     /**
      * getCartsByMember() 메서드 테스트
      * - 회원의 장바구니 목록 조회 성공
-     * - 회원이 null이면 예외 발생
-     * - 로그인한 회원과 요청한 회원이 다르면 예외 발생
      */
 
     @Test
@@ -150,7 +148,7 @@ class CartServiceTest {
         given(cartRepository.findAllByMemberWithProducts(member)).willReturn(cartList);
 
         // when
-        List<CartResponse> result = cartService.getCartsByMember(member.getId(), member);
+        List<CartResponse> result = cartService.getCartsByMember(member);
 
         // then
         assertThat(result).isNotEmpty();
@@ -158,27 +156,4 @@ class CartServiceTest {
         verify(cartRepository).findAllByMemberWithProducts(member);
     }
 
-    @Test
-    @DisplayName("회원이 null이면 예외 발생")
-    void getCartsByMember_WithNullMember_ThrowsAuthException() {
-        // given
-        Member nullMember = null;
-
-        // when & then
-        assertThatThrownBy(() -> cartService.getCartsByMember(1L, nullMember))
-                .isInstanceOf(AuthException.class)
-                .hasMessage("해당 유저가 존재하지 않습니다.");
-    }
-
-    @Test
-    @DisplayName("로그인한 회원과 요청한 회원이 다르면 예외 발생")
-    void getCartsByMember_WithDifferentMember_ThrowsCartException() {
-        // given
-        Long differentMemberId = 2L;
-
-        // when & then
-        assertThatThrownBy(() -> cartService.getCartsByMember(differentMemberId, member))
-                .isInstanceOf(CartException.class)
-                .hasMessage("요청한 회원 ID와 로그인한 회원 ID가 다릅니다.");
-    }
 }
