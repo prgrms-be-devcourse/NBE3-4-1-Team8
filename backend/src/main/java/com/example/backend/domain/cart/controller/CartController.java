@@ -42,6 +42,6 @@ public class CartController {
 
         List<CartResponse> cartResponses = cartService.getCartsByMember(memberId, member);
 
-        return ResponseEntity.ok(GenericResponse.of(cartResponses));
+        return ResponseEntity.status(HttpStatus.OK).body(GenericResponse.of(cartResponses));
     }
 }
