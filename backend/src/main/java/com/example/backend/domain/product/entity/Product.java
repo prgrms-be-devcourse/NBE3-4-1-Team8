@@ -1,5 +1,7 @@
 package com.example.backend.domain.product.entity;
 
+import com.example.backend.domain.product.exception.ProductErrorCode;
+import com.example.backend.domain.product.exception.ProductException;
 import com.example.backend.global.baseEntity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -38,5 +40,17 @@ public class Product extends BaseEntity {
         this.price = price;
         this.imgUrl = imgUrl;
         this.quantity = quantity;
+    }
+
+    /**
+     * 상품 재고 감소 로직
+     */
+    public void removeQuantity(int quantity) {
+
+        int restQuantity = this.quantity - quantity;
+        if(restQuantity < 0) {
+            throw new ProductException(ProductErrorCode.INSUFFICIENT_QUANTITY);
+        }
+        this.quantity = restQuantity;
     }
 }

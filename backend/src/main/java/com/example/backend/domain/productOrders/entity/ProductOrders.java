@@ -38,7 +38,8 @@ public class ProductOrders extends BaseEntity {
         this.product = product;
         this.quantity = quantity;
         this.price = price;
-        // todo 주문 수량 만큼 제거 product.removeQauntity(quantity);
+
+        product.removeQuantity(quantity); // 주문 수량 만큼 감소
     }
 
     /**

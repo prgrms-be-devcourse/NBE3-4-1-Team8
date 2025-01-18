@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 @Getter
 public enum ProductErrorCode {
+    INSUFFICIENT_QUANTITY(HttpStatus.BAD_REQUEST, "상품 재고가 부족합니다.", "400-1"),
     NOT_FOUND(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다.", "404");
 
     final HttpStatus httpStatus;
