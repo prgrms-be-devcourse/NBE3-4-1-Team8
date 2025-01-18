@@ -95,7 +95,7 @@ public class OrdersRepositoryTest {
 		// Orders 객체 생성
 		Orders orders = Orders.create()
 			.member(savedMember)
-			.productOrders(productOrdersList)
+			.productOrdersList(productOrdersList)
 			.build();
 
 		// 주문 저장
@@ -104,7 +104,7 @@ public class OrdersRepositoryTest {
 		// 저장된 주문이 예상한 주문과 동일한지 검증
 		assertThat(orders).isEqualTo(savedOrder);
 		assertThat(orders.getMember()).isEqualTo(savedOrder.getMember());
-		assertThat(orders.getProductOrders()).isEqualTo(savedOrder.getProductOrders());
+		assertThat(orders.getProductOrdersList()).isEqualTo(savedOrder.getProductOrdersList());
 		assertThat(200).isEqualTo(savedOrder.getTotalPrice());
 	}
 
@@ -120,7 +120,7 @@ public class OrdersRepositoryTest {
 
 		Orders orders = Orders.create()
 			.member(savedMember)
-			.productOrders(List.of(savedProductOrders))
+			.productOrdersList(List.of(savedProductOrders))
 			.build();
 
 		Orders save = ordersRepository.save(orders);
@@ -146,12 +146,12 @@ public class OrdersRepositoryTest {
 
 		Orders orders1 = Orders.create()
 			.member(savedMember)
-			.productOrders(List.of(createProductOrders(savedProduct)))
+			.productOrdersList(List.of(createProductOrders(savedProduct)))
 			.build();
 
 		Orders orders2 = Orders.create()
 			.member(savedMember)
-			.productOrders(List.of(createProductOrders(savedProduct)))
+			.productOrdersList(List.of(createProductOrders(savedProduct)))
 			.build();
 
 		orders2.changeStatus(DeliveryStatus.SHIPPED);

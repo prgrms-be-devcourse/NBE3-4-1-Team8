@@ -44,7 +44,7 @@ class OrdersServiceTest {
         lenient().when(orders.getDeliveryStatus()).thenReturn(status);
         when(orders.getCreatedAt()).thenReturn(now);
         when(orders.getModifiedAt()).thenReturn(now);
-        when(orders.getProductOrders()).thenReturn(productOrders);
+        when(orders.getProductOrdersList()).thenReturn(productOrders);
 
         return orders;
     }
@@ -79,7 +79,7 @@ class OrdersServiceTest {
         assertThat(orders.getCreatedAt()).isEqualTo(ordersResponse.getCreateAt());
         assertThat(orders.getModifiedAt()).isEqualTo(ordersResponse.getModifiedAt());
 
-        ProductOrders firstProductOrder = orders.getProductOrders().get(0);
+        ProductOrders firstProductOrder = orders.getProductOrdersList().get(0);
         assertThat(firstProductOrder.getProduct().getName()).isEqualTo("A");
         assertThat(firstProductOrder.getProduct().getImgUrl()).isEqualTo("http://example.com/productA.jpg");
 
