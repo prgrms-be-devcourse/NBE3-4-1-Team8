@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.backend.domain.member.conveter.MemberConverter;
 import com.example.backend.domain.member.dto.MemberInfoResponse;
 import com.example.backend.domain.member.dto.MemberSignupForm;
 import com.example.backend.domain.member.service.MemberService;
@@ -40,7 +41,7 @@ public class MemberController {
 	public ResponseEntity<GenericResponse<MemberInfoResponse>> getMemberInfo(
 		@AuthenticationPrincipal CustomUserDetails customUserDetails) {
 		return ResponseEntity.status(HttpStatus.OK)
-			.body(GenericResponse.of(MemberInfoResponse.of(customUserDetails.getMember())));
+			.body(GenericResponse.of(MemberConverter.from(customUserDetails.getMember())));
 	}
 
 }
