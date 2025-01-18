@@ -36,7 +36,7 @@ public class OrdersService {
         Orders orders = ordersRepository.findOrderById(id)
                 .orElseThrow(() -> new OrdersException(OrdersErrorCode.NOT_FOUND));
 
-        return OrdersConverter.from(orders);
+        return OrdersConverter.toResponse(orders);
     }
 
     @Transactional(readOnly = true)

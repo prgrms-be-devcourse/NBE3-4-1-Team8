@@ -13,7 +13,7 @@ import java.util.List;
 public class OrdersConverter {
 
     public static Orders of(OrdersForm ordersForm, Member member, List<ProductOrders> productOrdersList) {
-        Address address = from(ordersForm);
+        Address address = toAddress(ordersForm);
         return Orders.create()
                 .member(member)
                 .productOrdersList(productOrdersList)
@@ -21,7 +21,7 @@ public class OrdersConverter {
                 .build();
     }
 
-    private static Address from(OrdersForm ordersForm) {
+    private static Address toAddress(OrdersForm ordersForm) {
         return Address.builder()
                 .city(ordersForm.city())
                 .district(ordersForm.district())
@@ -32,11 +32,11 @@ public class OrdersConverter {
 
     public static List<OrdersResponse> from(List<Orders> ordersList) {
         return ordersList.stream()
-                .map(OrdersConverter::from)
+                .map(OrdersConverter::toResponse)
                 .toList();
     }
 
-    public static OrdersResponse from(Orders orders) {
+    public static OrdersResponse toResponse(Orders orders) {
         return OrdersResponse.builder()
                 .id(orders.getId())
                 .products(toProductInfoDtoList(orders))

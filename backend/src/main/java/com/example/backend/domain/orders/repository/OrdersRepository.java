@@ -13,14 +13,14 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 
     @Query("select distinct o from Orders o " +
             "join fetch o.member m " +
-            "join fetch o.productOrders po " +
+            "join fetch o.productOrdersList po " +
             "join fetch po.product p " +
             "where o.id = :id")
     Optional<Orders> findOrderById(@Param("id") Long id);
 
     @Query("select distinct o from Orders o " +
             "join fetch o.member m " +
-            "join fetch o.productOrders po " +
+            "join fetch o.productOrdersList po " +
             "join fetch po.product p " +
             "where m.id = :id and o.deliveryStatus = :status")
     List<Orders> findByMemberIdAndDeliveryStatus(
