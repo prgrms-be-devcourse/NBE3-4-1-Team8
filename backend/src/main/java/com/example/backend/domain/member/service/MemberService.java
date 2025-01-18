@@ -35,7 +35,7 @@ import lombok.RequiredArgsConstructor;
 public class MemberService {
 	@Value("${mail.verify-url}")
 	private String verifyUrl;
-	private static final String REDIS_EMAIL_PREFIX = "certification_email:";
+	private static final String REDIS_CERTIFICATION_PREFIX = "certification_email:";
 	private final MemberRepository memberRepository;
 	private final RedisService redisService;
 	private final MailService mailService;
@@ -60,8 +60,8 @@ public class MemberService {
 
 		Map convertValue = objectMapper.convertValue(emailCertification, Map.class);
 
-		redisService.setHashDataAll(REDIS_EMAIL_PREFIX + username, convertValue);
-		redisService.setTimeout(REDIS_EMAIL_PREFIX + username, 10);
+		redisService.setHashDataAll(REDIS_CERTIFICATION_PREFIX + username, convertValue);
+		redisService.setTimeout(REDIS_CERTIFICATION_PREFIX + username, 10);
 
 		Map<String, String> htmlParameterMap = new HashMap<>();
 		htmlParameterMap.put("certificationUrl", certificationUrl);
@@ -98,29 +98,25 @@ public class MemberService {
 		memberRepository.save(changedPasswordMember);
 	}
 
+	public MemberInfoResponse modify(MemberDto memberDto, MemberModifyForm memberModifyForm) {
+		existsNickname(memberModifyForm.nickname());
+
+		return MemberConverter.from(
+			memberRepository.save(Member.from(MemberConverter.of(memberDto, memberModifyForm))));
+	}
+
 	private void existsMember(String username, String nickname) {
 		boolean usernameExists = memberRepository.existsByUsername(username);
-		boolean nicknameExists = memberRepository.existsByNickname(nickname);
+		existsNickname(nickname);
 
 		if (usernameExists) {
 			throw new MemberException(MemberErrorCode.EXISTS_USERNAME);
-		}
-
-		if (nicknameExists) {
-			throw new MemberException(MemberErrorCode.EXISTS_NICKNAME);
 		}
 	}
 
 	private String generateCertificationUrl(String to, String certificationCode, VerifyType verifyType) {
 		return verifyUrl + "email=" + to + "&certificationCode="
 			+ certificationCode + "&verifyType=" + verifyType.toString();
-	}
-
-	public MemberInfoResponse modify(MemberDto memberDto, MemberModifyForm memberModifyForm) {
-		existsNickname(memberModifyForm.nickname());
-
-		return MemberConverter.from(
-			memberRepository.save(Member.from(MemberConverter.of(memberDto, memberModifyForm))));
 	}
 
 	private void existsNickname (String nickname) {
