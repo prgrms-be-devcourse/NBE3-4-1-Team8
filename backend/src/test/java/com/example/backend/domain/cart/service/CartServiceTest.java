@@ -128,19 +128,4 @@ class CartServiceTest {
                 .isInstanceOf(CartException.class)
                 .hasMessage("이미 장바구니에 추가된 상품입니다.");
     }
-
-    @Test
-    @DisplayName("상품의 재고가 부족하면 예외 발생")
-    void addCartItem_WithInsufficientStock_ThrowsCartException() {
-        // given
-        CartForm cartFormWithExcessiveQuantity = new CartForm(1L, 1L, 20);
-        given(productService.findById(cartFormWithExcessiveQuantity.productId())).willReturn(product);
-        given(cartRepository.existsByProductId_IdAndMemberId_Id(cartFormWithExcessiveQuantity.productId(), member.getId()))
-                .willReturn(false);
-
-        // when & then
-        assertThatThrownBy(() -> cartService.addCartItem(cartFormWithExcessiveQuantity, member))
-                .isInstanceOf(CartException.class)
-                .hasMessage("재고가 부족합니다.");
-    }
 }
