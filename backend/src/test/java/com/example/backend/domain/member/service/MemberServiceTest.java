@@ -134,6 +134,37 @@ class MemberServiceTest {
 		verify(memberRepository, times(1)).save(changePasswordMember);
 	}
 
+	@DisplayName("비밀번호 변경시 원래 비밀번호와 일치하지 않을 때 실패 테스트")
+	@Test
+	void password_not_match_success() {
+	    //given
+		Address givenAddress = Address.builder()
+			.city("testCity")
+			.detail("testDetail")
+			.country("testCountry")
+			.district("testDistrict")
+			.build();
+
+		Member givenMember = Member.builder()
+			.username("testUsername")
+			.nickname("testNickname")
+			.password("!testPassword1234")
+			.address(givenAddress)
+			.memberStatus(MemberStatus.ACTIVE)
+			.role(Role.ROLE_USER)
+			.build();
+
+		String changePassword = "!changePassword12345";
+
+		given(passwordEncoder.matches(changePassword, givenMember.getPassword())).willReturn(false);
+
+	    //when & then
+		assertThatThrownBy(() -> memberService.passwordChange(changePassword, changePassword, givenMember))
+			.isInstanceOf(MemberException.class)
+			.hasMessage(MemberErrorCode.PASSWORD_NOT_MATCH.getMessage());
+
+	}
+
 	@DisplayName("회원가입 이메일 중복 실패 테스트")
 	@Test
 	void signup_exists_username_fail() {
