@@ -49,7 +49,7 @@ public class ProductController {
                 .body(GenericResponse.of("상품이 정상적으로 등록되었습니다."));
     }
 
-    @PostMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<GenericResponse<String>> modify(@PathVariable("id") Long id,
                                                           @RequestBody @Validated(ValidationSequence.class) ProductForm productForm) {
 

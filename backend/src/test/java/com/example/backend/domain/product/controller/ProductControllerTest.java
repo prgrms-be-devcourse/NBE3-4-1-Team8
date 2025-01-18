@@ -27,8 +27,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
@@ -341,7 +340,7 @@ public class ProductControllerTest {
         doNothing().when(productService).modify(anyLong(), any(ProductForm.class));
 
         // when
-        ResultActions resultActions = mockMvc.perform(post("/api/v1/products/1")
+        ResultActions resultActions = mockMvc.perform(patch("/api/v1/products/1")
                 .content("""
                                 {
                                     "name": "Test Product Name",
@@ -371,7 +370,7 @@ public class ProductControllerTest {
                 .modify(eq(notExistId), any(ProductForm.class));
 
         // when
-        ResultActions resultActions = mockMvc.perform(post("/api/v1/products/" + notExistId)
+        ResultActions resultActions = mockMvc.perform(patch("/api/v1/products/" + notExistId)
                 .content("""
                                 {
                                     "name": "Test Product Name",
