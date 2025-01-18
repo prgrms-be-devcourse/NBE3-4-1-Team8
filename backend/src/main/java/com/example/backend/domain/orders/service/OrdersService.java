@@ -10,6 +10,7 @@ import com.example.backend.domain.product.exception.ProductErrorCode;
 import com.example.backend.domain.product.exception.ProductException;
 import com.example.backend.domain.product.repository.ProductRepository;
 import com.example.backend.domain.productOrders.entity.ProductOrders;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,14 +63,18 @@ public class OrdersService {
     public List<ProductOrders> createProductOrdersList(OrdersForm ordersForm) {
         return ordersForm.productOrdersRequestList().stream().map(
                 po -> {
-                    Product product = productRepository.findById(po.productId())
-                            .orElseThrow(() -> new ProductException(ProductErrorCode.NOT_FOUND));
+                    try {
+                        Product product = productRepository.findById(po.productId())
+                                .orElseThrow(() -> new ProductException(ProductErrorCode.NOT_FOUND));
 
-                    return ProductOrders.create()
-                            .product(product)
-                            .price(product.getPrice())
-                            .quantity(po.quantity())
-                            .build();
+                        return ProductOrders.create()
+                                .product(product)
+                                .price(product.getPrice())
+                                .quantity(po.quantity())
+                                .build();
+                    } catch (ObjectOptimisticLockingFailureException e) {
+                        throw new ProductException(ProductErrorCode.CONFLICT);
+                    }
                 }
         ).toList();
     }

@@ -33,6 +33,9 @@ public class Product extends BaseEntity {
 
     private int quantity;
 
+    @Version
+    private Long version;
+
     @Builder
     public Product(String name, String content, int price, String imgUrl, int quantity) {
         this.name = name;
