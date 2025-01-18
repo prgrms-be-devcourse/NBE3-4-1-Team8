@@ -18,6 +18,7 @@ import com.example.backend.domain.member.dto.MemberInfoResponse;
 import com.example.backend.domain.member.dto.MemberModifyForm;
 import com.example.backend.domain.member.dto.MemberSignupForm;
 import com.example.backend.domain.member.entity.Member;
+import com.example.backend.domain.member.entity.MemberStatus;
 import com.example.backend.domain.member.entity.Role;
 import com.example.backend.domain.member.exception.MemberErrorCode;
 import com.example.backend.domain.member.exception.MemberException;
@@ -94,6 +95,43 @@ class MemberServiceTest {
 		verify(memberRepository, times(1)).existsByNickname(givenMember.nickname());
 		verify(memberRepository, times(1)).existsByUsername(givenMember.username());
 		verify(memberRepository, times(1)).save(any(Member.class));
+	}
+
+	@DisplayName("비밀번호 변경 성공 테스트")
+	@Test
+	void password_change_success() {
+	    //given
+		Address givenAddress = Address.builder()
+			.city("testCity")
+			.detail("testDetail")
+			.country("testCountry")
+			.district("testDistrict")
+			.build();
+
+		Member givenMember = Member.builder()
+			.username("testUsername")
+			.nickname("testNickname")
+			.password("!testPassword1234")
+			.address(givenAddress)
+			.memberStatus(MemberStatus.ACTIVE)
+			.role(Role.ROLE_USER)
+			.build();
+
+		String changePassword = "!changePassword1234";
+
+		Member changePasswordMember = givenMember.changePassword(changePassword);
+
+		given(passwordEncoder.matches(changePassword, givenMember.getPassword())).willReturn(true);
+		given(passwordEncoder.encode(changePassword)).willReturn(changePassword);
+		given(memberRepository.save(changePasswordMember)).willReturn(changePasswordMember);
+
+	    //when
+		memberService.passwordChange(givenMember.getPassword(), changePassword, givenMember);
+
+	    //then
+		verify(passwordEncoder, times(1)).matches(changePassword, givenMember.getPassword());
+		verify(passwordEncoder, times(1)).encode(changePassword);
+		verify(memberRepository, times(1)).save(changePasswordMember);
 	}
 
 	@DisplayName("회원가입 이메일 중복 실패 테스트")
