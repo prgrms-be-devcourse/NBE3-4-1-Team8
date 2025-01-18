@@ -58,4 +58,10 @@ public class ProductService {
 
         productRepository.save(ProductConverter.from(productForm));
     }
+
+    @Transactional
+    public void modify(Long id, ProductForm productForm) {
+
+        findById(id).modify(productForm);
+    }
 }
