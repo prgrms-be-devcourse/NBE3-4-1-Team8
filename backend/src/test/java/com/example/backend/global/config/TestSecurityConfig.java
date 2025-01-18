@@ -1,6 +1,9 @@
 package com.example.backend.global.auth.service.config;
 
+import com.example.backend.global.auth.jwt.JwtProvider;
+import com.example.backend.global.auth.service.CustomUserDetailsService;
 import com.example.backend.global.config.CorsConfig;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +23,8 @@ import org.springframework.security.web.SecurityFilterChain;
  */
 @Configuration
 @RequiredArgsConstructor
+@EnableWebSecurity
+@Profile("test")
 public class TestSecurityConfig {
 
     private final CorsConfig corsConfig;

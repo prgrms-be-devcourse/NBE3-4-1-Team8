@@ -2,8 +2,6 @@ package com.example.backend.domain.member.entity;
 
 import java.time.ZonedDateTime;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
-
 import com.example.backend.domain.common.Address;
 import com.example.backend.domain.member.dto.MemberDto;
 import com.example.backend.global.baseEntity.BaseEntity;
@@ -90,9 +88,5 @@ public class Member extends BaseEntity {
 			.createdAt(this.createdAt)
 			.modifiedAt(this.modifiedAt)
 			.build();
-	}
-
-	public boolean checkPassword(String password, PasswordEncoder passwordEncoder) {
-		return passwordEncoder.matches(password, this.password);
 	}
 }

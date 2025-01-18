@@ -126,7 +126,7 @@ public class GlobalControllerAdvice {
 
 	@ExceptionHandler(AuthException.class)
 	public ResponseEntity<HttpErrorInfo> handlerAuthException(AuthException ex, HttpServletRequest request) {
-		log.error("GlobalControllerAdvice={}", ex);
+		log.error("AuthControllerAdvice={}", ex);
 		return ResponseEntity.status(ex.getStatus())
 			.body(HttpErrorInfo.of(ex.getCode(), request.getRequestURI(), ex.getMessage()));
 	}

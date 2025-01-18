@@ -1,10 +1,7 @@
 package com.example.backend.domain.product.repository;
 
-import com.example.backend.domain.product.dto.ProductForm;
 import com.example.backend.domain.product.dto.ProductResponse;
 import com.example.backend.domain.product.entity.Product;
-import com.example.backend.domain.product.repository.ProductRepository;
-import com.example.backend.global.config.JpaAuditingConfig;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +9,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * ProductReposiotryTest
  * ProductRepository 단위 테스트 진행 코드
+ *
  * @author 100minha
  */
 @DataJpaTest
@@ -73,7 +72,7 @@ public class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("상품 조회(Entity) 테스트")
+    @DisplayName("상품 단건 조회(Entity) 테스트")
     void findByIdTest() {
         // given
         // when
@@ -90,7 +89,7 @@ public class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("상품 조회(DTO) 테스트")
+    @DisplayName("상품 단건 조회(DTO) 테스트")
     void findProductResponseByIdTest() {
         // given
         // when
@@ -103,7 +102,32 @@ public class ProductRepositoryTest {
         assertThat(productResponse.content()).isEqualTo(this.content1);
         assertThat(productResponse.price()).isEqualTo(this.price1);
         assertThat(productResponse.imgUrl()).isEqualTo(this.imgUrl1);
-        assertThat(productResponse.quantity()).isEqualTo(this.quantity1);
+    }
+
+    @Test
+    @DisplayName("상품 다건 조회 테스트")
+    void findAllPagedTest() {
+        // given
+        PageRequest pageRequest1 = PageRequest.of(0, 10);   // 1페이지
+        PageRequest pageRequest2 = PageRequest.of(1, 10);   // 2페이지
+
+        for (int i = 1; i <= 15; i++) {
+            productRepository.save(Product.builder()    // 15 + setUp()에서 +1
+                    .build());
+        }
+
+        // when
+        Page<ProductResponse> productResponsePage1 = productRepository.findAllPaged(pageRequest1);
+        Page<ProductResponse> productResponsePage2 = productRepository.findAllPaged(pageRequest2);
+
+        // then
+        assertThat(productResponsePage1).isNotNull();
+        assertThat(productResponsePage1.getTotalPages()).isEqualTo(2);
+        assertThat(productResponsePage1.getTotalElements()).isEqualTo(16);
+
+        assertThat(productResponsePage1.getNumberOfElements()).isEqualTo(10);
+        assertThat(productResponsePage2.getNumberOfElements()).isEqualTo(6);
+
     }
 
 }

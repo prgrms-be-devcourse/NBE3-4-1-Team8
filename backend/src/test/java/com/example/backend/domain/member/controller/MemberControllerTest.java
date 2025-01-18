@@ -4,47 +4,39 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.example.backend.global.config.TestSecurityConfig;
+import com.example.backend.global.config.CorsConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import com.example.backend.domain.common.Address;
 import com.example.backend.domain.member.dto.MemberSignupForm;
+import com.example.backend.domain.member.entity.Member;
+import com.example.backend.domain.member.entity.MemberStatus;
+import com.example.backend.domain.member.entity.Role;
 import com.example.backend.domain.member.exception.MemberErrorCode;
 import com.example.backend.domain.member.exception.MemberException;
-import com.example.backend.domain.member.repository.MemberRepository;
 import com.example.backend.domain.member.service.MemberService;
-import com.example.backend.global.auth.jwt.JwtProvider;
-import com.example.backend.global.auth.service.CustomUserDetailsService;
-import com.example.backend.global.config.CorsConfig;
-import com.example.backend.global.config.SecurityConfig;
+import com.example.backend.global.auth.model.CustomUserDetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
-@ExtendWith(SpringExtension.class)
 @WebMvcTest(MemberController.class)
-@Import({SecurityConfig.class, CorsConfig.class})
+@Import({TestSecurityConfig.class, CorsConfig.class})
 @Slf4j
 class MemberControllerTest {
 	@MockitoBean
 	MemberService memberService;
-
-	@MockitoBean
-	CustomUserDetailsService customUserDetailsService;
-
-	@MockitoBean
-	JwtProvider jwtProvider;
-
-	@MockitoBean
-	MemberRepository memberRepository;
 
 	@Autowired
     private MockMvc mockMvc;
@@ -404,5 +396,45 @@ class MemberControllerTest {
 		resultActions.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.code").value("400-1"))
 			.andExpect(jsonPath("$.message").value("중복된 이메일 입니다."));
+	}
+
+	@Test
+	@DisplayName("멤버 정보 조회")
+	void getMemberInfo() throws Exception {
+		// given
+		Address address = Address.builder()
+			.city("testCity")
+			.district("testDistrict")
+			.country("testCountry")
+			.detail("testDetail")
+			.build();
+		Member member = Member.builder()
+			.username("test@naver.com")
+			.nickname("testNickname")
+			.memberStatus(MemberStatus.ACTIVE)
+			.role(Role.ROLE_USER)
+			.address(address)
+			.build();
+		CustomUserDetails customUserDetails = new CustomUserDetails(member);
+
+		// Authentication 설정
+		UsernamePasswordAuthenticationToken authenticationToken =
+			new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+
+		// when
+		ResultActions resultActions = mockMvc.perform(get("/api/v1/members")
+			.with(SecurityMockMvcRequestPostProcessors.authentication(authenticationToken)));
+
+		// then
+		resultActions
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.username").value("test@naver.com"))
+			.andExpect(jsonPath("$.data.nickname").value("testNickname"))
+			.andExpect(jsonPath("$.data.address.city").value("testCity"))
+			.andExpect(jsonPath("$.data.address.district").value("testDistrict"))
+			.andExpect(jsonPath("$.data.address.country").value("testCountry"))
+			.andExpect(jsonPath("$.data.address.detail").value("testDetail"))
+			.andExpect(jsonPath("$.success").value(true));
+
 	}
 }
