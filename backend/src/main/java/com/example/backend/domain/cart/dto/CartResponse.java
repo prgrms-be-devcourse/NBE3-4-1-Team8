@@ -1,22 +1,18 @@
 package com.example.backend.domain.cart.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-public class CartResponse {
+public record CartResponse(
 
-    private Long id;
-    private Long memberId;
-    private String memberNickname;
-    private Long productId;
-    private String productName;
-    private int quantity;
-    private int productPrice;
-    private String productImgUrl;
-}
+        Long id,
+
+        Long memberId,
+        String memberNickname,
+
+        Long productId,
+        String productName,
+        int quantity,
+        int productPrice,
+        String productImgUrl
+) {}
