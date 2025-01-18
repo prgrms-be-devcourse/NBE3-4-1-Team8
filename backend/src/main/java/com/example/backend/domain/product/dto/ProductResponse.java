@@ -1,12 +1,13 @@
 package com.example.backend.domain.product.dto;
 
-import com.example.backend.domain.product.entity.Product;
+import lombok.Builder;
 
 /**
  * ProductResponse
  * 상품 조회 시 사용하는 DTO
  * @author 100minha
  */
+@Builder
 public record ProductResponse(
         Long Id,
         String name,
@@ -15,13 +16,4 @@ public record ProductResponse(
         String imgUrl
 ) {
 
-    public static ProductResponse of(Product product) {
-        return new ProductResponse(
-                product.getId(),
-                product.getName(),
-                product.getContent(),
-                product.getPrice(),
-                product.getImgUrl()
-        );
-    }
 }
