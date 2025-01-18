@@ -12,10 +12,8 @@ import java.util.List;
 
 public class OrdersConverter {
 
-    public static Orders toEntity(OrdersForm ordersForm, Member member, List<ProductOrders> productOrdersList) {
-
-        Address address = getAddress(ordersForm);
-
+    public static Orders of(OrdersForm ordersForm, Member member, List<ProductOrders> productOrdersList) {
+        Address address = from(ordersForm);
         return Orders.create()
                 .member(member)
                 .productOrdersList(productOrdersList)
@@ -23,34 +21,32 @@ public class OrdersConverter {
                 .build();
     }
 
-    private static Address getAddress(OrdersForm ordersForm) {
-        Address address = Address.builder()
+    private static Address from(OrdersForm ordersForm) {
+        return Address.builder()
                 .city(ordersForm.city())
                 .district(ordersForm.district())
                 .country(ordersForm.country())
                 .detail(ordersForm.detail())
                 .build();
-        return address;
     }
 
-
-    public static List<OrdersResponse> toOrdersResponseList(List<Orders> ordersList) {
+    public static List<OrdersResponse> from(List<Orders> ordersList) {
         return ordersList.stream()
-                .map(OrdersConverter::toOrdersResponse)
+                .map(OrdersConverter::from)
                 .toList();
     }
 
-    public static OrdersResponse toOrdersResponse(Orders orders) {
+    public static OrdersResponse from(Orders orders) {
         return OrdersResponse.builder()
                 .id(orders.getId())
-                .products(toProductInfoDtos(orders))
+                .products(toProductInfoDtoList(orders))
                 .totalPrice(orders.getTotalPrice())
                 .createAt(orders.getCreatedAt())
                 .modifiedAt(orders.getModifiedAt())
                 .build();
     }
 
-    private static List<ProductInfoDto> toProductInfoDtos(Orders orders) {
+    private static List<ProductInfoDto> toProductInfoDtoList(Orders orders) {
         return orders.getProductOrdersList().stream()
                 .map(OrdersConverter::toProductInfoDto)
                 .toList();

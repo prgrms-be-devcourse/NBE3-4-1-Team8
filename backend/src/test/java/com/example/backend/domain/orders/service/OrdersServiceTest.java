@@ -73,11 +73,11 @@ class OrdersServiceTest {
         OrdersResponse ordersResponse = ordersService.findOne(orderId);
 
         // Then
-        assertThat(orderId).isEqualTo(ordersResponse.getId());
-        assertThat(orders.getTotalPrice()).isEqualTo(ordersResponse.getTotalPrice());
-        assertThat(orders.getDeliveryStatus()).isEqualTo(ordersResponse.getStatus());
-        assertThat(orders.getCreatedAt()).isEqualTo(ordersResponse.getCreateAt());
-        assertThat(orders.getModifiedAt()).isEqualTo(ordersResponse.getModifiedAt());
+        assertThat(orderId).isEqualTo(ordersResponse.id());
+        assertThat(orders.getTotalPrice()).isEqualTo(ordersResponse.totalPrice());
+        assertThat(orders.getDeliveryStatus()).isEqualTo(ordersResponse.status());
+        assertThat(orders.getCreatedAt()).isEqualTo(ordersResponse.createAt());
+        assertThat(orders.getModifiedAt()).isEqualTo(ordersResponse.modifiedAt());
 
         ProductOrders firstProductOrder = orders.getProductOrdersList().get(0);
         assertThat(firstProductOrder.getProduct().getName()).isEqualTo("A");
@@ -127,9 +127,9 @@ class OrdersServiceTest {
 
         // 첫 번째 주문 검증
         OrdersResponse firstOrder = result.get(0);
-        assertThat(firstOrder.getId()).isEqualTo(1L);
-        assertThat(firstOrder.getTotalPrice()).isEqualTo(1000);
-        assertThat(firstOrder.getProducts()).hasSize(1);
+        assertThat(firstOrder.id()).isEqualTo(1L);
+        assertThat(firstOrder.totalPrice()).isEqualTo(1000);
+        assertThat(firstOrder.products()).hasSize(1);
 
         // 메서드 호출 검증
         verify(ordersRepository).findByMemberIdAndDeliveryStatus(

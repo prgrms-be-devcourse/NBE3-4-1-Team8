@@ -36,7 +36,7 @@ public class OrdersService {
         Orders orders = ordersRepository.findOrderById(id)
                 .orElseThrow(() -> new OrdersException(OrdersErrorCode.NOT_FOUND));
 
-        return OrdersConverter.toOrdersResponse(orders);
+        return OrdersConverter.from(orders);
     }
 
     @Transactional(readOnly = true)
@@ -45,7 +45,7 @@ public class OrdersService {
                 ordersRepository.findByMemberIdAndDeliveryStatus(id, DeliveryStatus.READY)
         ).orElseThrow(() -> new OrdersException(OrdersErrorCode.NOT_FOUND));
 
-        return OrdersConverter.toOrdersResponseList(ordersList);
+        return OrdersConverter.from(ordersList);
     }
 
 
@@ -54,7 +54,7 @@ public class OrdersService {
 
         List<ProductOrders> productOrdersList = createProductOrdersList(ordersForm);
 
-        Orders orders = OrdersConverter.toEntity(ordersForm, member, productOrdersList);
+        Orders orders = OrdersConverter.of(ordersForm, member, productOrdersList);
 
         return ordersRepository.save(orders).getId();
     }
