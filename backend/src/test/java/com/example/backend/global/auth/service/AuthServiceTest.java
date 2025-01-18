@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
+import com.example.backend.global.auth.dto.AuthResponse;
+import com.example.backend.global.auth.jwt.JwtUtils;
 import java.util.Map;
 import java.util.Optional;
 
@@ -44,6 +46,9 @@ class AuthServiceTest {
 	@Mock
 	private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private JwtUtils jwtUtils;
+
 	@Mock
 	private MemberRepository memberRepository;
 
@@ -80,24 +85,25 @@ class AuthServiceTest {
 		when(passwordEncoder.matches(any(String.class), any(String.class))).thenReturn(true);
 		when(jwtProvider.generateAccessToken(any(Long.class), any(String.class), any(Role.class))).thenReturn(
 			"access_token");
-		when(jwtProvider.generateRefreshToken(any(Long.class), any(String.class))).thenReturn("refresh_token");
+		when(jwtProvider.generateRefreshToken(any(Long.class), any(String.class), any(Role.class))).thenReturn("refresh_token");
 		doNothing().when(refreshTokenService).saveRefreshToken(any(String.class), any(String.class));
 
-		AuthForm authForm = new AuthForm();
-		authForm.setUsername("user@gmail.com");
-		authForm.setPassword("password");
+		AuthForm authForm = AuthForm.builder()
+			.username("user@gmail.com")
+			.password("password")
+			.build();
 
-		//when
-		String result = authService.login(authForm);
+        //when
+        AuthResponse result = authService.login(authForm);
 
-		//then
-		assertThat(result).isEqualTo("access_token refresh_token");
-		verify(memberRepository).findByUsername("user@gmail.com");
-		verify(passwordEncoder).matches("password", "password");
-		verify(jwtProvider).generateAccessToken(1L, "user@gmail.com", Role.ROLE_USER);
-		verify(jwtProvider).generateRefreshToken(1L, "user@gmail.com");
-
-		// saveRefreshToken이 호출되었는지 검증
+        //then
+        assertThat(result.username()).isEqualTo("user@gmail.com");
+        assertThat(result.accessToken()).isEqualTo("access_token");
+        assertThat(result.refreshToken()).isEqualTo("refresh_token");
+        verify(memberRepository).findByUsername("user@gmail.com");
+        verify(passwordEncoder).matches("password", "password");
+        verify(jwtProvider).generateAccessToken(1L, "user@gmail.com", Role.ROLE_USER);
+        verify(jwtProvider).generateRefreshToken(1L, "user@gmail.com", Role.ROLE_USER);
 		verify(refreshTokenService).saveRefreshToken("user@gmail.com", "refresh_token");
 	}
 
@@ -118,9 +124,10 @@ class AuthServiceTest {
 		when(memberRepository.findByUsername("user@gmail.com"))
 			.thenReturn(Optional.of(member));
 
-		AuthForm authForm = new AuthForm();
-		authForm.setUsername("user@gmail.com");
-		authForm.setPassword("password");
+		AuthForm authForm = AuthForm.builder()
+			.username("user@gmail.com")
+			.password("password")
+			.build();
 
 		// when & then
 		assertThatThrownBy(() -> authService.login(authForm))
@@ -137,9 +144,10 @@ class AuthServiceTest {
 		when(memberRepository.findByUsername("user@gmail.com"))
 			.thenReturn(Optional.empty());
 
-		AuthForm authForm = new AuthForm();
-		authForm.setUsername("user@gmail.com");
-		authForm.setPassword("password");
+		AuthForm authForm = AuthForm.builder()
+			.username("user@gmail.com")
+			.password("password")
+			.build();
 
 		// when & then
 		assertThatThrownBy(() -> authService.login(authForm))
@@ -164,9 +172,10 @@ class AuthServiceTest {
 		when(memberRepository.findByUsername("user@gmail.com")).thenReturn(Optional.of(member));
 		when(passwordEncoder.matches("pw", "password")).thenReturn(false);
 
-		AuthForm authForm = new AuthForm();
-		authForm.setUsername("user@gmail.com");
-		authForm.setPassword("pw");
+		AuthForm authForm = AuthForm.builder()
+			.username("user@gmail.com")
+			.password("pw")
+			.build();
 
 		// when & then
 		assertThatThrownBy(() -> authService.login(authForm))
@@ -495,13 +504,13 @@ class AuthServiceTest {
         //given
         String accessToken = "accessToken";
         String username = "user@gmail.com";
-        when(jwtProvider.getUsernameFromToken(any(String.class))).thenReturn(username);
+        when(jwtUtils.getUsernameFromToken(any(String.class))).thenReturn(username);
 
 		//when
 		authService.logout(accessToken);
 
 		//then
-		verify(jwtProvider).getUsernameFromToken(accessToken);
+		verify(jwtUtils).getUsernameFromToken(accessToken);
 		verify(refreshTokenService).deleteRefreshToken(username);
 	}
 }

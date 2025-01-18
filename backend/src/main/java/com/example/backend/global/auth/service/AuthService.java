@@ -1,5 +1,7 @@
 package com.example.backend.global.auth.service;
 
+import com.example.backend.global.auth.dto.AuthResponse;
+import com.example.backend.global.auth.jwt.JwtUtils;
 import java.util.Map;
 
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,17 +32,18 @@ import lombok.RequiredArgsConstructor;
 public class AuthService {
 	private static final String REDIS_EMAIL_PREFIX = "certification_email:";
 	private final JwtProvider jwtProvider;
+	private final JwtUtils jwtUtils;
 	private final PasswordEncoder passwordEncoder;
 	private final RefreshTokenService refreshTokenService;
 	private final MemberRepository memberRepository;
 	private final RedisService redisService;
 	private final ObjectMapper objectMapper;
 
-    public String login(AuthForm authForm) {
-        MemberDto findMember = memberRepository.findByUsername(authForm.getUsername())
+    public AuthResponse login(AuthForm authForm) {
+        MemberDto findMember = memberRepository.findByUsername(authForm.username())
             .orElseThrow(() -> new AuthException(AuthErrorCode.MEMBER_NOT_FOUND)).toModel();
 
-        if (!passwordEncoder.matches(authForm.getPassword(), findMember.password())) {
+        if (!passwordEncoder.matches(authForm.password(), findMember.password())) {
             throw new AuthException(AuthErrorCode.PASSWORD_NOT_MATCH);
         }
 
@@ -49,10 +52,18 @@ public class AuthService {
         }
 
         String accessToken = jwtProvider.generateAccessToken(findMember.id(), findMember.username(), findMember.role());
-        String refreshToken = jwtProvider.generateRefreshToken(findMember.id(), findMember.username());
+        String refreshToken = jwtProvider.generateRefreshToken(findMember.id(), findMember.username(), findMember.role());
         refreshTokenService.saveRefreshToken(findMember.username(), refreshToken);
 
-		return accessToken + " " + refreshToken;
+        return AuthResponse.of(findMember.username(), accessToken, refreshToken);
+    }
+
+	public void logout(String accessToken) {
+		String username = jwtUtils.getUsernameFromToken(accessToken);
+		refreshTokenService.deleteRefreshToken(username);
+
+		// 시큐리티 컨텍스트 초기화
+		SecurityContextHolder.clearContext();
 	}
 
 	public void verify(String username, String certificationCode, VerifyType verifyType) {
@@ -91,13 +102,5 @@ public class AuthService {
 		}
 
 		redisService.delete(REDIS_EMAIL_PREFIX + username);
-	}
-
-	public void logout(String accessToken) {
-		String username = jwtProvider.getUsernameFromToken(accessToken);
-		refreshTokenService.deleteRefreshToken(username);
-
-		// 시큐리티 컨텍스트 초기화
-		SecurityContextHolder.clearContext();
 	}
 }
