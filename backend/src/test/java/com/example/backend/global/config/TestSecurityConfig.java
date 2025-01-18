@@ -1,19 +1,18 @@
-package com.example.backend.global.auth.service.config;
+package com.example.backend.global.config;
 
-import com.example.backend.global.auth.jwt.JwtProvider;
-import com.example.backend.global.auth.service.CustomUserDetailsService;
-import com.example.backend.global.config.CorsConfig;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+
+import lombok.RequiredArgsConstructor;
 
 /**
  * TestSecurityConfig
@@ -23,6 +22,8 @@ import org.springframework.security.web.SecurityFilterChain;
  */
 @Configuration
 @RequiredArgsConstructor
+@EnableWebSecurity
+@Profile("test")
 public class TestSecurityConfig {
 
     private final CorsConfig corsConfig;

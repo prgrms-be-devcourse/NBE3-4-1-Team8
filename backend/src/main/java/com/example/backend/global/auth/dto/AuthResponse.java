@@ -1,17 +1,11 @@
 package com.example.backend.global.auth.dto;
 
 import lombok.Builder;
-import lombok.Getter;
 
-@Getter
 @Builder
-public class AuthResponse {
+public record AuthResponse (String username, String accessToken, String refreshToken) {
 
-    private String username;
-
-    public static AuthResponse of(String username) {
-        return AuthResponse.builder()
-            .username(username)
-            .build();
+    public static AuthResponse of(String username, String accessToken, String refreshToken) {
+        return new AuthResponse(username, accessToken, refreshToken);
     }
 }

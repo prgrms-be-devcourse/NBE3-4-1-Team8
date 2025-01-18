@@ -4,6 +4,9 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -19,36 +23,32 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.example.backend.domain.common.VerifyType;
 import com.example.backend.domain.member.exception.MemberErrorCode;
 import com.example.backend.domain.member.exception.MemberException;
-import com.example.backend.domain.member.repository.MemberRepository;
 import com.example.backend.global.auth.dto.EmailCertificationForm;
 import com.example.backend.global.auth.exception.AuthErrorCode;
 import com.example.backend.global.auth.exception.AuthException;
-import com.example.backend.global.auth.jwt.JwtProvider;
 import com.example.backend.global.auth.service.AuthService;
-import com.example.backend.global.auth.service.CustomUserDetailsService;
+import com.example.backend.global.auth.service.CookieService;
+import com.example.backend.global.auth.dto.AuthForm;
+import com.example.backend.global.auth.dto.AuthResponse;
 import com.example.backend.global.config.CorsConfig;
-import com.example.backend.global.config.SecurityConfig;
+import com.example.backend.global.config.TestSecurityConfig;
 import com.example.backend.global.exception.GlobalErrorCode;
+import com.example.backend.global.exception.GlobalException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 import lombok.extern.slf4j.Slf4j;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(AuthController.class)
-@Import({SecurityConfig.class, CorsConfig.class})
+@Import({TestSecurityConfig.class, CorsConfig.class})
 @Slf4j
 public class AuthControllerTest {
 	@MockitoBean
 	AuthService authService;
 
 	@MockitoBean
-	CustomUserDetailsService customUserDetailsService;
-
-	@MockitoBean
-	JwtProvider jwtProvider;
-
-	@MockitoBean
-	MemberRepository memberRepository;
+	CookieService cookieService;
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -278,5 +278,164 @@ public class AuthControllerTest {
 			.andExpect(jsonPath("$.message").value(GlobalErrorCode.NOT_VALID.getMessage()))
 			.andExpect(jsonPath("$.errorDetails[0].field").value("verifyType"))
 			.andExpect(jsonPath("$.errorDetails[0].reason").value("인증 타입은 필수 항목 입니다."));
+	}
+
+	@Test
+	@DisplayName("로그인 성공")
+	void login_success() throws Exception {
+		//given
+		AuthForm authForm = AuthForm.builder()
+			.username("user@gmail.com")
+			.password("Password123!")
+			.build();
+
+		AuthResponse authResponse = AuthResponse.of("user@gmail.com", "accessToken", "refreshToken");
+		when(authService.login(any(AuthForm.class))).thenReturn(authResponse);
+		doNothing().when(cookieService).addAccessTokenToCookie(any(String.class), any(HttpServletResponse.class));
+		doNothing().when(cookieService).addRefreshTokenToCookie(any(String.class), any(HttpServletResponse.class));
+
+		//when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/auth/login")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(authForm)));
+
+		//then
+		resultActions
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.success").value(true))
+			.andExpect(jsonPath("$.message").value("로그인 성공"))
+			.andExpect(jsonPath("$.data.username").value("user@gmail.com"));
+
+		verify(authService, times(1)).login(any(AuthForm.class));
+		verify(cookieService, times(1)).addAccessTokenToCookie(eq("accessToken"),
+			any(HttpServletResponse.class));
+		verify(cookieService, times(1)).addRefreshTokenToCookie(eq("refreshToken"),
+			any(HttpServletResponse.class));
+	}
+
+	@Test
+	@DisplayName("로그인 실패 - 입력한 이메일 유저가 존재하지 않을 경우")
+	void login_fail_member_not_found() throws Exception {
+		// given
+		AuthForm authForm = new AuthForm("user@gmail.com", "Password123!");
+
+		when(authService.login(any(AuthForm.class))).thenThrow(new AuthException(AuthErrorCode.MEMBER_NOT_FOUND));
+
+		// when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/auth/login")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(authForm)));
+
+		// then
+		resultActions
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.code").value(AuthErrorCode.MEMBER_NOT_FOUND.getCode()))
+			.andExpect(jsonPath("$.message").value(AuthErrorCode.MEMBER_NOT_FOUND.getMessage()));
+
+		verify(authService, times(1)).login(any(AuthForm.class));
+		verify(cookieService, times(0)).addAccessTokenToCookie(any(String.class), any(HttpServletResponse.class));
+		verify(cookieService, times(0)).addRefreshTokenToCookie(any(String.class), any(HttpServletResponse.class));
+	}
+
+	@Test
+	@DisplayName("로그인 실패 - 비밀번호가 일치하지 않는 경우")
+	void login_fail_password_not_match() throws Exception {
+		// given
+		AuthForm authForm = new AuthForm("user@gmail.com", "Password123!");
+
+		when(authService.login(any(AuthForm.class))).thenThrow(new AuthException(AuthErrorCode.PASSWORD_NOT_MATCH));
+
+		// when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/auth/login")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(authForm)));
+
+		// then
+		resultActions
+			.andExpect(status().isUnauthorized())
+			.andExpect(jsonPath("$.code").value(AuthErrorCode.PASSWORD_NOT_MATCH.getCode()))
+			.andExpect(jsonPath("$.message").value(AuthErrorCode.PASSWORD_NOT_MATCH.getMessage()));
+
+		verify(authService, times(1)).login(any(AuthForm.class));
+		verify(cookieService, times(0)).addAccessTokenToCookie(any(String.class), any(HttpServletResponse.class));
+		verify(cookieService, times(0)).addRefreshTokenToCookie(any(String.class), any(HttpServletResponse.class));
+	}
+
+	@Test
+	@DisplayName("로그인 실패 - 이메일이 빈 값일 경우")
+	void login_fail_email_empty() throws Exception {
+		// given
+		AuthForm authForm = new AuthForm("", "Password123!");
+
+		when(authService.login(any(AuthForm.class))).thenThrow(new GlobalException(GlobalErrorCode.NOT_VALID));
+
+		// when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/auth/login")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(authForm)));
+
+		// then
+		resultActions
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value(GlobalErrorCode.NOT_VALID.getCode()))
+			.andExpect(jsonPath("$.message").value(GlobalErrorCode.NOT_VALID.getMessage()))
+			.andExpect(jsonPath("$.errorDetails[0].field").value("username"))
+			.andExpect(jsonPath("$.errorDetails[0].reason").value("유효하지 않은 이메일 입니다."));
+
+		verify(authService, times(0)).login(any(AuthForm.class));
+		verify(cookieService, times(0)).addAccessTokenToCookie(any(String.class), any(HttpServletResponse.class));
+		verify(cookieService, times(0)).addRefreshTokenToCookie(any(String.class), any(HttpServletResponse.class));
+	}
+
+	@Test
+	@DisplayName("로그인 실패 - 이메일 형식이 아닐 경우")
+	void login_fail_not_email() throws Exception {
+		// given
+		AuthForm authForm = new AuthForm("", "Password123!");
+
+		when(authService.login(any(AuthForm.class))).thenThrow(new GlobalException(GlobalErrorCode.NOT_VALID));
+
+		// when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/auth/login")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(authForm)));
+
+		// then
+		resultActions
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value(GlobalErrorCode.NOT_VALID.getCode()))
+			.andExpect(jsonPath("$.message").value(GlobalErrorCode.NOT_VALID.getMessage()))
+			.andExpect(jsonPath("$.errorDetails[0].field").value("username"))
+			.andExpect(jsonPath("$.errorDetails[0].reason").value("유효하지 않은 이메일 입니다."));
+
+		verify(authService, times(0)).login(any(AuthForm.class));
+		verify(cookieService, times(0)).addAccessTokenToCookie(any(String.class), any(HttpServletResponse.class));
+		verify(cookieService, times(0)).addRefreshTokenToCookie(any(String.class), any(HttpServletResponse.class));
+	}
+
+	@Test
+	@DisplayName("로그아웃 성공 테스트")
+	@WithMockUser
+	void logout_success() throws Exception {
+		// given
+		String accessToken = "accessToken";
+		when(cookieService.getAccessTokenFromRequest(any(HttpServletRequest.class))).thenReturn(accessToken);
+		doNothing().when(authService).logout(accessToken);
+		doNothing().when(cookieService).deleteRefreshTokenFromCookie(any(HttpServletResponse.class));
+
+		// when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/auth/logout")
+			.cookie(new Cookie("accessToken", accessToken)));
+
+		// then
+		resultActions
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.success").value(true))
+			.andExpect(jsonPath("$.message").value("로그아웃 성공"))
+			.andExpect(jsonPath("$.data").isEmpty());
+
+		verify(cookieService, times(1)).getAccessTokenFromRequest(any(HttpServletRequest.class));
+		verify(authService, times(1)).logout(accessToken);
+		verify(cookieService, times(1)).deleteRefreshTokenFromCookie(any(HttpServletResponse.class));
 	}
 }

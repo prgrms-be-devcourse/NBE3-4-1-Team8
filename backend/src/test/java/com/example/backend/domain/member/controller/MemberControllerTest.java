@@ -4,47 +4,32 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.example.backend.global.config.TestSecurityConfig;
+import com.example.backend.global.config.CorsConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.example.backend.domain.member.dto.MemberSignupForm;
 import com.example.backend.domain.member.exception.MemberErrorCode;
 import com.example.backend.domain.member.exception.MemberException;
-import com.example.backend.domain.member.repository.MemberRepository;
 import com.example.backend.domain.member.service.MemberService;
-import com.example.backend.global.auth.jwt.JwtProvider;
-import com.example.backend.global.auth.service.CustomUserDetailsService;
-import com.example.backend.global.config.CorsConfig;
-import com.example.backend.global.config.SecurityConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
-@ExtendWith(SpringExtension.class)
 @WebMvcTest(MemberController.class)
-@Import({SecurityConfig.class, CorsConfig.class})
+@Import({TestSecurityConfig.class, CorsConfig.class})
 @Slf4j
 class MemberControllerTest {
 	@MockitoBean
 	MemberService memberService;
-
-	@MockitoBean
-	CustomUserDetailsService customUserDetailsService;
-
-	@MockitoBean
-	JwtProvider jwtProvider;
-
-	@MockitoBean
-	MemberRepository memberRepository;
 
 	@Autowired
     private MockMvc mockMvc;
