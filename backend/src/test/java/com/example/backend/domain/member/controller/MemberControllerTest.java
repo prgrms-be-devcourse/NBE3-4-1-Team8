@@ -4,6 +4,10 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.example.backend.domain.member.conveter.MemberConverter;
+import com.example.backend.domain.member.dto.MemberDto;
+import com.example.backend.domain.member.dto.MemberInfoResponse;
+import com.example.backend.domain.member.dto.MemberModifyForm;
 import com.example.backend.global.config.TestSecurityConfig;
 import com.example.backend.global.config.CorsConfig;
 import org.junit.jupiter.api.DisplayName;
@@ -399,7 +403,7 @@ class MemberControllerTest {
 	}
 
 	@Test
-	@DisplayName("멤버 정보 조회")
+	@DisplayName("회원 정보 조회")
 	void getMemberInfo() throws Exception {
 		// given
 		Address address = Address.builder()
@@ -437,4 +441,326 @@ class MemberControllerTest {
 			.andExpect(jsonPath("$.success").value(true));
 
 	}
+
+	@Test
+	@DisplayName("회원 정보 수정 성공")
+	void modify_success() throws Exception {
+		// given
+		Address address = Address.builder()
+			.city("testCity")
+			.district("testDistrict")
+			.country("testCountry")
+			.detail("testDetail")
+			.build();
+		Member member = Member.builder()
+			.username("test@naver.com")
+			.nickname("testNickname")
+			.memberStatus(MemberStatus.ACTIVE)
+			.role(Role.ROLE_USER)
+			.address(address)
+			.build();
+		CustomUserDetails customUserDetails = new CustomUserDetails(member);
+
+		// Authentication 설정
+		UsernamePasswordAuthenticationToken authenticationToken =
+			new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+
+		MemberModifyForm memberModifyForm = MemberModifyForm.builder()
+			.nickname("updatedNickname")
+			.city("updatedCity")
+			.district("updatedDistrict")
+			.country("updatedCountry")
+			.detail("updatedDetail")
+			.build();
+
+		MemberDto memberDto = MemberConverter.of(member.toModel(), memberModifyForm);
+		Member updatedMember = Member.from(memberDto);
+		MemberInfoResponse response = MemberConverter.from(updatedMember);
+		when(memberService.modify(any(MemberDto.class), any(MemberModifyForm.class))).thenReturn(response);
+
+		// when
+		ResultActions resultActions = mockMvc.perform(patch("/api/v1/members")
+			.with(SecurityMockMvcRequestPostProcessors.authentication(authenticationToken))
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(memberModifyForm)));
+
+		// then
+		resultActions
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.username").value("test@naver.com"))
+			.andExpect(jsonPath("$.data.nickname").value("updatedNickname"))
+			.andExpect(jsonPath("$.data.address.city").value("updatedCity"))
+			.andExpect(jsonPath("$.data.address.district").value("updatedDistrict"))
+			.andExpect(jsonPath("$.data.address.country").value("updatedCountry"))
+			.andExpect(jsonPath("$.data.address.detail").value("updatedDetail"))
+			.andExpect(jsonPath("$.success").value(true));
+	}
+
+	@Test
+	@DisplayName("회원 정보 수정 실패 - 중복된 닉네임일 경우")
+	void modify_fail_nickname_already_exists() throws Exception {
+		// given
+		Address address = Address.builder()
+			.city("testCity")
+			.district("testDistrict")
+			.country("testCountry")
+			.detail("testDetail")
+			.build();
+		Member member = Member.builder()
+			.username("test@naver.com")
+			.nickname("testNickname")
+			.memberStatus(MemberStatus.ACTIVE)
+			.role(Role.ROLE_USER)
+			.address(address)
+			.build();
+		CustomUserDetails customUserDetails = new CustomUserDetails(member);
+
+		// Authentication 설정
+		UsernamePasswordAuthenticationToken authenticationToken =
+			new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+
+		MemberModifyForm memberModifyForm = MemberModifyForm.builder()
+			.nickname("duplicateNickname")
+			.city("updatedCity")
+			.district("updatedDistrict")
+			.country("updatedCountry")
+			.detail("updatedDetail")
+			.build();
+
+		doThrow(new MemberException(MemberErrorCode.EXISTS_NICKNAME))
+			.when(memberService)
+			.modify(any(MemberDto.class), any(MemberModifyForm.class));
+
+		// when
+		ResultActions resultActions = mockMvc.perform(patch("/api/v1/members")
+			.with(SecurityMockMvcRequestPostProcessors.authentication(authenticationToken))
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(memberModifyForm)));
+
+		// then
+		resultActions.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("400-2"))
+			.andExpect(jsonPath("$.message").value("중복된 닉네임 입니다."));
+	}
+
+	@Test
+	@DisplayName("회원 정보 수정 실패 - 닉네임 유효성 검사 실패")
+	void modify_fail_nickname_not_valid() throws Exception {
+		// given
+		Address address = Address.builder()
+			.city("testCity")
+			.district("testDistrict")
+			.country("testCountry")
+			.detail("testDetail")
+			.build();
+		Member member = Member.builder()
+			.username("test@naver.com")
+			.nickname("testNickname")
+			.memberStatus(MemberStatus.ACTIVE)
+			.role(Role.ROLE_USER)
+			.address(address)
+			.build();
+		CustomUserDetails customUserDetails = new CustomUserDetails(member);
+
+		// Authentication 설정
+		UsernamePasswordAuthenticationToken authenticationToken =
+			new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+
+		MemberModifyForm memberModifyForm = MemberModifyForm.builder()
+			.nickname("")
+			.city("updatedCity")
+			.district("updatedDistrict")
+			.country("updatedCountry")
+			.detail("updatedDetail")
+			.build();
+
+		// when
+		ResultActions resultActions = mockMvc.perform(patch("/api/v1/members")
+			.with(SecurityMockMvcRequestPostProcessors.authentication(authenticationToken))
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(memberModifyForm)));
+
+		// then
+		resultActions.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("400-1"))
+			.andExpect(jsonPath("$.errorDetails[0].field").value("nickname"))
+			.andExpect(jsonPath("$.errorDetails[0].reason").value("유효하지 않은 회원 이름 입니다."));
+	}
+
+	@Test
+	@DisplayName("회원 정보 수정 실패 - 도시 유효성 검사 실패")
+	void modify_fail_city_not_valid() throws Exception {
+		// given
+		Address address = Address.builder()
+			.city("testCity")
+			.district("testDistrict")
+			.country("testCountry")
+			.detail("testDetail")
+			.build();
+		Member member = Member.builder()
+			.username("test@naver.com")
+			.nickname("testNickname")
+			.memberStatus(MemberStatus.ACTIVE)
+			.role(Role.ROLE_USER)
+			.address(address)
+			.build();
+		CustomUserDetails customUserDetails = new CustomUserDetails(member);
+
+		// Authentication 설정
+		UsernamePasswordAuthenticationToken authenticationToken =
+			new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+
+		MemberModifyForm memberModifyForm = MemberModifyForm.builder()
+			.nickname("updatedNickname")
+			.city("")
+			.district("updatedDistrict")
+			.country("updatedCountry")
+			.detail("updatedDetail")
+			.build();
+
+		// when
+		ResultActions resultActions = mockMvc.perform(patch("/api/v1/members")
+			.with(SecurityMockMvcRequestPostProcessors.authentication(authenticationToken))
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(memberModifyForm)));
+
+		// then
+		resultActions.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("400-1"))
+			.andExpect(jsonPath("$.errorDetails[0].field").value("city"))
+			.andExpect(jsonPath("$.errorDetails[0].reason").value("도시는 필수 항목 입니다."));
+	}
+
+	@Test
+	@DisplayName("회원 정보 수정 실패 - 지역 구 유효성 검사 실패")
+	void modify_fail_district_not_valid() throws Exception {
+		// given
+		Address address = Address.builder()
+			.city("testCity")
+			.district("testDistrict")
+			.country("testCountry")
+			.detail("testDetail")
+			.build();
+		Member member = Member.builder()
+			.username("test@naver.com")
+			.nickname("testNickname")
+			.memberStatus(MemberStatus.ACTIVE)
+			.role(Role.ROLE_USER)
+			.address(address)
+			.build();
+		CustomUserDetails customUserDetails = new CustomUserDetails(member);
+
+		// Authentication 설정
+		UsernamePasswordAuthenticationToken authenticationToken =
+			new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+
+		MemberModifyForm memberModifyForm = MemberModifyForm.builder()
+			.nickname("updatedNickname")
+			.city("updatedCity")
+			.district("")
+			.country("updatedCountry")
+			.detail("updatedDetail")
+			.build();
+
+		// when
+		ResultActions resultActions = mockMvc.perform(patch("/api/v1/members")
+			.with(SecurityMockMvcRequestPostProcessors.authentication(authenticationToken))
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(memberModifyForm)));
+
+		// then
+		resultActions.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("400-1"))
+			.andExpect(jsonPath("$.errorDetails[0].field").value("district"))
+			.andExpect(jsonPath("$.errorDetails[0].reason").value("지역 구는 필수 항목 입니다."));
+	}
+
+	@Test
+	@DisplayName("회원 정보 수정 실패 - 도로명 주소 유효성 검사 실패")
+	void modify_fail_country_not_valid() throws Exception {
+		// given
+		Address address = Address.builder()
+			.city("testCity")
+			.district("testDistrict")
+			.country("testCountry")
+			.detail("testDetail")
+			.build();
+		Member member = Member.builder()
+			.username("test@naver.com")
+			.nickname("testNickname")
+			.memberStatus(MemberStatus.ACTIVE)
+			.role(Role.ROLE_USER)
+			.address(address)
+			.build();
+		CustomUserDetails customUserDetails = new CustomUserDetails(member);
+
+		// Authentication 설정
+		UsernamePasswordAuthenticationToken authenticationToken =
+			new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+
+		MemberModifyForm memberModifyForm = MemberModifyForm.builder()
+			.nickname("updatedNickname")
+			.city("updatedCity")
+			.district("updatedDistrict")
+			.country("")
+			.detail("updatedDetail")
+			.build();
+
+		// when
+		ResultActions resultActions = mockMvc.perform(patch("/api/v1/members")
+			.with(SecurityMockMvcRequestPostProcessors.authentication(authenticationToken))
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(memberModifyForm)));
+
+		// then
+		resultActions.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("400-1"))
+			.andExpect(jsonPath("$.errorDetails[0].field").value("country"))
+			.andExpect(jsonPath("$.errorDetails[0].reason").value("도로명 주소는 필수 항목 입니다."));
+	}
+
+	@Test
+	@DisplayName("회원 정보 수정 실패 - 상세 주소 유효성 검사 실패")
+	void modify_fail_detail_not_valid() throws Exception {
+		// given
+		Address address = Address.builder()
+			.city("testCity")
+			.district("testDistrict")
+			.country("testCountry")
+			.detail("testDetail")
+			.build();
+		Member member = Member.builder()
+			.username("test@naver.com")
+			.nickname("testNickname")
+			.memberStatus(MemberStatus.ACTIVE)
+			.role(Role.ROLE_USER)
+			.address(address)
+			.build();
+		CustomUserDetails customUserDetails = new CustomUserDetails(member);
+
+		// Authentication 설정
+		UsernamePasswordAuthenticationToken authenticationToken =
+			new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+
+		MemberModifyForm memberModifyForm = MemberModifyForm.builder()
+			.nickname("updatedNickname")
+			.city("updatedCity")
+			.district("updatedDistrict")
+			.country("updatedCountry")
+			.detail("")
+			.build();
+
+		// when
+		ResultActions resultActions = mockMvc.perform(patch("/api/v1/members")
+			.with(SecurityMockMvcRequestPostProcessors.authentication(authenticationToken))
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(memberModifyForm)));
+
+		// then
+		resultActions.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("400-1"))
+			.andExpect(jsonPath("$.errorDetails[0].field").value("detail"))
+			.andExpect(jsonPath("$.errorDetails[0].reason").value("상세 주소는 필수 항목 입니다."));
+	}
+
 }
