@@ -7,7 +7,6 @@ import com.example.backend.domain.cart.exception.CartErrorCode;
 import com.example.backend.domain.cart.exception.CartException;
 import com.example.backend.domain.cart.repository.CartRepository;
 import com.example.backend.domain.member.entity.Member;
-import com.example.backend.domain.product.entity.Product;
 import com.example.backend.domain.product.service.ProductService;
 import com.example.backend.global.auth.exception.AuthErrorCode;
 import com.example.backend.global.auth.exception.AuthException;
@@ -43,15 +42,12 @@ public class CartService {
             throw new CartException(CartErrorCode.ALREADY_EXISTS_IN_CART);
         }
 
-        // 상품의 재고가 요청한 수량보다 적은 경우 exception 발생
-        Product product = productService.findById(productId);
-
-        if (quantity > product.getQuantity()) {
-            throw new CartException(CartErrorCode.INSUFFICIENT_STOCK);
-        }
-
         // 장바구니에 상품 추가
-        Cart cart = cartConverter.toCart(cartForm, member, product);
+        Cart cart = cartConverter.toCart(
+                cartForm,
+                member,
+                productService.findById(productId)
+        );
 
         return cartRepository.save(cart).getId();
     }
