@@ -190,4 +190,28 @@ class ProductServiceTest {
         assertThat(exception.getCode()).isEqualTo("404");
     }
 
+    @Test
+    @DisplayName("상품 수정 테스트(더티체킹)")
+    void modifyTest() {
+        // given
+        when(productRepository.findById(anyLong())).thenReturn(Optional.of(product1));
+        ProductForm updatedproductForm = ProductForm.builder()
+                .name("Updated Name")
+                .content("Updated Content")
+                .price(12345)
+                .imgUrl("Updated imgUrl")
+                .quantity(123)
+                .build();
+
+        // when
+        productService.modify(1L, updatedproductForm);
+
+        // then
+        assertThat(product1.getName()).isEqualTo(updatedproductForm.name());
+        assertThat(product1.getContent()).isEqualTo(updatedproductForm.content());
+        assertThat(product1.getPrice()).isEqualTo(updatedproductForm.price());
+        assertThat(product1.getImgUrl()).isEqualTo(updatedproductForm.imgUrl());
+        assertThat(product1.getQuantity()).isEqualTo(updatedproductForm.quantity());
+    }
+
 }
