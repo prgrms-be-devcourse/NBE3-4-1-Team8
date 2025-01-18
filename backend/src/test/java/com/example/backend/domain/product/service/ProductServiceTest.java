@@ -1,5 +1,6 @@
 package com.example.backend.domain.product.service;
 
+import com.example.backend.domain.product.converter.ProductConverter;
 import com.example.backend.domain.product.dto.ProductForm;
 import com.example.backend.domain.product.dto.ProductResponse;
 import com.example.backend.domain.product.entity.Product;
@@ -12,7 +13,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,14 +44,14 @@ class ProductServiceTest {
     private final String imgUrl1 = "Test Product Image";
     private final int quantity1 = 10;
 
-    ProductForm productForm1 = new ProductForm(name1, content1, price1, imgUrl1, quantity1);
-    Product product1 = Product.builder()
+    ProductForm productForm1 = ProductForm.builder()
             .name(name1)
             .content(content1)
             .price(price1)
             .imgUrl(imgUrl1)
             .quantity(quantity1)
             .build();
+    Product product1 = ProductConverter.from(productForm1);
 
     @Test
     @DisplayName("상품 등록 테스트")
@@ -70,7 +74,7 @@ class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("상품 조회(Entity) 성공 테스트")
+    @DisplayName("상품 단건 조회(Entity) 성공 테스트")
     void findByIdSuccessTest() {
         // given
         Long id = 1L;
@@ -88,7 +92,7 @@ class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("상품 조회(Entity) 실패 테스트")
+    @DisplayName("상품 단건 조회(Entity) 실패 테스트")
     void findByIdFailTest() {
         // given
         Long invalidId = 999L; // 존재하지 않는 상품 ID
@@ -105,11 +109,11 @@ class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("상품 조회(DTO) 테스트")
+    @DisplayName("상품 단건 조회(DTO) 테스트")
     void findProductResponseByIdSuccessTest() {
         // given
         Long id = 1L;
-        when(productRepository.findProductResponseById(id)).thenReturn(Optional.of(ProductResponse.of(product1)));
+        when(productRepository.findProductResponseById(id)).thenReturn(Optional.of(ProductConverter.from(product1)));
 
         // when
         ProductResponse productResponse = productService.findProductResponseById(1L);
@@ -119,11 +123,10 @@ class ProductServiceTest {
         assertThat(productResponse.content()).isEqualTo(this.content1);
         assertThat(productResponse.price()).isEqualTo(this.price1);
         assertThat(productResponse.imgUrl()).isEqualTo(this.imgUrl1);
-        assertThat(productResponse.quantity()).isEqualTo(this.quantity1);
     }
 
     @Test
-    @DisplayName("상품 조회(DTO) 실패 테스트")
+    @DisplayName("상품 단건 조회(DTO) 실패 테스트")
     void findProductResponseByIdFailTest() {
         // given
         Long invalidId = 999L; // 존재하지 않는 상품 ID
@@ -138,4 +141,53 @@ class ProductServiceTest {
         // then
         assertThat(exception.getCode()).isEqualTo("404");
     }
+
+    @Test
+    @DisplayName("상품 다건 조회 테스트")
+    void findAllPagedTest() {
+        // given
+        Sort sortByNameAsc = Sort.by(Sort.Order.asc("name"));
+        List<ProductResponse> productResponseList = new ArrayList<>();
+
+        for (int i = 1; i <= 5; i++) {
+            productResponseList.add(ProductConverter.from(Product.builder()
+                    .name("Test Name_" + i)
+                    .build()));
+        }
+
+        Pageable pageable = PageRequest.of(0, 10, sortByNameAsc);
+        Page<ProductResponse> mockPage = new PageImpl<>(productResponseList, pageable, 5);
+        when(productRepository.findAllPaged(any())).thenReturn(mockPage);
+
+        // when
+        Page<ProductResponse> productResponsePage = productService.findAllPaged(0);
+
+        //then
+        verify(productRepository, times(1)).findAllPaged(pageable);
+
+        assertThat(productResponsePage.getTotalPages()).isEqualTo(1);
+        assertThat(productResponsePage.getNumberOfElements()).isEqualTo(5);
+        assertThat(productResponsePage.getContent().get(3).name()).isEqualTo("Test Name_4");
+    }
+
+    @Test
+    @DisplayName("상품 다건 조회 빈 페이지 반환 시 404반환 테스트")
+    void findAllPagedButIsEmptyTest() {
+        // given
+        Sort sortByNameAsc = Sort.by(Sort.Order.asc("name"));
+        Pageable inValidPageable = PageRequest.of(999, 10, sortByNameAsc);  //빈 페이지 요청
+        when(productRepository.findAllPaged(inValidPageable)).thenReturn(Page.empty());
+
+        // when
+        ProductException exception = assertThrows(
+                ProductException.class,
+                () -> productService.findAllPaged(999)
+        );
+
+        //then
+        verify(productRepository, times(1)).findAllPaged(inValidPageable);
+
+        assertThat(exception.getCode()).isEqualTo("404");
+    }
+
 }

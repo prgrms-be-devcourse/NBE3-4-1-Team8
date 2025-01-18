@@ -1,17 +1,19 @@
 package com.example.backend.domain.product.dto;
 
-import static com.example.backend.global.validation.ValidationGroups.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import org.hibernate.validator.constraints.Length;
+
+import static com.example.backend.global.validation.ValidationGroups.*;
 
 /**
  * ProductForm
  * 상품 등록 및 수정 시 사용하는 DTO
  * @author 100
  */
+@Builder
 public record ProductForm(
         @NotBlank(message = "상품 이름은 공백일 수 없습니다.", groups = NotBlankGroup.class)
         @Length(min = 2, max = 50, message = "상품 이름은 2자 이상 50자 이하여야 합니다.", groups = SizeGroup.class)

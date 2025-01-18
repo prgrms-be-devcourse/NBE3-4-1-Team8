@@ -1,5 +1,6 @@
 package com.example.backend.domain.product.service;
 
+import com.example.backend.domain.product.converter.ProductConverter;
 import com.example.backend.domain.product.dto.ProductForm;
 import com.example.backend.domain.product.dto.ProductResponse;
 import com.example.backend.domain.product.entity.Product;
@@ -7,6 +8,10 @@ import com.example.backend.domain.product.exception.ProductErrorCode;
 import com.example.backend.domain.product.exception.ProductException;
 import com.example.backend.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,17 +39,23 @@ public class ProductService {
                 -> new ProductException(ProductErrorCode.NOT_FOUND));
     }
 
+    public Page<ProductResponse> findAllPaged(int page) {
+
+        Sort sortByNameAsc = Sort.by(Sort.Order.asc("name"));
+        Pageable pageable = PageRequest.of(page, 10, sortByNameAsc);
+
+        Page<ProductResponse> productResponsePage = productRepository.findAllPaged(pageable);
+
+        if(productResponsePage.isEmpty()) {
+            throw new ProductException(ProductErrorCode.NOT_FOUND);
+        }
+
+        return productResponsePage;
+    }
+
     @Transactional
     public void create(ProductForm productForm) {
 
-        Product product = Product.builder()
-                .name(productForm.name())
-                .content(productForm.content())
-                .price(productForm.price())
-                .imgUrl(productForm.imgUrl())
-                .quantity(productForm.quantity())
-                .build();
-
-        productRepository.save(product);
+        productRepository.save(ProductConverter.from(productForm));
     }
 }

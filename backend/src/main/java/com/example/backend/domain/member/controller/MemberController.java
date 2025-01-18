@@ -2,14 +2,18 @@ package com.example.backend.domain.member.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.backend.domain.member.dto.MemberInfoResponse;
 import com.example.backend.domain.member.dto.MemberSignupForm;
 import com.example.backend.domain.member.service.MemberService;
+import com.example.backend.global.auth.model.CustomUserDetails;
 import com.example.backend.global.response.GenericResponse;
 import com.example.backend.global.validation.ValidationSequence;
 
@@ -31,4 +35,12 @@ public class MemberController {
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(GenericResponse.of());
 	}
+
+	@GetMapping
+	public ResponseEntity<GenericResponse<MemberInfoResponse>> getMemberInfo(
+		@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+		return ResponseEntity.status(HttpStatus.OK)
+			.body(GenericResponse.of(MemberInfoResponse.of(customUserDetails.getMember())));
+	}
+
 }
