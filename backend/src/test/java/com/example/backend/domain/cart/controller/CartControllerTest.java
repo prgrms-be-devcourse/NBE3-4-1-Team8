@@ -2,7 +2,6 @@ package com.example.backend.domain.cart.controller;
 
 import com.example.backend.domain.cart.dto.CartForm;
 import com.example.backend.domain.cart.dto.CartResponse;
-import com.example.backend.domain.cart.exception.CartErrorCode;
 import com.example.backend.domain.cart.exception.CartException;
 import com.example.backend.domain.cart.service.CartService;
 import com.example.backend.domain.member.entity.Member;
@@ -75,7 +74,6 @@ class CartControllerTest {
     /**
      * getCarts() 메서드 테스트
      * - 회원의 장바구니 목록 조회
-     * - 다른 회원의 장바구니 접근 시 예외 발생
      * - 빈 장바구니 목록 조회
      * @throws CartException
      */
@@ -88,11 +86,11 @@ class CartControllerTest {
         CartResponse cartResponse = new CartResponse(1L,"testProductName", 10, 1000, 10000, "test.jpg");
         List<CartResponse> cartResponses = List.of(cartResponse);
 
-        when(cartService.getCartsByMember(memberId, member)).thenReturn(cartResponses);
+        when(cartService.getCartsByMember(member)).thenReturn(cartResponses);
 
         // when
         ResponseEntity<GenericResponse<List<CartResponse>>> response =
-                cartController.getCarts(memberId, customUserDetails);
+                cartController.getCarts(customUserDetails);
 
         // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -100,23 +98,7 @@ class CartControllerTest {
         assertEquals(1, response.getBody().getData().size());
         assertEquals(cartResponse.productName(), response.getBody().getData().get(0).productName());
 
-        verify(cartService).getCartsByMember(memberId, member);
-    }
-
-    @Test
-    @WithMockUser
-    @DisplayName("다른 회원의 장바구니 접근 시 예외 발생")
-    void getCarts_WithDifferentMember_ThrowsCartException() {
-        // given
-        Long differentMemberId = 2L;
-        when(cartService.getCartsByMember(differentMemberId, member))
-                .thenThrow(new CartException(CartErrorCode.INVALID_MEMBER));
-
-        // when & then
-        assertThrows(CartException.class, () ->
-                cartController.getCarts(differentMemberId, customUserDetails));
-
-        verify(cartService).getCartsByMember(differentMemberId, member);
+        verify(cartService).getCartsByMember(member);
     }
 
     @Test
@@ -127,17 +109,17 @@ class CartControllerTest {
         Long memberId = 1L;
         List<CartResponse> emptyCartResponses = List.of();
 
-        when(cartService.getCartsByMember(memberId, member)).thenReturn(emptyCartResponses);
+        when(cartService.getCartsByMember(member)).thenReturn(emptyCartResponses);
 
         // when
         ResponseEntity<GenericResponse<List<CartResponse>>> response =
-                cartController.getCarts(memberId, customUserDetails);
+                cartController.getCarts(customUserDetails);
 
         // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertTrue(response.getBody().getData().isEmpty());
 
-        verify(cartService).getCartsByMember(memberId, member);
+        verify(cartService).getCartsByMember(member);
     }
 }
