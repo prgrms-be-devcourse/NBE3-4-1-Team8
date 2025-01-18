@@ -46,7 +46,7 @@ public class SecurityConfig {
                 SessionCreationPolicy.STATELESS))
             .addFilter(corsConfig.corsFilter())
             .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                .requestMatchers("/api/v1/members/join", "/api/v1/auth/verify").permitAll()
+                .requestMatchers("/api/v1/members/join", "/api/v1/auth/verify", "/api/v1/auth/login").permitAll()
                 .requestMatchers("/api/v1/members/**").hasAnyRole("USER", "ADMIN")
                 .requestMatchers("/api/v1/auth/**").hasAnyRole("USER", "ADMIN")
                 .requestMatchers("/api/v1/products/**").hasAnyRole("ADMIN")
