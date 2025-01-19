@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ProductErrorCode {
     INSUFFICIENT_QUANTITY(HttpStatus.BAD_REQUEST, "상품 재고가 부족합니다.", "400-1"),
+    EXISTS_NAME(HttpStatus.BAD_REQUEST, "400-2", "중복된 상품 이름입니다."),
     NOT_FOUND(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다.", "404"),
     CONFLICT(HttpStatus.CONFLICT, "현재 다른 사용자가 해당 상품을 처리 중입니다. 잠시 후 다시 시도해 주세요.", "409-1");
 
