@@ -48,7 +48,6 @@ public class OrdersService {
         return OrdersConverter.from(ordersList);
     }
 
-
     @Transactional
     public Long create(OrdersForm ordersForm, Member member) {
         List<ProductOrders> productOrdersList = createProductOrdersList(ordersForm);
@@ -86,5 +85,10 @@ public class OrdersService {
         ).orElseThrow(() -> new OrdersException(OrdersErrorCode.NOT_FOUND));
 
         return OrdersConverter.from(ordersList);
+    }
+
+    @Transactional
+    public void deleteByMemberId(Long id) {
+        ordersRepository.deleteByMemberId(id);
     }
 }

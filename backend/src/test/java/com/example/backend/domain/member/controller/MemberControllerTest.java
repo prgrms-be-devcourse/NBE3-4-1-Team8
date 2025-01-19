@@ -8,6 +8,8 @@ import com.example.backend.domain.member.conveter.MemberConverter;
 import com.example.backend.domain.member.dto.MemberDto;
 import com.example.backend.domain.member.dto.MemberInfoResponse;
 import com.example.backend.domain.member.dto.MemberModifyForm;
+import com.example.backend.domain.member.service.MemberDeleteService;
+import com.example.backend.global.auth.service.CookieService;
 import com.example.backend.global.config.TestSecurityConfig;
 import com.example.backend.global.config.CorsConfig;
 import org.junit.jupiter.api.DisplayName;
@@ -33,6 +35,7 @@ import com.example.backend.domain.member.service.MemberService;
 import com.example.backend.global.auth.model.CustomUserDetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 @WebMvcTest(MemberController.class)
@@ -41,6 +44,12 @@ import lombok.extern.slf4j.Slf4j;
 class MemberControllerTest {
 	@MockitoBean
 	MemberService memberService;
+
+	@MockitoBean
+	MemberDeleteService memberDeleteService;
+
+	@MockitoBean
+	CookieService cookieService;
 
 	@Autowired
     private MockMvc mockMvc;
@@ -763,4 +772,39 @@ class MemberControllerTest {
 			.andExpect(jsonPath("$.errorDetails[0].reason").value("상세 주소는 필수 항목 입니다."));
 	}
 
+	@Test
+	@DisplayName("회원 탈퇴 성공 테스트")
+	void delete_success() throws Exception {
+		// given
+		Address address = Address.builder()
+			.city("testCity")
+			.district("testDistrict")
+			.country("testCountry")
+			.detail("testDetail")
+			.build();
+		Member member = Member.builder()
+			.username("test@naver.com")
+			.nickname("testNickname")
+			.memberStatus(MemberStatus.ACTIVE)
+			.role(Role.ROLE_USER)
+			.address(address)
+			.build();
+		CustomUserDetails customUserDetails = new CustomUserDetails(member);
+
+		// Authentication 설정
+		UsernamePasswordAuthenticationToken authenticationToken =
+			new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+
+		doNothing().when(memberDeleteService).delete(any(MemberDto.class));
+		doNothing().when(cookieService).deleteRefreshTokenFromCookie(any(HttpServletResponse.class));
+		doNothing().when(cookieService).deleteRefreshTokenFromCookie(any(HttpServletResponse.class));
+
+		// when
+		ResultActions resultActions = mockMvc.perform(delete("/api/v1/members")
+			.with(SecurityMockMvcRequestPostProcessors.authentication(authenticationToken))
+			.contentType(MediaType.APPLICATION_JSON));
+
+		// then
+		resultActions.andExpect(status().isNoContent());
+	}
 }
