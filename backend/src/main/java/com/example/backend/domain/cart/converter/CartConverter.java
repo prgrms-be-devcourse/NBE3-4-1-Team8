@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CartConverter {
 
     /**
