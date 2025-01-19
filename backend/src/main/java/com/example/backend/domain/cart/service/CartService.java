@@ -3,6 +3,7 @@ package com.example.backend.domain.cart.service;
 import com.example.backend.domain.cart.converter.CartConverter;
 import com.example.backend.domain.cart.dto.CartForm;
 import com.example.backend.domain.cart.dto.CartResponse;
+import com.example.backend.domain.cart.dto.CartUpdateForm;
 import com.example.backend.domain.cart.entity.Cart;
 import com.example.backend.domain.cart.exception.CartErrorCode;
 import com.example.backend.domain.cart.exception.CartException;
@@ -58,5 +59,25 @@ public class CartService {
     @Transactional
     public void deleteByMemberId(Long memberId) {
         cartRepository.deleteByMemberId(memberId);
+    }
+
+    @Transactional
+    public Long updateCartItemQuantity(CartUpdateForm cartUpdateForm, Member member) {
+        // 해당 상품이 장바구니에 있는지 조회 후 없으면 exception 발생
+        Cart cart = cartRepository.findByProductIdAndMemberId(cartUpdateForm.productId(), member.getId())
+                .orElseThrow(() -> new CartException(CartErrorCode.PRODUCT_NOT_FOUND_IN_CART));
+
+        // 현재 수량과 동일한 수량인 경우 exception 발생
+        if (cart.getQuantity() == cartUpdateForm.quantity()) {
+            throw new CartException(CartErrorCode.SAME_QUANTITY_IN_CART);
+        }
+
+        // 수량 업데이트
+        cart.updateQuantity(cartUpdateForm.quantity());
+
+        // 장바구니 수량 업데이트 후 저장
+        cartRepository.save(cart);
+
+        return cart.getId();
     }
 }
