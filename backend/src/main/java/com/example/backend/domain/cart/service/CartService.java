@@ -2,6 +2,7 @@ package com.example.backend.domain.cart.service;
 
 import com.example.backend.domain.cart.converter.CartConverter;
 import com.example.backend.domain.cart.dto.CartForm;
+import com.example.backend.domain.cart.dto.CartResponse;
 import com.example.backend.domain.cart.entity.Cart;
 import com.example.backend.domain.cart.exception.CartErrorCode;
 import com.example.backend.domain.cart.exception.CartException;
@@ -10,9 +11,11 @@ import com.example.backend.domain.member.entity.Member;
 import com.example.backend.domain.product.service.ProductService;
 import com.example.backend.global.auth.exception.AuthErrorCode;
 import com.example.backend.global.auth.exception.AuthException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -50,4 +53,12 @@ public class CartService {
 
         return cartRepository.save(cart).getId();
     }
+
+    @Transactional(readOnly = true)
+    public List<CartResponse> getCartsByMember(Member member) {
+        List<Cart> cartList = cartRepository.findAllByMemberWithProducts(member);
+
+        return CartConverter.toResponseList(cartList);
+    }
+
 }
