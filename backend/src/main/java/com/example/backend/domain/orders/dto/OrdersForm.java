@@ -17,7 +17,7 @@ public record OrdersForm(
         @NotBlank(message = "구는 필수입니다.", groups = NotNullGroup.class)
         String district,
 
-        @NotBlank(message = "국가는 필수입니다.", groups = NotNullGroup.class)
+        @NotBlank(message = "도로명 주소는 필수입니다.", groups = NotNullGroup.class)
         String country,
 
         @NotBlank(message = "상세 주소는 필수입니다.", groups = NotNullGroup.class)
