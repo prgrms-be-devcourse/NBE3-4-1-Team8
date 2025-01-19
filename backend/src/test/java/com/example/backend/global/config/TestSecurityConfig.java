@@ -1,5 +1,6 @@
 package com.example.backend.global.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -11,8 +12,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-
-import lombok.RequiredArgsConstructor;
 
 /**
  * TestSecurityConfig
@@ -44,7 +43,7 @@ public class TestSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
                         .requestMatchers("/api/v1/products/**").hasAnyRole("ADMIN")
                         .requestMatchers("/api/v1/orders/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers("/api/v1/cart/**").hasAnyRole("USER", "ADMIN"))
+                        .requestMatchers("/api/v1/carts/**").hasAnyRole("USER", "ADMIN"))
                 ;
         return http.build();
     }

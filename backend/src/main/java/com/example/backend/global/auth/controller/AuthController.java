@@ -45,6 +45,7 @@ public class AuthController {
         String accessToken = cookieService.getAccessTokenFromRequest(request);
 
         authService.logout(accessToken);
+		cookieService.deleteAccessTokenFromCookie(response);
         cookieService.deleteRefreshTokenFromCookie(response);
 
         return ResponseEntity.status(HttpStatus.OK).body(GenericResponse.of("로그아웃 성공"));

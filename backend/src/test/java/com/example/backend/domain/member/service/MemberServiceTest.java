@@ -1,8 +1,8 @@
 package com.example.backend.domain.member.service;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,7 +12,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.example.backend.domain.common.Address;
+import com.example.backend.domain.member.conveter.MemberConverter;
 import com.example.backend.domain.member.dto.MemberDto;
+import com.example.backend.domain.member.dto.MemberInfoResponse;
+import com.example.backend.domain.member.dto.MemberModifyForm;
 import com.example.backend.domain.member.dto.MemberSignupForm;
 import com.example.backend.domain.member.entity.Member;
 import com.example.backend.domain.member.entity.Role;
@@ -27,12 +30,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 class MemberServiceTest {
 	@Mock
 	private MemberRepository memberRepository;
+
 	@Mock
 	private RedisService redisService;
+
 	@Mock
 	private MailService mailService;
+
 	@Mock
 	private PasswordEncoder passwordEncoder;
+
 	@Mock
 	private ObjectMapper objectMapper;
 
@@ -123,7 +130,7 @@ class MemberServiceTest {
 		given(memberRepository.existsByNickname(givenMember.nickname())).willReturn(false);
 
 		//when & then
-		Assertions.assertThatThrownBy(() -> memberService.signup(
+		assertThatThrownBy(() -> memberService.signup(
 				givenMemberSignupForm.username(), givenMemberSignupForm.nickname(),
 				givenMemberSignupForm.password(), givenMemberSignupForm.city(), givenMemberSignupForm.district(),
 				givenMemberSignupForm.country(), givenMemberSignupForm.detail()))
@@ -165,10 +172,83 @@ class MemberServiceTest {
 		given(memberRepository.existsByNickname(givenMember.nickname())).willReturn(true);
 
 		//when & then
-		Assertions.assertThatThrownBy(() -> memberService.signup(
+		assertThatThrownBy(() -> memberService.signup(
 				givenMemberSignupForm.username(), givenMemberSignupForm.nickname(),
 				givenMemberSignupForm.password(), givenMemberSignupForm.city(), givenMemberSignupForm.district(),
 				givenMemberSignupForm.country(), givenMemberSignupForm.detail()))
+			.isInstanceOf(MemberException.class)
+			.hasMessage(MemberErrorCode.EXISTS_NICKNAME.getMessage());
+	}
+
+	@Test
+	@DisplayName("회원 정보 수정 성공 테스트")
+	void modify_success() {
+		// given
+		Address address = Address.builder()
+			.city("testCity")
+			.district("testDistrict")
+			.country("testCountry")
+			.detail("testDetail")
+			.build();
+
+		MemberDto memberDto = MemberDto.builder()
+			.nickname("testNickName")
+			.address(address)
+			.build();
+
+		MemberModifyForm memberModifyForm = MemberModifyForm.builder()
+			.nickname("updatedNickName")
+			.city("updatedCity")
+			.district("updatedDistrict")
+			.country("updatedCountry")
+			.detail("updatedDetail")
+			.build();
+
+		Member member = Member.from(MemberConverter.of(memberDto, memberModifyForm));
+		when(memberRepository.existsByNickname(memberModifyForm.nickname())).thenReturn(false);
+		when(memberRepository.save(any(Member.class))).thenReturn(member);
+
+		// when
+		MemberInfoResponse result = memberService.modify(memberDto, memberModifyForm);
+
+		// then
+		assertThat(result).isNotNull();
+		assertThat(result).isInstanceOf(MemberInfoResponse.class);
+		assertThat(result.nickname()).isEqualTo(memberModifyForm.nickname());
+		assertThat(result.address().getCity()).isEqualTo(memberModifyForm.city());
+		assertThat(result.address().getDistrict()).isEqualTo(memberModifyForm.district());
+		assertThat(result.address().getCountry()).isEqualTo(memberModifyForm.country());
+		assertThat(result.address().getDetail()).isEqualTo(memberModifyForm.detail());
+	}
+
+	@Test
+	@DisplayName("회원 정보 수정 실패 - 닉네임 중복")
+	void modify_fail_nickname_already_exists() {
+		// given
+		Address address = Address.builder()
+			.city("testCity")
+			.district("testDistrict")
+			.country("testCountry")
+			.detail("testDetail")
+			.build();
+
+		MemberDto memberDto = MemberDto.builder()
+			.nickname("testNickName")
+			.address(address)
+			.build();
+
+		MemberModifyForm memberModifyForm = MemberModifyForm.builder()
+			.nickname("updatedNickName")
+			.city("updatedCity")
+			.district("updatedDistrict")
+			.country("updatedCountry")
+			.detail("updatedDetail")
+			.build();
+
+		when(memberRepository.existsByNickname(memberModifyForm.nickname())).thenReturn(true);
+
+		// when & then
+		assertThatThrownBy(() -> memberService.modify(memberDto, memberModifyForm))
 			.isInstanceOf(MemberException.class)
 			.hasMessage(MemberErrorCode.EXISTS_NICKNAME.getMessage());
 	}

@@ -1,9 +1,17 @@
 package com.example.backend.global.advice;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
+import com.example.backend.domain.cart.exception.CartException;
+import com.example.backend.domain.member.exception.MemberException;
+import com.example.backend.domain.product.exception.ProductException;
+import com.example.backend.global.auth.exception.AuthException;
+import com.example.backend.global.exception.GlobalErrorCode;
+import com.example.backend.global.exception.GlobalException;
+import com.example.backend.global.response.ErrorDetail;
+import com.example.backend.global.response.HttpErrorInfo;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -14,18 +22,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import com.example.backend.domain.member.exception.MemberException;
-import com.example.backend.domain.product.exception.ProductException;
-import com.example.backend.global.auth.exception.AuthException;
-import com.example.backend.global.exception.GlobalErrorCode;
-import com.example.backend.global.exception.GlobalException;
-import com.example.backend.global.response.ErrorDetail;
-import com.example.backend.global.response.HttpErrorInfo;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
-import lombok.extern.slf4j.Slf4j;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * GlobalControllerAdvice
@@ -157,5 +156,21 @@ public class GlobalControllerAdvice {
 		HttpServletRequest request) {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 			.body(HttpErrorInfo.of("400", request.getRequestURI(), ex.getMessage()));
+	}
+
+
+	/**
+	 * Cart 예외 발생시 처리하는 핸들러
+	 *
+	 * @param ex      CartException
+	 * @param request HttpServletRequest
+	 * @return {@link ResponseEntity<HttpErrorInfo>}
+	 */
+
+	@ExceptionHandler(CartException.class)
+	public ResponseEntity<HttpErrorInfo> handlerCartException(CartException ex, HttpServletRequest request) {
+		log.info("GlobalControllerAdvice={}", ex);
+		return ResponseEntity.status(ex.getStatus())
+				.body(HttpErrorInfo.of(ex.getCode(), request.getRequestURI(), ex.getMessage()));
 	}
 }
