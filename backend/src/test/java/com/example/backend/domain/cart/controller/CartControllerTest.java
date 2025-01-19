@@ -86,11 +86,11 @@ class CartControllerTest {
         CartResponse cartResponse = new CartResponse(1L,"testProductName", 10, 1000, 10000, "test.jpg");
         List<CartResponse> cartResponses = List.of(cartResponse);
 
-        when(cartService.getCartsByMember(member)).thenReturn(cartResponses);
+        when(cartService.getCartByMember(member)).thenReturn(cartResponses);
 
         // when
         ResponseEntity<GenericResponse<List<CartResponse>>> response =
-                cartController.getCarts(customUserDetails);
+                cartController.getCart(customUserDetails);
 
         // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -98,7 +98,7 @@ class CartControllerTest {
         assertEquals(1, response.getBody().getData().size());
         assertEquals(cartResponse.productName(), response.getBody().getData().get(0).productName());
 
-        verify(cartService).getCartsByMember(member);
+        verify(cartService).getCartByMember(member);
     }
 
     @Test
@@ -109,17 +109,17 @@ class CartControllerTest {
         Long memberId = 1L;
         List<CartResponse> emptyCartResponses = List.of();
 
-        when(cartService.getCartsByMember(member)).thenReturn(emptyCartResponses);
+        when(cartService.getCartByMember(member)).thenReturn(emptyCartResponses);
 
         // when
         ResponseEntity<GenericResponse<List<CartResponse>>> response =
-                cartController.getCarts(customUserDetails);
+                cartController.getCart(customUserDetails);
 
         // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertTrue(response.getBody().getData().isEmpty());
 
-        verify(cartService).getCartsByMember(member);
+        verify(cartService).getCartByMember(member);
     }
 }
