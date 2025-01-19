@@ -9,6 +9,7 @@ import com.example.backend.global.validation.annotation.ValidUsername;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 
+@Builder
 public record EmailCertificationForm(
 	@ValidUsername(groups = PatternGroup.class)
 	String username,
@@ -16,11 +17,4 @@ public record EmailCertificationForm(
 	String certificationCode,
 	@ValidEnum(enumClass = VerifyType.class, message = "인증 타입은 필수 항목 입니다.", groups = ValidEnumGroup.class)
 	VerifyType verifyType) {
-
-	@Builder
-	public EmailCertificationForm(String username, String certificationCode, VerifyType verifyType) {
-		this.username = username;
-		this.certificationCode = certificationCode;
-		this.verifyType = verifyType;
-	}
 }
