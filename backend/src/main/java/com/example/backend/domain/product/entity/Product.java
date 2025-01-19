@@ -72,16 +72,4 @@ public class Product extends BaseEntity {
         this.quantity = productForm.quantity();
     }
 
-    /**
-     * 상품 재고 감소 로직
-     */
-    public void removeQuantity(int quantity) {
-
-        int restQuantity = this.quantity - quantity;
-        if(restQuantity < 0) {
-            throw new ProductException(ProductErrorCode.INSUFFICIENT_QUANTITY);
-        }
-        this.quantity = restQuantity;
-    }
-
 }
