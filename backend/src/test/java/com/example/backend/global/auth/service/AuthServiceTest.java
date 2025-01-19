@@ -603,7 +603,7 @@ class AuthServiceTest {
 			.hasMessage(AuthErrorCode.VERIFY_TYPE_NOT_MATCH.getMessage());
 	}
 
-	@DisplayName("이메일 인증 코드 재발송시 인증 타입이 일치하지 않을 때 실패 테스트")
+	@DisplayName("이메일 인증 코드 재발송시 10분 이내 5회 이상 전송했을 때 실패 테스트")
 	@Test
 	void send_too_many_resend_attempts_fail() {
 		//given
