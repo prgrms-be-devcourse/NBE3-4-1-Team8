@@ -561,4 +561,45 @@ class AuthServiceTest {
 			.sendCertificationMail(any(String.class), any(EmailCertification.class), any(TemplateName.class));
 		verify(memberRepository, times(1)).findByUsername(givenUsername);
 	}
+
+	@DisplayName("이메일 인증 코드 재발송시 인증 타입이 일치하지 않을 때 실패 테스트")
+	@Test
+	void send_verify_type_not_match_fail() {
+		//given
+		String givenUsername = "testEmail@naver.com";
+		VerifyType givenVerifyType = VerifyType.PASSWORD_RESET;
+
+		Address givenAddress = Address.builder()
+			.city("testCity")
+			.detail("testDetail")
+			.country("testCountry")
+			.district("testDistrict")
+			.build();
+
+		Member givenMember = Member.builder()
+			.username(givenUsername)
+			.nickname("testNickName")
+			.password("!testPassword1234")
+			.address(givenAddress)
+			.memberStatus(MemberStatus.ACTIVE)
+			.role(Role.ROLE_USER)
+			.build();
+
+		EmailCertification givenEmailCertification = EmailCertification.builder()
+			.verifyType(VerifyType.SIGNUP.toString())
+			.certificationCode("testCode")
+			.sendCount("5")
+			.build();
+
+		Map<Object, Object> givenConvertMap = testObjectMapper.convertValue(givenEmailCertification, Map.class);
+
+		given(memberRepository.findByUsername(givenUsername)).willReturn(Optional.of(givenMember));
+		given(redisService.getHashDataAll("certification_email:" + givenUsername)).willReturn(givenConvertMap);
+		given(objectMapper.convertValue(givenConvertMap, EmailCertification.class)).willReturn(givenEmailCertification);
+
+		//when & then
+		assertThatThrownBy(() -> authService.send(givenUsername, givenVerifyType))
+			.isInstanceOf(AuthException.class)
+			.hasMessage(AuthErrorCode.VERIFY_TYPE_NOT_MATCH.getMessage());
+	}
 }
