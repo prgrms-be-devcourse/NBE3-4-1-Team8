@@ -4,14 +4,6 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import com.example.backend.domain.member.conveter.MemberConverter;
-import com.example.backend.domain.member.dto.MemberDto;
-import com.example.backend.domain.member.dto.MemberInfoResponse;
-import com.example.backend.domain.member.dto.MemberModifyForm;
-import com.example.backend.domain.member.service.MemberDeleteService;
-import com.example.backend.global.auth.service.CookieService;
-import com.example.backend.global.config.TestSecurityConfig;
-import com.example.backend.global.config.CorsConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,12 +29,15 @@ import com.example.backend.domain.member.entity.MemberStatus;
 import com.example.backend.domain.member.entity.Role;
 import com.example.backend.domain.member.exception.MemberErrorCode;
 import com.example.backend.domain.member.exception.MemberException;
+import com.example.backend.domain.member.service.MemberDeleteService;
 import com.example.backend.domain.member.service.MemberService;
 import com.example.backend.global.auth.model.CustomUserDetails;
+import com.example.backend.global.auth.service.CookieService;
 import com.example.backend.global.config.CorsConfig;
 import com.example.backend.global.config.TestSecurityConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 @WebMvcTest(MemberController.class)
@@ -52,8 +47,14 @@ class MemberControllerTest {
 	@MockitoBean
 	MemberService memberService;
 
+	@MockitoBean
+	MemberDeleteService memberDeleteService;
+
+	@MockitoBean
+	CookieService cookieService;
+
 	@Autowired
-    private MockMvc mockMvc;
+	private MockMvc mockMvc;
 
 	@Autowired
 	ObjectMapper objectMapper;
@@ -86,7 +87,7 @@ class MemberControllerTest {
 		resultActions.andExpect(status().isCreated());
 	}
 
-@DisplayName("회원가입 이메일 유효성 검사 실패 테스트")
+	@DisplayName("회원가입 이메일 유효성 검사 실패 테스트")
 	@Test
 	void signup_username_valid_username_fail() throws Exception {
 		//given
@@ -363,11 +364,10 @@ class MemberControllerTest {
 			.district("testDistrict")
 			.build();
 
-
 		doThrow(new MemberException(MemberErrorCode.EXISTS_NICKNAME))
 			.when(memberService).signup(any(String.class), any(String.class),
-			any(String.class), any(String.class), any(String.class),
-			any(String.class), any(String.class));
+				any(String.class), any(String.class), any(String.class),
+				any(String.class), any(String.class));
 
 		//when
 		ResultActions resultActions = mockMvc.perform(post("/api/v1/members/join")
@@ -395,11 +395,10 @@ class MemberControllerTest {
 			.district("testDistrict")
 			.build();
 
-
 		doThrow(new MemberException(MemberErrorCode.EXISTS_USERNAME))
 			.when(memberService).signup(any(String.class), any(String.class),
-			any(String.class), any(String.class), any(String.class),
-			any(String.class), any(String.class));
+				any(String.class), any(String.class), any(String.class),
+				any(String.class), any(String.class));
 
 		//when
 		ResultActions resultActions = mockMvc.perform(post("/api/v1/members/join")
@@ -808,6 +807,7 @@ class MemberControllerTest {
 		// then
 		resultActions.andExpect(status().isNoContent());
 	}
+
 	@WithMockUser
 	@DisplayName("비밀번호 변경 성공 테스트")
 	@Test
