@@ -81,7 +81,7 @@ public class AuthController {
 	@PostMapping("/code")
 	public ResponseEntity<GenericResponse<Void>> code(@RequestBody @Validated(ValidationSequence.class)
 		SendEmailCertificationCodeForm sendEmailCertificationCodeForm) {
-		authService.send(sendEmailCertificationCodeForm.email(), sendEmailCertificationCodeForm.verifyType());
+		authService.send(sendEmailCertificationCodeForm.username(), sendEmailCertificationCodeForm.verifyType());
 
 		return ResponseEntity.ok().body(GenericResponse.of());
 	}

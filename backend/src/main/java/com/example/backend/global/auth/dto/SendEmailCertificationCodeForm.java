@@ -14,7 +14,7 @@ public record SendEmailCertificationCodeForm(
 	@NotBlank(message = "이메일은 필수 항목입니다.", groups = NotBlankGroup.class)
 	@Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$",
 		message = "유효하지 않은 이메일 입니다.", groups = PatternGroup.class)
-	String email,
+	String username,
 	@ValidEnum(message = "지원하지 않는 인증 유형입니다.", groups = ValidEnumGroup.class, enumClass = VerifyType.class)
 	VerifyType verifyType) {
 }

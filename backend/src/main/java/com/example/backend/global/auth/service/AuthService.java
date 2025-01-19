@@ -119,16 +119,16 @@ public class AuthService {
 		redisService.delete(REDIS_EMAIL_PREFIX + username);
 	}
 
-	public void send(String email, VerifyType verifyType) {
+	public void send(String username, VerifyType verifyType) {
 		TemplateName templateName =
 			VerifyType.SIGNUP.equals(verifyType) ? TemplateName.SIGNUP_VERIFY : TemplateName.PASSWORD_RESET_VERIFY;
 
-		Member findMember = memberRepository.findByUsername(email)
+		Member findMember = memberRepository.findByUsername(username)
 			.orElseThrow(() -> new AuthException(AuthErrorCode.MEMBER_NOT_FOUND));
 
 		String certificationCode = UUID.randomUUID().toString();
 
-		Map<?, ?> findHashDataAll = redisService.getHashDataAll(REDIS_EMAIL_PREFIX + email);
+		Map<?, ?> findHashDataAll = redisService.getHashDataAll(REDIS_EMAIL_PREFIX + username);
 
 		//인증 코드를 처음 발급하는지 확인
 		if (findHashDataAll.isEmpty()) {
@@ -138,13 +138,13 @@ public class AuthService {
 				.verifyType(verifyType.toString())
 				.build();
 
-			mailService.sendCertificationMail(email, emailCertification, templateName);
+			mailService.sendCertificationMail(username, emailCertification, templateName);
 
 			redisService.setHashDataAll(
-				REDIS_EMAIL_PREFIX + email, objectMapper.convertValue(emailCertification, Map.class)
+				REDIS_EMAIL_PREFIX + username, objectMapper.convertValue(emailCertification, Map.class)
 			);
 
-			redisService.setTimeout(REDIS_EMAIL_PREFIX + email, 10);
+			redisService.setTimeout(REDIS_EMAIL_PREFIX + username, 10);
 		} else {
 			EmailCertification findEmailCertification = objectMapper.convertValue(findHashDataAll,
 				EmailCertification.class);
@@ -162,13 +162,13 @@ public class AuthService {
 			findEmailCertification.addResendCount();
 			findEmailCertification.setCertificationCode(certificationCode);
 
-			mailService.sendCertificationMail(email, findEmailCertification, templateName);
+			mailService.sendCertificationMail(username, findEmailCertification, templateName);
 
 			redisService.setHashDataAll(
-				REDIS_EMAIL_PREFIX + email, objectMapper.convertValue(findEmailCertification, Map.class)
+				REDIS_EMAIL_PREFIX + username, objectMapper.convertValue(findEmailCertification, Map.class)
 			);
 
-			redisService.setTimeout(REDIS_EMAIL_PREFIX + email, 10);
+			redisService.setTimeout(REDIS_EMAIL_PREFIX + username, 10);
 		}
 	}
 }
