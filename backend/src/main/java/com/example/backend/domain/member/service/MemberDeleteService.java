@@ -2,6 +2,7 @@ package com.example.backend.domain.member.service;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.domain.cart.service.CartService;
 import com.example.backend.domain.member.dto.MemberDto;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class MemberDeleteService {
 
 	private final MemberRepository memberRepository;
