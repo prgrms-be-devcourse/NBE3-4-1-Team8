@@ -460,4 +460,29 @@ public class AuthControllerTest {
 		resultActions
 			.andExpect(status().isOk());
 	}
+
+	@DisplayName("인증 타입이 일치하지 않을 때 실패 테스트")
+	@Test
+	void send_verify_type_not_match_fail() throws Exception {
+	    //given
+		SendEmailCertificationCodeForm givenSendEmailCertificationCodeForm = SendEmailCertificationCodeForm.builder()
+			.username("testEmail@naver.com")
+			.verifyType(VerifyType.SIGNUP)
+			.build();
+
+		doThrow(new AuthException(AuthErrorCode.VERIFY_TYPE_NOT_MATCH))
+			.when(authService)
+			.send(givenSendEmailCertificationCodeForm.username(), givenSendEmailCertificationCodeForm.verifyType());
+
+		//when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/auth/code")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(givenSendEmailCertificationCodeForm)));
+
+	    //then
+		resultActions
+			.andExpect(status().isUnauthorized())
+			.andExpect(jsonPath("$.code").value(AuthErrorCode.VERIFY_TYPE_NOT_MATCH.getCode()))
+			.andExpect(jsonPath("$.message").value(AuthErrorCode.VERIFY_TYPE_NOT_MATCH.getMessage()));
+	}
 }
