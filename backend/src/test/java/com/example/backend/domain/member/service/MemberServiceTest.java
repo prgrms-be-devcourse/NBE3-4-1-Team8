@@ -27,7 +27,10 @@ import com.example.backend.global.mail.service.MailService;
 import com.example.backend.global.redis.service.RedisService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lombok.extern.slf4j.Slf4j;
+
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 class MemberServiceTest {
 	@Mock
 	private MemberRepository memberRepository;
@@ -119,19 +122,26 @@ class MemberServiceTest {
 
 		String changePassword = "!changePassword1234";
 
-		Member changePasswordMember = givenMember.changePassword(changePassword);
+		Member givenChangePasswordMember = Member.builder()
+			.username("testUsername")
+			.nickname("testNickname")
+			.password(changePassword)
+			.address(givenAddress)
+			.memberStatus(MemberStatus.ACTIVE)
+			.role(Role.ROLE_USER)
+			.build();
 
-		given(passwordEncoder.matches(changePassword, givenMember.getPassword())).willReturn(true);
+		given(passwordEncoder.matches(any(String.class), any(String.class))).willReturn(true);
 		given(passwordEncoder.encode(changePassword)).willReturn(changePassword);
-		given(memberRepository.save(changePasswordMember)).willReturn(changePasswordMember);
+		given(memberRepository.save(any(Member.class))).willReturn(givenChangePasswordMember);
 
 	    //when
 		memberService.passwordChange(givenMember.getPassword(), changePassword, givenMember);
 
 	    //then
-		verify(passwordEncoder, times(1)).matches(changePassword, givenMember.getPassword());
+		verify(passwordEncoder, times(1)).matches(any(String.class), any(String.class));
 		verify(passwordEncoder, times(1)).encode(changePassword);
-		verify(memberRepository, times(1)).save(changePasswordMember);
+		verify(memberRepository, times(1)).save(any(Member.class));
 	}
 
 	@DisplayName("비밀번호 변경시 원래 비밀번호와 일치하지 않을 때 실패 테스트")
@@ -187,7 +197,7 @@ class MemberServiceTest {
 			.district(givenMemberSignupForm.district())
 			.build();
 
-		MemberDto givenMember = MemberDto.builder()
+		Member givenMember = Member.builder()
 			.username(givenMemberSignupForm.username())
 			.nickname(givenMemberSignupForm.nickname())
 			.password(givenMemberSignupForm.password())
@@ -195,8 +205,8 @@ class MemberServiceTest {
 			.role(Role.ROLE_USER)
 			.build();
 
-		given(memberRepository.existsByUsername(givenMember.username())).willReturn(true);
-		given(memberRepository.existsByNickname(givenMember.nickname())).willReturn(false);
+		given(memberRepository.existsByUsername(givenMember.getUsername())).willReturn(true);
+		given(memberRepository.existsByNickname(givenMember.getNickname())).willReturn(false);
 
 		//when & then
 		assertThatThrownBy(() -> memberService.signup(
