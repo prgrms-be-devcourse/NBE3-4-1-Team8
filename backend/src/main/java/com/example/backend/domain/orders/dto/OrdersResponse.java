@@ -7,21 +7,13 @@ import lombok.*;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-/**
- * 주문 단건 조회 시 사용되는 dto
- */
 
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Getter
-public class OrdersResponse {
-
-    private Long id;
-    private List<ProductInfoDto> products;
-    private int totalPrice;
-    private DeliveryStatus status;
-    private ZonedDateTime createAt;
-    private ZonedDateTime modifiedAt;
-
-}
+public record OrdersResponse(
+        Long id,
+        List<ProductInfoDto> products,
+        int totalPrice,
+        DeliveryStatus status,
+        ZonedDateTime createAt,
+        ZonedDateTime modifiedAt
+) {}

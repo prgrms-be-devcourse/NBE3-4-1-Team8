@@ -2,17 +2,17 @@ package com.example.backend.domain.orders.controller;
 
 
 import com.example.backend.domain.member.entity.Member;
+import com.example.backend.domain.orders.dto.OrdersForm;
 import com.example.backend.domain.orders.dto.OrdersResponse;
 import com.example.backend.domain.orders.service.OrdersService;
 import com.example.backend.global.auth.model.CustomUserDetails;
 import com.example.backend.global.response.GenericResponse;
+import com.example.backend.global.validation.ValidationSequence;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -37,13 +37,24 @@ public class OrdersController {
     public ResponseEntity<GenericResponse<List<OrdersResponse>>> current(
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-
         Long memberId = customUserDetails.getMember().getId();
         List<OrdersResponse> responseList = ordersService.current(memberId);
 
         return ResponseEntity.ok()
                 .body(GenericResponse.of(responseList));
 
+    }
+
+    @PostMapping
+    public ResponseEntity<GenericResponse<Long>> create(
+            @RequestBody @Validated(ValidationSequence.class) OrdersForm ordersForm,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ) {
+        Member member = customUserDetails.getMember();
+        Long orderId = ordersService.create(ordersForm, member);
+
+        return ResponseEntity.ok()
+                .body(GenericResponse.of(orderId));
     }
 
 }

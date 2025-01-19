@@ -2,6 +2,7 @@ package com.example.backend.global.advice;
 
 import com.example.backend.domain.cart.exception.CartException;
 import com.example.backend.domain.member.exception.MemberException;
+import com.example.backend.domain.orders.exception.OrdersException;
 import com.example.backend.domain.product.exception.ProductException;
 import com.example.backend.global.auth.exception.AuthException;
 import com.example.backend.global.exception.GlobalErrorCode;
@@ -169,6 +170,20 @@ public class GlobalControllerAdvice {
 
 	@ExceptionHandler(CartException.class)
 	public ResponseEntity<HttpErrorInfo> handlerCartException(CartException ex, HttpServletRequest request) {
+		log.info("GlobalControllerAdvice={}", ex);
+		return ResponseEntity.status(ex.getStatus())
+				.body(HttpErrorInfo.of(ex.getCode(), request.getRequestURI(), ex.getMessage()));
+	}
+
+	/**
+	 * Order 예외 발생시 처리하는 핸들러
+	 *
+	 * @param ex      OrderException
+	 * @param request HttpServletRequest
+	 * @return {@link ResponseEntity<HttpErrorInfo>}
+	 */
+	@ExceptionHandler(OrdersException.class)
+	public ResponseEntity<HttpErrorInfo> handlerOrderException(OrdersException ex, HttpServletRequest request) {
 		log.info("GlobalControllerAdvice={}", ex);
 		return ResponseEntity.status(ex.getStatus())
 				.body(HttpErrorInfo.of(ex.getCode(), request.getRequestURI(), ex.getMessage()));
