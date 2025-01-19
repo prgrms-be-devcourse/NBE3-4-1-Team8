@@ -485,4 +485,29 @@ public class AuthControllerTest {
 			.andExpect(jsonPath("$.code").value(AuthErrorCode.VERIFY_TYPE_NOT_MATCH.getCode()))
 			.andExpect(jsonPath("$.message").value(AuthErrorCode.VERIFY_TYPE_NOT_MATCH.getMessage()));
 	}
+
+	@DisplayName("인증 타입이 일치하지 않을 때 실패 테스트")
+	@Test
+	void send_too_many_resend_attempts_fail() throws Exception {
+	    //given
+		SendEmailCertificationCodeForm givenSendEmailCertificationCodeForm = SendEmailCertificationCodeForm.builder()
+			.username("testEmail@naver.com")
+			.verifyType(VerifyType.SIGNUP)
+			.build();
+
+		doThrow(new AuthException(AuthErrorCode.TOO_MANY_RESEND_ATTEMPTS))
+			.when(authService)
+			.send(givenSendEmailCertificationCodeForm.username(), givenSendEmailCertificationCodeForm.verifyType());
+
+		//when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/auth/code")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(givenSendEmailCertificationCodeForm)));
+
+	    //then
+		resultActions
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value(AuthErrorCode.TOO_MANY_RESEND_ATTEMPTS.getCode()))
+			.andExpect(jsonPath("$.message").value(AuthErrorCode.TOO_MANY_RESEND_ATTEMPTS.getMessage()));
+	}
 }
