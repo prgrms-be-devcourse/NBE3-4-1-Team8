@@ -16,13 +16,16 @@ import com.example.backend.domain.member.conveter.MemberConverter;
 import com.example.backend.domain.member.dto.MemberInfoResponse;
 import com.example.backend.domain.member.dto.MemberModifyForm;
 import com.example.backend.domain.member.dto.MemberSignupForm;
+import com.example.backend.domain.member.service.MemberDeleteService;
 import com.example.backend.domain.member.service.MemberService;
 import com.example.backend.global.auth.model.CustomUserDetails;
+import com.example.backend.global.auth.service.CookieService;
 import com.example.backend.global.response.GenericResponse;
 import com.example.backend.global.validation.ValidationSequence;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -31,6 +34,8 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "ApiV1MemberController", description = "API 회원 컨트롤러")
 public class MemberController {
 	private final MemberService memberService;
+	private final MemberDeleteService memberDeleteService;
+	private final CookieService cookieService;
 
 	@Operation(summary = "회원 가입")
 	@PostMapping("/join")
@@ -61,9 +66,13 @@ public class MemberController {
 			.body(GenericResponse.of(memberService.modify(customUserDetails.getMember().toModel(), memberModifyForm)));
 	}
 
+	@Operation(summary = "회원 탈퇴")
 	@DeleteMapping
-	public ResponseEntity<GenericResponse<Void>> delete(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
-		memberService.delete(customUserDetails.getMember().toModel());
+	public ResponseEntity<GenericResponse<Void>> delete(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+		HttpServletResponse response) {
+		cookieService.deleteAccessTokenFromCookie(response);
+		cookieService.deleteRefreshTokenFromCookie(response);
+		memberDeleteService.delete(customUserDetails.getMember().toModel());
 		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(GenericResponse.of());
 	}
 }

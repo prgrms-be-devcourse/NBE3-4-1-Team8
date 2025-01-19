@@ -61,4 +61,8 @@ public class CartService {
         return CartConverter.toResponseList(cartList);
     }
 
+
+    public void deleteByMemberId(Long memberId) {
+        cartRepository.deleteByMemberId(memberId);
+    }
 }

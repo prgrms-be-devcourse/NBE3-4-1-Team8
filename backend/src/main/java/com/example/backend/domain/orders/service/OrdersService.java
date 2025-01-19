@@ -48,6 +48,10 @@ public class OrdersService {
         return OrdersConverter.from(ordersList);
     }
 
+    public void deleteByMemberId(Long id) {
+        ordersRepository.deleteByMemberId(id);
+    }
+
 
     @Transactional
     public Long create(OrdersForm ordersForm, Member member) {

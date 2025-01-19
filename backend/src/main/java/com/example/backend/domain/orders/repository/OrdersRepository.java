@@ -37,5 +37,5 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
             @Param("id") Long id,
             @Param("status") List<DeliveryStatus> status);
 
-
+    void deleteByMemberId(Long memberId);
 }
