@@ -14,7 +14,7 @@ import jakarta.validation.GroupSequence;
  * @author : Kim Dong O
  */
 
-@GroupSequence({NotNullGroup.class, NotBlankGroup.class, SizeGroup.class, MinGroup.class, MaxGroup.class,
+@GroupSequence({NotNullGroup.class, NotEmptyGroup.class, NotBlankGroup.class, SizeGroup.class, MinGroup.class, MaxGroup.class,
 	ValidEnumGroup.class,
 	PatternGroup.class})
 public interface ValidationSequence {
