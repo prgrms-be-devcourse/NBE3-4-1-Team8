@@ -77,6 +77,34 @@ public class ProductControllerTest {
     }
 
     @Test
+    @DisplayName("중복된 상품 이름으로 인한 등록 실패 테스트")
+    void createFailWhenNameIsExistsTest() throws Exception {
+        // given
+        doThrow(new ProductException(ProductErrorCode.EXISTS_NAME)).when(productService).create(any(ProductForm.class));
+
+        // when
+        ResultActions resultActions = mockMvc.perform(post("/api/v1/products")
+                .content("""
+                                {
+                                    "name": "Test Product Name",
+                                    "content": "Test Product content",
+                                    "price": 1000,
+                                    "imgUrl": "Test Product Image URL",
+                                    "quantity": 10
+                                }
+                                """)
+                .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        resultActions
+                .andExpect(handler().handlerType(ProductController.class))
+                .andExpect(handler().methodName("create"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("중복된 상품 이름입니다."));
+    }
+
+    @Test
     @DisplayName("상품 이름 글자수 초과로 인한 등록 실패 테스트")
     void createFailWhenNameInvalidTest() throws Exception {
         // given

@@ -72,6 +72,32 @@ public class ProductRepositoryTest {
     }
 
     @Test
+    @DisplayName("상품 이름 유일성 검사(중복) 테스트")
+    void existsProductTest() {
+        //given
+        String name = "Test Product Name";
+
+        //when
+        Boolean isExists = productRepository.existsByName(name);
+
+        //then
+        assertThat(isExists).isTrue();
+    }
+
+    @Test
+    @DisplayName("상품 이름 유일성 검사(유일) 테스트")
+    void notExistsProductTest() {
+        //given
+        String name = "Unique Product Name";
+
+        //when
+        Boolean isExists = productRepository.existsByName(name);
+
+        //then
+        assertThat(isExists).isFalse();
+    }
+
+    @Test
     @DisplayName("상품 단건 조회(Entity) 테스트")
     void findByIdTest() {
         // given

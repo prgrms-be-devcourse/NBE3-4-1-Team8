@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
+import org.springframework.http.HttpStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +59,7 @@ class ProductServiceTest {
     void createTest() {
         // given
         ArgumentCaptor<Product> productCaptor = ArgumentCaptor.forClass(Product.class);
+        when(productRepository.existsByName(productForm1.name())).thenReturn(false);
 
         // when
         productService.create(productForm1);
@@ -71,6 +73,25 @@ class ProductServiceTest {
         assertThat(price1).isEqualTo(savedProduct.getPrice());
         assertThat(imgUrl1).isEqualTo(savedProduct.getImgUrl());
         assertThat(quantity1).isEqualTo(savedProduct.getQuantity());
+    }
+
+    @Test
+    @DisplayName("중복 이름 상품 등록 테스트")
+    void alreadyExistsCreateTest() {
+        // given
+        when(productRepository.existsByName(productForm1.name())).thenReturn(true);
+
+        // when
+        ProductException exception = assertThrows(
+                ProductException.class,
+                () -> productService.create(productForm1)
+        );
+
+        // then
+        verify(productRepository, times(1)).existsByName(productForm1.name());
+        assertThat(exception.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(exception.getCode()).isEqualTo("400-2");
+        assertThat(exception.getMessage()).isEqualTo("중복된 상품 이름입니다.");
     }
 
     @Test
