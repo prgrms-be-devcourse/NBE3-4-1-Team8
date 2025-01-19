@@ -77,6 +77,7 @@ public class MemberController {
 		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(GenericResponse.of());
 	}
 
+	@Operation(summary = "회원 비밀번호 변경")
 	@PatchMapping("/password")
 	public ResponseEntity<GenericResponse<Void>> changePassword(@Validated(ValidationSequence.class) @RequestBody
 	PasswordChangeForm passwordChangeForm, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
