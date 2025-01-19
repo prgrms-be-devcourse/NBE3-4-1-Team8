@@ -156,7 +156,7 @@ public class AuthService {
 
 			//5회 이상 요청했을 때 EXCEPTION
 			if (Integer.parseInt(findEmailCertification.getSendCount()) >= 5) {
-				throw new AuthException(AuthErrorCode.TOOMANY_RESEND_ATTEMPTS);
+				throw new AuthException(AuthErrorCode.TOO_MANY_RESEND_ATTEMPTS);
 			}
 
 			findEmailCertification.addResendCount();

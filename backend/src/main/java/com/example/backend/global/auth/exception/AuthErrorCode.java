@@ -27,7 +27,7 @@ public enum AuthErrorCode {
     REFRESH_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, "401-9", "리프레시 토큰을 찾을 수 없습니다."),
 
 	ALREADY_CERTIFIED(HttpStatus.BAD_REQUEST, "400-1", "이미 이메일 인증을 하셨습니다."),
-	TOOMANY_RESEND_ATTEMPTS(HttpStatus.BAD_REQUEST, "400-2", "5회 이상 시도하셨습니다. 잠시후 다시 시도해주세요.");
+	TOO_MANY_RESEND_ATTEMPTS(HttpStatus.BAD_REQUEST, "400-2", "5회 이상 시도하셨습니다. 잠시후 다시 시도해주세요.");
 
 	final HttpStatus httpStatus;
 	final String code;
