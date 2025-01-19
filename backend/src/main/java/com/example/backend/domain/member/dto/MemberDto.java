@@ -38,18 +38,4 @@ public record MemberDto(Long id, String username, String nickname, String passwo
 		this.createdAt = createdAt;
 		this.modifiedAt = modifiedAt;
 	}
-
-	public MemberDto verify() {
-		return MemberDto.builder()
-			.id(this.id)
-			.username(username)
-			.nickname(nickname)
-			.password(password)
-			.memberStatus(MemberStatus.ACTIVE)
-			.role(this.role)
-			.address(this.address)
-			.createdAt(this.createdAt)
-			.modifiedAt(this.modifiedAt)
-			.build();
-	}
 }

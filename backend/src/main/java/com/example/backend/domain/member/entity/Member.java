@@ -1,6 +1,8 @@
 package com.example.backend.domain.member.entity;
 
 import java.time.ZonedDateTime;
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 import com.example.backend.domain.common.Address;
 import com.example.backend.domain.member.dto.MemberDto;
@@ -90,8 +92,34 @@ public class Member extends BaseEntity {
 			.build();
 	}
 
-	public Member changePassword(String password) {
+	public void changePassword(String password) {
 		this.password = password;
-		return this;
+	}
+
+	public void verify() {
+		this.memberStatus = MemberStatus.ACTIVE;
+	}
+
+	public static String createTemporaryPassword() {
+		final String SPECIAL_CHARACTERS = "~!@#$%^&*+=()_-";
+		String uuid = UUID.randomUUID().toString().replace("-", "");
+		StringBuilder password = new StringBuilder();
+
+		char randomLetter = (char)('a' + ThreadLocalRandom.current().nextInt(26));
+		password.append(randomLetter);
+
+		char randomSpecialChar = SPECIAL_CHARACTERS.charAt(
+			ThreadLocalRandom.current().nextInt(SPECIAL_CHARACTERS.length()));
+		password.append(randomSpecialChar);
+
+		char randomDigit = (char)('0' + ThreadLocalRandom.current().nextInt(10));
+		password.append(randomDigit);
+
+		while (password.length() < 8) {
+			char randomChar = uuid.charAt(ThreadLocalRandom.current().nextInt(uuid.length()));
+			password.append(randomChar);
+		}
+
+		return password.toString();
 	}
 }
