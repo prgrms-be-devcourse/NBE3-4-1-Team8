@@ -23,7 +23,7 @@ public record OrdersForm(
         @NotBlank(message = "상세 주소는 필수입니다.", groups = NotNullGroup.class)
         String detail,
 
-        @NotEmpty(message = "상품 주문 리스트는 비어 있을 수 없습니다.")
+        @NotEmpty(message = "상품 주문 리스트는 비어 있을 수 없습니다.", groups = NotEmptyGroup.class)
         @Size(min = 1, max = 20, message = "상품 리스트는 1 ~ 20개 사이여야 합니다.", groups = SizeGroup.class)
         List<@Valid ProductOrdersRequest> productOrdersRequestList
 ) {
