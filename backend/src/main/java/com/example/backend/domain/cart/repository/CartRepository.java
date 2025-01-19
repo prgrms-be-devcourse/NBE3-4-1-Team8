@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CartRepository extends JpaRepository<Cart, Long> {
 
@@ -16,4 +17,6 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
     List<Cart> findAllByMemberWithProducts(@Param("member") Member member);
 
     void deleteByMemberId(Long memberId);
+
+    Optional<Cart> findByProductIdAndMemberId(Long productId, Long memberId);
 }
