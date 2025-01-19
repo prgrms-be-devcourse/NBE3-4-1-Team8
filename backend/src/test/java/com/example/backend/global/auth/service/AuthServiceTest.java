@@ -33,6 +33,8 @@ import com.example.backend.global.auth.exception.AuthErrorCode;
 import com.example.backend.global.auth.exception.AuthException;
 import com.example.backend.global.auth.jwt.JwtProvider;
 import com.example.backend.global.auth.jwt.JwtUtils;
+import com.example.backend.global.mail.service.MailService;
+import com.example.backend.global.mail.util.TemplateName;
 import com.example.backend.global.redis.service.RedisService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -46,8 +48,8 @@ class AuthServiceTest {
 	@Mock
 	private PasswordEncoder passwordEncoder;
 
-    @Mock
-    private JwtUtils jwtUtils;
+	@Mock
+	private JwtUtils jwtUtils;
 
 	@Mock
 	private MemberRepository memberRepository;
@@ -57,6 +59,9 @@ class AuthServiceTest {
 
 	@Mock
 	private RedisService redisService;
+
+	@Mock
+	private MailService mailService;
 
 	@Mock
 	private ObjectMapper objectMapper;
@@ -85,7 +90,8 @@ class AuthServiceTest {
 		when(passwordEncoder.matches(any(String.class), any(String.class))).thenReturn(true);
 		when(jwtProvider.generateAccessToken(any(Long.class), any(String.class), any(Role.class))).thenReturn(
 			"access_token");
-		when(jwtProvider.generateRefreshToken(any(Long.class), any(String.class), any(Role.class))).thenReturn("refresh_token");
+		when(jwtProvider.generateRefreshToken(any(Long.class), any(String.class), any(Role.class))).thenReturn(
+			"refresh_token");
 		doNothing().when(refreshTokenService).saveRefreshToken(any(String.class), any(String.class));
 
 		AuthForm authForm = AuthForm.builder()
@@ -93,17 +99,17 @@ class AuthServiceTest {
 			.password("password")
 			.build();
 
-        //when
-        AuthResponse result = authService.login(authForm);
+		//when
+		AuthResponse result = authService.login(authForm);
 
-        //then
-        assertThat(result.username()).isEqualTo("user@gmail.com");
-        assertThat(result.accessToken()).isEqualTo("access_token");
-        assertThat(result.refreshToken()).isEqualTo("refresh_token");
-        verify(memberRepository).findByUsername("user@gmail.com");
-        verify(passwordEncoder).matches("password", "password");
-        verify(jwtProvider).generateAccessToken(1L, "user@gmail.com", Role.ROLE_USER);
-        verify(jwtProvider).generateRefreshToken(1L, "user@gmail.com", Role.ROLE_USER);
+		//then
+		assertThat(result.username()).isEqualTo("user@gmail.com");
+		assertThat(result.accessToken()).isEqualTo("access_token");
+		assertThat(result.refreshToken()).isEqualTo("refresh_token");
+		verify(memberRepository).findByUsername("user@gmail.com");
+		verify(passwordEncoder).matches("password", "password");
+		verify(jwtProvider).generateAccessToken(1L, "user@gmail.com", Role.ROLE_USER);
+		verify(jwtProvider).generateRefreshToken(1L, "user@gmail.com", Role.ROLE_USER);
 		verify(refreshTokenService).saveRefreshToken("user@gmail.com", "refresh_token");
 	}
 
@@ -182,9 +188,9 @@ class AuthServiceTest {
 			.isInstanceOf(AuthException.class)
 			.hasMessage(AuthErrorCode.PASSWORD_NOT_MATCH.getMessage());
 
-        verify(memberRepository).findByUsername("user@gmail.com");
-        verify(passwordEncoder).matches("pw", "password");
-    }
+		verify(memberRepository).findByUsername("user@gmail.com");
+		verify(passwordEncoder).matches("pw", "password");
+	}
 
 	@DisplayName("이메일 인증 성공 테스트")
 	@Test
@@ -496,14 +502,13 @@ class AuthServiceTest {
 			.hasMessage(AuthErrorCode.ALREADY_CERTIFIED.getMessage());
 	}
 
-
-    @Test
-    @DisplayName("로그아웃 성공 시 리프레시 토큰 레디스에서 삭제")
-    void logoutSuccess() {
-        //given
-        String accessToken = "accessToken";
-        String username = "user@gmail.com";
-        when(jwtUtils.getUsernameFromToken(any(String.class))).thenReturn(username);
+	@Test
+	@DisplayName("로그아웃 성공 시 리프레시 토큰 레디스에서 삭제")
+	void logoutSuccess() {
+		//given
+		String accessToken = "accessToken";
+		String username = "user@gmail.com";
+		when(jwtUtils.getUsernameFromToken(any(String.class))).thenReturn(username);
 
 		//when
 		authService.logout(accessToken);
@@ -511,5 +516,49 @@ class AuthServiceTest {
 		//then
 		verify(jwtUtils).getUsernameFromToken(accessToken);
 		verify(refreshTokenService).deleteRefreshToken(username);
+	}
+
+	@DisplayName("이메일 인증 코드 발송 성공 테스트")
+	@Test
+	void send_success() {
+		//given
+		String givenUsername = "testEmail@naver.com";
+		VerifyType givenVerifyType = VerifyType.PASSWORD_RESET;
+
+		Address givenAddress = Address.builder()
+			.city("testCity")
+			.detail("testDetail")
+			.country("testCountry")
+			.district("testDistrict")
+			.build();
+
+		Member givenMember = Member.builder()
+			.username(givenUsername)
+			.nickname("testNickName")
+			.password("!testPassword1234")
+			.address(givenAddress)
+			.memberStatus(MemberStatus.ACTIVE)
+			.role(Role.ROLE_USER)
+			.build();
+
+		EmailCertification givenEmailCertification = EmailCertification.builder()
+			.verifyType(VerifyType.PASSWORD_RESET.toString())
+			.certificationCode("testCode")
+			.sendCount("1")
+			.build();
+
+		Map<Object, Object> givenConvertMap = testObjectMapper.convertValue(givenEmailCertification, Map.class);
+
+		doNothing().when(mailService).sendCertificationMail(any(String.class), any(EmailCertification.class), any(
+			TemplateName.class));
+		given(memberRepository.findByUsername(givenUsername)).willReturn(Optional.of(givenMember));
+
+		//when
+		authService.send(givenUsername, givenVerifyType);
+
+		//then
+		verify(mailService, times(1))
+			.sendCertificationMail(any(String.class), any(EmailCertification.class), any(TemplateName.class));
+		verify(memberRepository, times(1)).findByUsername(givenUsername);
 	}
 }
