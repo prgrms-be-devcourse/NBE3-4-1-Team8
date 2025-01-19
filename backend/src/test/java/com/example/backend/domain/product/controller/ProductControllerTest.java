@@ -419,4 +419,33 @@ public class ProductControllerTest {
                 .andExpect(jsonPath("$.message").value("상품을 찾을 수 없습니다."));
     }
 
+    @Test
+    @DisplayName("상품 수정 실패(상품 이름 중복) 테스트")
+    void modifyFailWhenNameAlreadyExistsTest() throws Exception {
+        // given
+        doThrow(new ProductException(ProductErrorCode.EXISTS_NAME)).when(productService)
+                .modify(eq(1L), any(ProductForm.class));
+
+        // when
+        ResultActions resultActions = mockMvc.perform(patch("/api/v1/products/1")
+                .content("""
+                                {
+                                    "name": "Test Product Name",
+                                    "content": "Test Product content",
+                                    "price": 1000,
+                                    "imgUrl": "Test Product Image URL",
+                                    "quantity": 10
+                                }
+                                """)
+                .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        resultActions
+                .andExpect(handler().handlerType(ProductController.class))
+                .andExpect(handler().methodName("modify"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("중복된 상품 이름입니다."));
+    }
+
 }

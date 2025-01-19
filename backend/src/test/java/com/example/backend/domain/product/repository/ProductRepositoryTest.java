@@ -73,12 +73,10 @@ public class ProductRepositoryTest {
 
     @Test
     @DisplayName("상품 이름 유일성 검사(중복) 테스트")
-    void existsProductTest() {
+    void existsByNameTest() {
         //given
-        String name = "Test Product Name";
-
         //when
-        Boolean isExists = productRepository.existsByName(name);
+        Boolean isExists = productRepository.existsByName(name1);
 
         //then
         assertThat(isExists).isTrue();
@@ -86,7 +84,7 @@ public class ProductRepositoryTest {
 
     @Test
     @DisplayName("상품 이름 유일성 검사(유일) 테스트")
-    void notExistsProductTest() {
+    void notExistsByNameTest() {
         //given
         String name = "Unique Product Name";
 
@@ -95,6 +93,30 @@ public class ProductRepositoryTest {
 
         //then
         assertThat(isExists).isFalse();
+    }
+
+    @Test
+    @DisplayName("상품 특정 id 제외 이름 유일성 검사 테스트")
+    void existsByNameAndIdNotTest() {
+        //given
+        String name2 = "Test Product Name2";
+        String uniqueName = "Unique Product Name";
+
+        Product product2 = Product.builder()
+                .name(name2)
+                .build();
+        productRepository.save(product2);
+        Long id = 2L;
+
+        //when
+        Boolean isExists1 = productRepository.existsByNameAndIdNot(name2, id);  // 수정 목표 상품 id의 name
+        Boolean isExists2 = productRepository.existsByNameAndIdNot(name1, id);  // 다른 상품의 name
+        Boolean isExists3 = productRepository.existsByNameAndIdNot(uniqueName, id); // 수정 했을 때 아예 다른 name
+
+        //then
+        assertThat(isExists1).isFalse();
+        assertThat(isExists2).isTrue();
+        assertThat(isExists3).isFalse();
     }
 
     @Test

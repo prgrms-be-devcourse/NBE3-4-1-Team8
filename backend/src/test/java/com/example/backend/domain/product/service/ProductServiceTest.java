@@ -215,7 +215,7 @@ class ProductServiceTest {
     @DisplayName("상품 수정 테스트(더티체킹)")
     void modifyTest() {
         // given
-        when(productRepository.findById(anyLong())).thenReturn(Optional.of(product1));
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product1));
         ProductForm updatedproductForm = ProductForm.builder()
                 .name("Updated Name")
                 .content("Updated Content")
@@ -223,6 +223,7 @@ class ProductServiceTest {
                 .imgUrl("Updated imgUrl")
                 .quantity(123)
                 .build();
+        when(productRepository.existsByNameAndIdNot(updatedproductForm.name(), 1L)).thenReturn(false);
 
         // when
         productService.modify(1L, updatedproductForm);
@@ -233,6 +234,29 @@ class ProductServiceTest {
         assertThat(product1.getPrice()).isEqualTo(updatedproductForm.price());
         assertThat(product1.getImgUrl()).isEqualTo(updatedproductForm.imgUrl());
         assertThat(product1.getQuantity()).isEqualTo(updatedproductForm.quantity());
+    }
+
+    @Test
+    @DisplayName("중복 이름 상품 수정 테스트")
+    void alreadyExistsModifyTest() {
+        // given
+        ProductForm updatedproductForm = ProductForm.builder()
+                .name("Updated Name")
+                .build();
+        when(productRepository.existsByNameAndIdNot(updatedproductForm.name(), 1L)).thenReturn(true);
+
+
+        // when
+        ProductException exception = assertThrows(
+                ProductException.class,
+                () -> productService.modify(1L, updatedproductForm)
+        );
+
+        // then
+        verify(productRepository, times(1)).existsByNameAndIdNot(updatedproductForm.name(), 1L);
+        assertThat(exception.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(exception.getCode()).isEqualTo("400-2");
+        assertThat(exception.getMessage()).isEqualTo("중복된 상품 이름입니다.");
     }
 
 }
