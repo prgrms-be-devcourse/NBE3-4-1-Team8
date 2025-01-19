@@ -4,8 +4,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
-import com.example.backend.global.auth.dto.AuthResponse;
-import com.example.backend.global.auth.jwt.JwtUtils;
 import java.util.Map;
 import java.util.Optional;
 
@@ -29,10 +27,12 @@ import com.example.backend.domain.member.exception.MemberErrorCode;
 import com.example.backend.domain.member.exception.MemberException;
 import com.example.backend.domain.member.repository.MemberRepository;
 import com.example.backend.global.auth.dto.AuthForm;
+import com.example.backend.global.auth.dto.AuthResponse;
 import com.example.backend.global.auth.dto.EmailCertificationForm;
 import com.example.backend.global.auth.exception.AuthErrorCode;
 import com.example.backend.global.auth.exception.AuthException;
 import com.example.backend.global.auth.jwt.JwtProvider;
+import com.example.backend.global.auth.jwt.JwtUtils;
 import com.example.backend.global.redis.service.RedisService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -199,7 +199,7 @@ class AuthServiceTest {
 			.district("testDistrict")
 			.build();
 
-		MemberDto givenMember = MemberDto.builder()
+		Member givenMember = Member.builder()
 			.username("testEmail@naver.com")
 			.nickname("testNickName")
 			.password("!testPassword1234")
@@ -208,7 +208,14 @@ class AuthServiceTest {
 			.role(Role.ROLE_USER)
 			.build();
 
-		MemberDto verifyMember = givenMember.verify();
+		Member verifyMember = Member.builder()
+			.username("testEmail@naver.com")
+			.nickname("testNickName")
+			.password("!testPassword1234")
+			.address(givenAddress)
+			.memberStatus(MemberStatus.ACTIVE)
+			.role(Role.ROLE_USER)
+			.build();
 
 		EmailCertificationForm givenEmailCertificationForm = EmailCertificationForm.builder()
 			.certificationCode("testCode")
@@ -230,9 +237,9 @@ class AuthServiceTest {
 		given(objectMapper.convertValue(givenConvertMap, EmailCertification.class)).willReturn(givenEmailCertification);
 
 		given(memberRepository.findByUsername(givenEmailCertificationForm.username()))
-			.willReturn(Optional.of(Member.from(givenMember)));
+			.willReturn(Optional.of(givenMember));
 
-		given(memberRepository.save(any(Member.class))).willReturn(Member.from(verifyMember));
+		given(memberRepository.save(any(Member.class))).willReturn(verifyMember);
 
 		doNothing().when(redisService).delete(givenRedisPrefix + givenEmailCertificationForm.username());
 
@@ -261,7 +268,7 @@ class AuthServiceTest {
 			.district("testDistrict")
 			.build();
 
-		MemberDto givenMember = MemberDto.builder()
+		Member givenMember = Member.builder()
 			.username("testEmail@naver.com")
 			.nickname("testNickName")
 			.password("!testPassword1234")
@@ -270,7 +277,7 @@ class AuthServiceTest {
 			.role(Role.ROLE_USER)
 			.build();
 
-		MemberDto verifyMember = givenMember.verify();
+		givenMember.verify();
 
 		EmailCertificationForm givenEmailCertificationForm = EmailCertificationForm.builder()
 			.certificationCode("testCode")
@@ -309,8 +316,6 @@ class AuthServiceTest {
 			.memberStatus(MemberStatus.PENDING)
 			.role(Role.ROLE_USER)
 			.build();
-
-		MemberDto verifyMember = givenMember.verify();
 
 		EmailCertificationForm givenEmailCertificationForm = EmailCertificationForm.builder()
 			.certificationCode("testCode")
@@ -351,7 +356,7 @@ class AuthServiceTest {
 			.district("testDistrict")
 			.build();
 
-		MemberDto givenMember = MemberDto.builder()
+		Member givenMember = Member.builder()
 			.username("testEmail@naver.com")
 			.nickname("testNickName")
 			.password("!testPassword1234")
@@ -359,8 +364,6 @@ class AuthServiceTest {
 			.memberStatus(MemberStatus.PENDING)
 			.role(Role.ROLE_USER)
 			.build();
-
-		MemberDto verifyMember = givenMember.verify();
 
 		EmailCertificationForm givenEmailCertificationForm = EmailCertificationForm.builder()
 			.certificationCode("testCode")
@@ -401,7 +404,7 @@ class AuthServiceTest {
 			.district("testDistrict")
 			.build();
 
-		MemberDto givenMember = MemberDto.builder()
+		Member givenMember = Member.builder()
 			.username("testEmail@naver.com")
 			.nickname("testNickName")
 			.password("!testPassword1234")
@@ -409,8 +412,6 @@ class AuthServiceTest {
 			.memberStatus(MemberStatus.PENDING)
 			.role(Role.ROLE_USER)
 			.build();
-
-		MemberDto verifyMember = givenMember.verify();
 
 		EmailCertificationForm givenEmailCertificationForm = EmailCertificationForm.builder()
 			.certificationCode("testCode")
@@ -463,8 +464,6 @@ class AuthServiceTest {
 			.memberStatus(MemberStatus.ACTIVE)
 			.role(Role.ROLE_USER)
 			.build();
-
-		MemberDto verifyMember = givenMember.verify();
 
 		EmailCertificationForm givenEmailCertificationForm = EmailCertificationForm.builder()
 			.certificationCode("testCode")
