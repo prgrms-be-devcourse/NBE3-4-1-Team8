@@ -52,7 +52,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
                 .requestMatchers("/api/v1/products/**").hasAnyRole("ADMIN")
                 .requestMatchers("/api/v1/orders/**").hasAnyRole("USER", "ADMIN")
-                .requestMatchers("/api/v1/carts/**").hasAnyRole("USER", "ADMIN"))
+                .requestMatchers("/api/v1/carts/**").hasAnyRole("USER", "ADMIN")
+                .anyRequest().permitAll())
             .addFilterBefore(new JwtAuthorizationFilter(jwtUtils, filterUtils, cookieService, customUserDetailsService),
                 UsernamePasswordAuthenticationFilter.class)
             .addFilterAfter(new RefreshTokenFilter(jwtProvider, jwtUtils, filterUtils, cookieService,
