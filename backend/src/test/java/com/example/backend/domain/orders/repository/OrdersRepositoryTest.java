@@ -184,5 +184,40 @@ public class OrdersRepositoryTest {
         assertThat(ordersList.get(0).getDeliveryStatus()).isEqualTo(DeliveryStatus.READY);
     }
 
+    @Test
+    @DisplayName("모든 주문 목록 조회 및 수정시간순으로 조회 성공")
+    void history() {
+        Member savedMember = memberRepository.save(createMember());
+        Product savedProduct = productRepository.save(createProduct());
+
+        Orders orders1 = Orders.create()
+                .member(savedMember)
+                .productOrdersList(List.of(createProductOrders(savedProduct)))
+                .address(savedMember.getAddress())
+                .build();
+
+        Orders orders2 = Orders.create()
+                .member(savedMember)
+                .productOrdersList(List.of(createProductOrders(savedProduct)))
+                .address(savedMember.getAddress())
+                .build();
+
+        orders2.changeStatus(DeliveryStatus.SHIPPED);
+
+        ordersRepository.save(orders1);
+        ordersRepository.save(orders2);
+
+        List<Orders> ordersList = ordersRepository.findAllByMemberIdAndDeliveryStatusOrderByModifiedAt(
+                savedMember.getId(),
+                List.of(DeliveryStatus.READY,
+                        DeliveryStatus.SHIPPED)
+        );
+
+        assertThat(ordersList.size()).isEqualTo(2);
+        assertThat(ordersList.get(0).getDeliveryStatus()).isEqualTo(DeliveryStatus.SHIPPED);
+
+    }
+
+
 
 }

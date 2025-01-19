@@ -178,6 +178,65 @@ public class OrdersControllerTest {
                 .andExpect(jsonPath("$.data[0].id").value(1L))
                 .andExpect(jsonPath("$.data[0].totalPrice").value(2000))
                 .andExpect(jsonPath("$.data[0].status").value("READY"));
+
+    }
+
+    @Test
+    @DisplayName("주문 히스토리 조회 성공")
+    void historySuccess() throws Exception {
+        // given
+        Long memberId = 1L;
+        List<OrdersResponse> mockOrderResponses = Arrays.asList(
+                OrdersResponse.builder()
+                        .id(1L)
+                        .products(List.of(
+                                ProductInfoDto.builder()
+                                        .name("상품A")
+                                        .price(1000)
+                                        .quantity(2)
+                                        .imgUrl("http://example.com/productA.jpg")
+                                        .build()
+                        ))
+                        .totalPrice(2000)
+                        .status(DeliveryStatus.READY)
+                        .createAt(ZonedDateTime.now())
+                        .modifiedAt(ZonedDateTime.now())
+                        .build(),
+                OrdersResponse.builder()
+                        .id(2L)
+                        .products(List.of(
+                                ProductInfoDto.builder()
+                                        .name("상품B")
+                                        .price(3000)
+                                        .quantity(1)
+                                        .imgUrl("http://example.com/productB.jpg")
+                                        .build()
+                        ))
+                        .totalPrice(3000)
+                        .status(DeliveryStatus.SHIPPED)
+                        .createAt(ZonedDateTime.now().plusHours(1))
+                        .modifiedAt(ZonedDateTime.now().plusHours(1))
+                        .build()
+        );
+
+        when(ordersService.history(1L)).thenReturn(mockOrderResponses);
+
+        // when, then
+        mockMvc.perform(get("/api/v1/orders/history")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(user(createMockCustomUserDetails(memberId))))
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(OrdersController.class))
+                .andExpect(handler().methodName("history"))
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.data.length()").value(2))
+                .andExpect(jsonPath("$.data[0].id").value(1L))
+                .andExpect(jsonPath("$.data[0].totalPrice").value(2000))
+                .andExpect(jsonPath("$.data[0].status").value("READY"))
+                .andExpect(jsonPath("$.data[1].id").value(2L))
+                .andExpect(jsonPath("$.data[1].totalPrice").value(3000))
+                .andExpect(jsonPath("$.data[1].status").value("SHIPPED"));
+
     }
 
     @Test
@@ -296,6 +355,8 @@ public class OrdersControllerTest {
         return new CustomUserDetails(mockMember);
 
     }
+
+
 
 
 }
