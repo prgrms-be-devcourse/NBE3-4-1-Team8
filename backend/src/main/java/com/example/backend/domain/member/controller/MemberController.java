@@ -20,14 +20,18 @@ import com.example.backend.global.auth.model.CustomUserDetails;
 import com.example.backend.global.response.GenericResponse;
 import com.example.backend.global.validation.ValidationSequence;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/members")
+@Tag(name = "ApiV1MemberController", description = "API 회원 컨트롤러")
 public class MemberController {
 	private final MemberService memberService;
 
+	@Operation(summary = "회원 가입")
 	@PostMapping("/join")
 	public ResponseEntity<GenericResponse<Void>> signUp(
 		@RequestBody @Validated(ValidationSequence.class) MemberSignupForm memberSignupForm) {
@@ -39,6 +43,7 @@ public class MemberController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(GenericResponse.of());
 	}
 
+	@Operation(summary = "회원 정보 조회")
 	@GetMapping
 	public ResponseEntity<GenericResponse<MemberInfoResponse>> getMemberInfo(
 		@AuthenticationPrincipal CustomUserDetails customUserDetails) {
@@ -46,6 +51,7 @@ public class MemberController {
 			.body(GenericResponse.of(MemberConverter.from(customUserDetails.getMember())));
 	}
 
+	@Operation(summary = "회원 정보 수정")
 	@PatchMapping
 	public ResponseEntity<GenericResponse<MemberInfoResponse>> modify(
 		@AuthenticationPrincipal CustomUserDetails customUserDetails,
