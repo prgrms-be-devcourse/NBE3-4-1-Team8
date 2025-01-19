@@ -32,7 +32,7 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
             "join fetch o.productOrdersList po " +
             "join fetch po.product p " +
             "where m.id = :id and o.deliveryStatus in :status " +
-            "order by o.modifiedAt")
+            "order by o.modifiedAt desc")
     List<Orders> findAllByMemberIdAndDeliveryStatusOrderByModifiedAt(
             @Param("id") Long id,
             @Param("status") List<DeliveryStatus> status);
