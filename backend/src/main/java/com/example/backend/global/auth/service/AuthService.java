@@ -151,11 +151,11 @@ public class AuthService {
 
 			// 인증 코드 타입이 일치하지 않을 때 EXCEPTION
 			if (!verifyType.toString().equalsIgnoreCase(findEmailCertification.getVerifyType())) {
-				throw new AuthException(AuthErrorCode.CERTIFICATION_CODE_NOT_MATCH);
+				throw new AuthException(AuthErrorCode.VERIFY_TYPE_NOT_MATCH);
 			}
 
 			//5회 이상 요청했을 때 EXCEPTION
-			if (Integer.parseInt(findEmailCertification.getSendCount()) > 5) {
+			if (Integer.parseInt(findEmailCertification.getSendCount()) >= 5) {
 				throw new AuthException(AuthErrorCode.TOOMANY_RESEND_ATTEMPTS);
 			}
 
