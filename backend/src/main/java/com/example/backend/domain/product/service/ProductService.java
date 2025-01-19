@@ -53,9 +53,17 @@ public class ProductService {
         return productResponsePage;
     }
 
+    public void existsProduct(String name) {
+
+        if(productRepository.existsByName(name)) {
+            throw new ProductException(ProductErrorCode.EXISTS_NAME);
+        }
+    }
+
     @Transactional
     public void create(ProductForm productForm) {
 
+        existsProduct(productForm.name());
         productRepository.save(ProductConverter.from(productForm));
     }
 
