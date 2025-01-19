@@ -2,6 +2,7 @@ package com.example.backend.domain.cart.controller;
 
 import com.example.backend.domain.cart.dto.CartForm;
 import com.example.backend.domain.cart.dto.CartResponse;
+import com.example.backend.domain.cart.dto.CartUpdateForm;
 import com.example.backend.domain.cart.service.CartService;
 import com.example.backend.domain.member.entity.Member;
 import com.example.backend.global.auth.model.CustomUserDetails;
@@ -43,4 +44,16 @@ public class CartController {
 
         return ResponseEntity.status(HttpStatus.OK).body(GenericResponse.of(cartResponses));
     }
+
+    @PatchMapping
+    public ResponseEntity<GenericResponse<Long>> updateCartItemQuantity(
+            @RequestBody @Valid CartUpdateForm cartUpdateForm,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
+        Member member = customUserDetails.getMember();
+        Long cartId = cartService.updateCartItemQuantity(cartUpdateForm, member);
+
+        return ResponseEntity.status(HttpStatus.OK).body(GenericResponse.of(cartId));
+    }
+
 }
