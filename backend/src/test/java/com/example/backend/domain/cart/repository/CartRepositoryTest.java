@@ -78,7 +78,7 @@ class CartRepositoryTest {
         cartRepository.save(cart);
 
         // When
-        boolean exists = cartRepository.existsByProductId_IdAndMemberId_Id(
+        boolean exists = cartRepository.existsByProductIdAndMemberId(
                 product.getId(),
                 member.getId()
         );

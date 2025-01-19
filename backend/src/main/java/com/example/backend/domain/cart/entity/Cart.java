@@ -26,6 +26,7 @@ public class Cart {
 
     @Builder
     public Cart(Long id, Member member, Product product, int quantity) {
+        this.id = id;
         this.member = member;
         this.product = product;
         this.quantity = quantity;

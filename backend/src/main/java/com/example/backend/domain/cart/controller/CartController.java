@@ -34,12 +34,12 @@ public class CartController {
     }
 
     @GetMapping
-    public ResponseEntity<GenericResponse<List<CartResponse>>> getCarts(
+    public ResponseEntity<GenericResponse<List<CartResponse>>> getCart(
             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
         Member member = customUserDetails.getMember();
 
-        List<CartResponse> cartResponses = cartService.getCartsByMember(member);
+        List<CartResponse> cartResponses = cartService.getCartByMember(member);
 
         return ResponseEntity.status(HttpStatus.OK).body(GenericResponse.of(cartResponses));
     }

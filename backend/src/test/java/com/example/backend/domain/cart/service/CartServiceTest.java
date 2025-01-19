@@ -84,7 +84,7 @@ class CartServiceTest {
     void addCartItem_Success() {
         // given
         given(productService.findById(cartForm.productId())).willReturn(product);
-        given(cartRepository.existsByProductId_IdAndMemberId_Id(cartForm.productId(), member.getId()))
+        given(cartRepository.existsByProductIdAndMemberId(cartForm.productId(), member.getId()))
                 .willReturn(false);
         given(cartRepository.save(any(Cart.class))).willReturn(cart);
 
@@ -111,22 +111,10 @@ class CartServiceTest {
     }
 
     @Test
-    @DisplayName("수량이 0 이하면 예외 발생")
-    void addCartItem_WithInvalidQuantity_ThrowsCartException() {
-        // given
-        CartForm invalidCartForm = new CartForm(1L, 1L, 0);
-
-        // when & then
-        assertThatThrownBy(() -> cartService.addCartItem(invalidCartForm, member))
-                .isInstanceOf(CartException.class)
-                .hasMessage("상품을 최소 1개 이상 추가하여야 합니다.");
-    }
-
-    @Test
     @DisplayName("이미 장바구니에 존재하는 상품이면 예외 발생")
     void addCartItem_WithExistingProduct_ThrowsCartException() {
         // given
-        given(cartRepository.existsByProductId_IdAndMemberId_Id(cartForm.productId(), member.getId()))
+        given(cartRepository.existsByProductIdAndMemberId(cartForm.productId(), member.getId()))
                 .willReturn(true);
 
         // when & then
@@ -148,7 +136,7 @@ class CartServiceTest {
         given(cartRepository.findAllByMemberWithProducts(member)).willReturn(cartList);
 
         // when
-        List<CartResponse> result = cartService.getCartsByMember(member);
+        List<CartResponse> result = cartService.getCartByMember(member);
 
         // then
         assertThat(result).isNotEmpty();

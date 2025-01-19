@@ -30,17 +30,11 @@ public class CartService {
         if (member.getId() != cartForm.memberId()) {
             throw new AuthException(AuthErrorCode.MEMBER_NOT_FOUND);
         }
-        // 요청한 상품 ID와 수량
+        // 요청한 상품 ID로 상품 조회
         Long productId = cartForm.productId();
-        int quantity = cartForm.quantity();
-
-        // 수량이 0 이하인 경우 exception 발생
-        if (quantity <= 0) {
-            throw new CartException(CartErrorCode.INVALID_QUANTITY);
-        }
 
         // 이미 장바구니에 있는 상품인 경우 exception 발생
-        if (cartRepository.existsByProductId_IdAndMemberId_Id(productId, member.getId())) {
+        if (cartRepository.existsByProductIdAndMemberId(productId, member.getId())) {
             throw new CartException(CartErrorCode.ALREADY_EXISTS_IN_CART);
         }
 
@@ -55,7 +49,7 @@ public class CartService {
     }
 
     @Transactional(readOnly = true)
-    public List<CartResponse> getCartsByMember(Member member) {
+    public List<CartResponse> getCartByMember(Member member) {
         List<Cart> cartList = cartRepository.findAllByMemberWithProducts(member);
 
         return CartConverter.toResponseList(cartList);
