@@ -8,6 +8,7 @@ import com.example.backend.domain.orders.dto.ProductInfoDto;
 import com.example.backend.domain.orders.entity.Orders;
 import com.example.backend.domain.productOrders.entity.ProductOrders;
 
+import java.util.Comparator;
 import java.util.List;
 
 public class OrdersConverter {
@@ -33,6 +34,7 @@ public class OrdersConverter {
     public static List<OrdersResponse> from(List<Orders> ordersList) {
         return ordersList.stream()
                 .map(OrdersConverter::toResponse)
+                .sorted(Comparator.comparing(OrdersResponse::modifiedAt).reversed())
                 .toList();
     }
 
