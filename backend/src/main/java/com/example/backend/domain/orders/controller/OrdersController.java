@@ -57,4 +57,17 @@ public class OrdersController {
                 .body(GenericResponse.of(orderId));
     }
 
+    @GetMapping("/history")
+    public ResponseEntity<GenericResponse<List<OrdersResponse>>> history(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ) {
+        Long memberId = customUserDetails.getMember().getId();
+        List<OrdersResponse> responseList = ordersService.history(memberId);
+
+        return ResponseEntity.ok()
+                .body(GenericResponse.of(responseList));
+
+    }
+
+
 }
