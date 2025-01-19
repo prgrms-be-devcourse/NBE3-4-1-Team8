@@ -11,6 +11,8 @@ build/
 **/main/resources/application.yml
 **/test/resources/application.yml
 ../.idea
+*.json
+
 ### STS ###
 .apt_generated
 .classpath
