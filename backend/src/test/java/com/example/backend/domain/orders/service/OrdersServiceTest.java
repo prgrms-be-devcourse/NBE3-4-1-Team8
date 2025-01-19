@@ -10,6 +10,7 @@ import java.util.Optional;
 import com.example.backend.domain.common.Address;
 import com.example.backend.domain.product.exception.ProductErrorCode;
 import com.example.backend.domain.product.exception.ProductException;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +30,7 @@ import com.example.backend.domain.productOrders.entity.ProductOrders;
 import org.springframework.http.HttpStatus;
 
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 class OrdersServiceTest {
 
     @Mock
@@ -128,8 +130,9 @@ class OrdersServiceTest {
         assertThat(result).hasSize(2);
 
         // 첫 번째 주문 검증
+        // + converter 에 정렬 추가되면서 해당 부분도 수정시간순으로 정렬
         OrdersResponse firstOrder = result.get(0);
-        assertThat(firstOrder.id()).isEqualTo(1L);
+        assertThat(firstOrder.id()).isEqualTo(2L);
         assertThat(firstOrder.totalPrice()).isEqualTo(1000);
         assertThat(firstOrder.products()).hasSize(1);
 
@@ -233,6 +236,49 @@ class OrdersServiceTest {
         }).isInstanceOf(ProductException.class)
                 .hasMessage(ProductErrorCode.INSUFFICIENT_QUANTITY.getMessage());
     }
+    @Test
+    @DisplayName("모든 주문 목록 조회 성공")
+    void history() {
+        // Given
+        String username = "testUser";
+        Member member = mock(Member.class);
+        when(member.getId()).thenReturn(1L);
 
+        // orders 목록 mock
+        Orders o1 = mockOrder(1L, DeliveryStatus.READY);
+        Orders o2 = mockOrder(2L, DeliveryStatus.SHIPPED);
+        List<Orders> ordersList = List.of(
+                o1,
+                o2
+        );
 
+        log.info("o1={}",o1.getModifiedAt());
+        log.info("o2={}",o2.getModifiedAt());
+
+        when(ordersRepository.findAllByMemberIdAndDeliveryStatusOrderByModifiedAt(
+                member.getId(),
+                List.of(
+                        DeliveryStatus.READY,
+                        DeliveryStatus.SHIPPED)
+        )).thenReturn(ordersList);
+
+        // When
+        List<OrdersResponse> result = ordersService.history(member.getId());
+
+        // Then
+        assertThat(result).hasSize(2);
+
+        OrdersResponse firstOrder = result.get(0);
+        // 수정시간이 최신인 주문이 먼저 조회되어야함
+        assertThat(firstOrder.id()).isEqualTo(o2.getId());
+        assertThat(firstOrder.products()).hasSize(1);
+
+        // 메서드 호출 검증
+        verify(ordersRepository).findAllByMemberIdAndDeliveryStatusOrderByModifiedAt(
+                member.getId(),
+                List.of(
+                        DeliveryStatus.READY,
+                        DeliveryStatus.SHIPPED)
+        );
+    }
 }
