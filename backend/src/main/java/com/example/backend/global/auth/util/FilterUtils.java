@@ -17,6 +17,23 @@ public class FilterUtils {
 
     private final ObjectMapper objectMapper;
 
+    // 보호되지 않는 특정 URL 목록
+    private static final List<String> UNPROTECTED_URLS = List.of(
+        "/api/v1/members/join",
+        "/api/v1/auth/login",
+        "/api/v1/auth/code",
+        "/api/v1/auth/verify"
+    );
+
+    // 보호된 URL 패턴 목록
+    private static final List<String> PROTECTED_URLS = List.of(
+        "/api/v1/members",
+        "/api/v1/auth",
+        "/api/v1/products",
+        "/api/v1/orders",
+        "/api/v1/carts"
+    );
+
     //필터에서 예외 발생 시 에러 메세지 생성 후 응답객체에 추가하는 메서드
     public void createErrorInfo(AuthErrorCode authErrorCode, HttpServletRequest request,
         HttpServletResponse response) throws IOException {
@@ -58,21 +75,4 @@ public class FilterUtils {
 
         return true; // 나머지 URL은 모두 허용
     }
-
-    // 보호되지 않는 특정 URL 목록
-    private static final List<String> UNPROTECTED_URLS = List.of(
-        "/api/v1/members/join",
-        "/api/v1/auth/login",
-        "/api/v1/auth/code",
-        "/api/v1/auth/verify"
-    );
-
-    // 보호된 URL 패턴 목록
-    private static final List<String> PROTECTED_URLS = List.of(
-        "/api/v1/members",
-        "/api/v1/auth",
-        "/api/v1/products",
-        "/api/v1/orders",
-        "/api/v1/carts"
-    );
 }
