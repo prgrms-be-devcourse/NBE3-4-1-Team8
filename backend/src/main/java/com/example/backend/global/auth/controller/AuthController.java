@@ -20,8 +20,19 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.backend.global.auth.dto.AuthForm;
+import com.example.backend.global.auth.dto.AuthLoginResponse;
+import com.example.backend.global.auth.dto.AuthResponse;
 import com.example.backend.global.auth.dto.EmailCertificationForm;
+import com.example.backend.global.auth.dto.SendEmailCertificationCodeForm;
+import com.example.backend.global.auth.service.AuthService;
+import com.example.backend.global.auth.service.CookieService;
+import com.example.backend.global.response.GenericResponse;
 import com.example.backend.global.validation.ValidationSequence;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -63,6 +74,14 @@ public class AuthController {
 	EmailCertificationForm emailCertificationForm) {
 		authService.verify(emailCertificationForm.username(), emailCertificationForm.certificationCode(),
 			emailCertificationForm.verifyType());
+
+		return ResponseEntity.ok().body(GenericResponse.of());
+	}
+
+	@PostMapping("/code")
+	public ResponseEntity<GenericResponse<Void>> code(@RequestBody @Validated(ValidationSequence.class)
+		SendEmailCertificationCodeForm sendEmailCertificationCodeForm) {
+		authService.send(sendEmailCertificationCodeForm.email(), sendEmailCertificationCodeForm.verifyType());
 
 		return ResponseEntity.ok().body(GenericResponse.of());
 	}
