@@ -53,9 +53,26 @@ public class ProductService {
         return productResponsePage;
     }
 
-    public void existsProduct(String name) {
+    /**
+     * 상품 등록 시 이름 중복 검증 메서드
+     * @param name
+     */
+    private void existsProduct(String name) {
 
         if(productRepository.existsByName(name)) {
+            throw new ProductException(ProductErrorCode.EXISTS_NAME);
+        }
+    }
+
+    /**
+     * 상품 수정 시 이름 중복 검증 메서드
+     * 수정시엔 해당 상품의 기존 이름은 중복 검증에서 제외
+     * @param id
+     * @param name
+     */
+    private void existsProduct(Long id, String name) {
+
+        if(productRepository.existsByNameAndIdNot(name, id)) {
             throw new ProductException(ProductErrorCode.EXISTS_NAME);
         }
     }
@@ -70,6 +87,7 @@ public class ProductService {
     @Transactional
     public void modify(Long id, ProductForm productForm) {
 
+        existsProduct(id, productForm.name());
         findById(id).modify(productForm);
     }
 }
