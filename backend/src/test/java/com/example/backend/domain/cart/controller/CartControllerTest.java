@@ -2,6 +2,7 @@ package com.example.backend.domain.cart.controller;
 
 import com.example.backend.domain.cart.dto.CartForm;
 import com.example.backend.domain.cart.dto.CartResponse;
+import com.example.backend.domain.cart.dto.CartUpdateForm;
 import com.example.backend.domain.cart.exception.CartException;
 import com.example.backend.domain.cart.service.CartService;
 import com.example.backend.domain.member.entity.Member;
@@ -121,5 +122,32 @@ class CartControllerTest {
         assertTrue(response.getBody().getData().isEmpty());
 
         verify(cartService).getCartByMember(member);
+    }
+
+    /**
+     * updateCartItemQuantity() 메서드 테스트
+     * - 장바구니 상품 수량 변경
+     * @throws CartException
+     */
+    @Test
+    @WithMockUser
+    @DisplayName("장바구니 상품 수량 변경")
+    void updateCartItemQuantity() throws CartException {
+        // given
+        Long cartId = 1L;
+        CartUpdateForm cartUpdateForm = new CartUpdateForm(1L, 3);
+
+        when(cartService.updateCartItemQuantity(cartUpdateForm, member)).thenReturn(cartId);
+
+        // when
+        ResponseEntity<GenericResponse<Long>> response = cartController
+                .updateCartItemQuantity(cartUpdateForm, customUserDetails);
+
+        // then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(cartId, response.getBody().getData());
+
+        verify(cartService).updateCartItemQuantity(cartUpdateForm, member);
     }
 }
