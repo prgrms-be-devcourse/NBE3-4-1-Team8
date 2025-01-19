@@ -51,9 +51,7 @@ public class OrdersService {
 
     @Transactional
     public Long create(OrdersForm ordersForm, Member member) {
-
         List<ProductOrders> productOrdersList = createProductOrdersList(ordersForm);
-
         Orders orders = OrdersConverter.of(ordersForm, member, productOrdersList);
 
         return ordersRepository.save(orders).getId();
@@ -78,5 +76,15 @@ public class OrdersService {
                     }
                 }
         ).toList();
+    }
+
+    public List<OrdersResponse> history(Long id) {
+        List<Orders> ordersList = Optional.ofNullable(
+                ordersRepository.findAllByMemberIdAndDeliveryStatusOrderByModifiedAt(
+                        id,
+                        List.of(DeliveryStatus.READY, DeliveryStatus.SHIPPED))
+        ).orElseThrow(() -> new OrdersException(OrdersErrorCode.NOT_FOUND));
+
+        return OrdersConverter.from(ordersList);
     }
 }
