@@ -26,4 +26,16 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
     List<Orders> findByMemberIdAndDeliveryStatus(
             @Param("id") Long id,
             @Param("status") DeliveryStatus status);
+
+    @Query("select distinct o from Orders o " +
+            "join fetch o.member m " +
+            "join fetch o.productOrdersList po " +
+            "join fetch po.product p " +
+            "where m.id = :id and o.deliveryStatus in :status " +
+            "order by o.modifiedAt")
+    List<Orders> findAllByMemberIdAndDeliveryStatusOrderByModifiedAt(
+            @Param("id") Long id,
+            @Param("status") List<DeliveryStatus> status);
+
+
 }
