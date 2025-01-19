@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -131,5 +132,46 @@ class CartRepositoryTest {
                 .containsExactlyInAnyOrder("Test Product", "Test Product 2");
         assertThat(cartList).extracting("quantity")
                 .containsExactlyInAnyOrder(1, 2);
+    }
+
+    @Test
+    @DisplayName("장바구니에서 특정 상품과 회원에 해당하는 항목을 조회 및 수량 변경 후 재조회")
+    void findByProduct_IdAndMember_Id_WithQuantityChange() {
+        // Given: 초기 장바구니에 상품 추가
+        Cart cart = Cart.builder()
+                .member(member)
+                .product(product)
+                .quantity(1)
+                .build();
+
+        cartRepository.save(cart);
+
+        // When: 장바구니 항목을 조회
+        Optional<Cart> foundCart = cartRepository.findByProductIdAndMemberId(
+                product.getId(),
+                member.getId()
+        );
+
+        // Then: 해당 상품과 회원에 대한 장바구니 항목이 존재하는지 확인
+        assertTrue(foundCart.isPresent());
+        assertThat(foundCart.get().getProduct()).isEqualTo(product);
+        assertThat(foundCart.get().getMember()).isEqualTo(member);
+        assertThat(foundCart.get().getQuantity()).isEqualTo(1); // 수량 확인
+
+        // Given: 수량을 변경한 새로운 Cart 객체 생성
+        Cart updatedCart = foundCart.get();
+        updatedCart.updateQuantity(3); // 수량 변경
+
+        cartRepository.save(updatedCart); // 변경된 수량을 DB에 저장
+
+        // When: 변경된 수량으로 다시 장바구니 항목 조회
+        Optional<Cart> updatedFoundCart = cartRepository.findByProductIdAndMemberId(
+                product.getId(),
+                member.getId()
+        );
+
+        // Then: 변경된 수량이 반영된 장바구니 항목을 확인
+        assertTrue(updatedFoundCart.isPresent());
+        assertThat(updatedFoundCart.get().getQuantity()).isEqualTo(3); // 수량 변경 확인
     }
 }
