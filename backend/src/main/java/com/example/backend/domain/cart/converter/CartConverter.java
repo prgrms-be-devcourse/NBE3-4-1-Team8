@@ -38,6 +38,7 @@ public class CartConverter {
     public static CartResponse toResponse(Cart cart) {
         return CartResponse.builder()
                 .id(cart.getId())
+                .productId(cart.getProduct().getId())
                 .productName(cart.getProduct().getName())
                 .quantity(cart.getQuantity())
                 .productPrice(cart.getProduct().getPrice())

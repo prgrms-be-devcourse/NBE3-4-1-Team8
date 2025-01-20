@@ -86,7 +86,7 @@ class CartControllerTest {
     void getCarts_Success() {
         // given
         Long memberId = 1L;
-        CartResponse cartResponse = new CartResponse(1L,"testProductName", 10, 1000, 10000, "test.jpg");
+        CartResponse cartResponse = new CartResponse(1L,1L,"testProductName", 10, 1000, 10000, "test.jpg");
         List<CartResponse> cartResponses = List.of(cartResponse);
 
         when(cartService.getCartByMember(member)).thenReturn(cartResponses);
