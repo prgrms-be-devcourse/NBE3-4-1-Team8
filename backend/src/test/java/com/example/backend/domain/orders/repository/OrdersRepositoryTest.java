@@ -217,7 +217,7 @@ public class OrdersRepositoryTest {
 	}
 
 	@Test
-	@DisplayName("전날 오후 2시부터 당일 2시까지 배송 준비중인 데이터 조회")
+	@DisplayName("startTime, endTime 사이의 배송 준비중인 데이터 조회")
 	void findReadyOrders() {
 		//given
 		Member savedMember = memberRepository.save(createMember());
@@ -251,7 +251,7 @@ public class OrdersRepositoryTest {
 
 		ZonedDateTime now = ZonedDateTime.now();
 		ZonedDateTime startTime = now.minusDays(1).with(LocalTime.of(14, 0));
-		ZonedDateTime endTime = now.with(LocalTime.of(14, 0));
+		ZonedDateTime endTime = now;
 
 		//when
 		List<Orders> ordersList = ordersRepository.findReadyOrders(startTime, endTime);
@@ -270,7 +270,7 @@ public class OrdersRepositoryTest {
 	}
 
 	@Test
-	@DisplayName("전날 오후 2시부터 당일 2시까지 배송 상태 SHIPPED으로 변경")
+	@DisplayName("startTime, endTime 사이의 주문 배송 상태 SHIPPED으로 변경")
 	void bulkUpdateDeliveryStatus() {
 		//given
 		Member savedMember = memberRepository.save(createMember());
@@ -304,7 +304,7 @@ public class OrdersRepositoryTest {
 
 		ZonedDateTime now = ZonedDateTime.now();
 		ZonedDateTime startTime = now.minusDays(1).with(LocalTime.of(14, 0));
-		ZonedDateTime endTime = now.with(LocalTime.of(14, 0));
+		ZonedDateTime endTime = now;
 
 		//when
 		ordersRepository.bulkUpdateDeliveryStatus(startTime, endTime);
@@ -323,7 +323,7 @@ public class OrdersRepositoryTest {
 	}
 
 	@Test
-	@DisplayName("전날 오후 2시부터 당일 2시까지 배송 준비중인 회원 username 조회")
+	@DisplayName("startTime, endTime 사이의 배송 준비중인 회원 username 조회")
 	void findUsernameByReady() {
 		//given
 		Member savedMember = memberRepository.save(createMember());
@@ -357,7 +357,7 @@ public class OrdersRepositoryTest {
 
 		ZonedDateTime now = ZonedDateTime.now();
 		ZonedDateTime startTime = now.minusDays(1).with(LocalTime.of(14, 0));
-		ZonedDateTime endTime = now.with(LocalTime.of(14, 0));
+		ZonedDateTime endTime = now;
 
 		//when
 		List<String> usernameList = ordersRepository.findUsernameByReady(startTime, endTime);
