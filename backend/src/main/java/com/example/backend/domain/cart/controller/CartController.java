@@ -1,5 +1,6 @@
 package com.example.backend.domain.cart.controller;
 
+import com.example.backend.domain.cart.dto.CartDeleteForm;
 import com.example.backend.domain.cart.dto.CartForm;
 import com.example.backend.domain.cart.dto.CartResponse;
 import com.example.backend.domain.cart.dto.CartUpdateForm;
@@ -55,6 +56,17 @@ public class CartController {
         Long cartId = cartService.updateCartItemQuantity(cartUpdateForm, member);
 
         return ResponseEntity.status(HttpStatus.OK).body(GenericResponse.of(cartId));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<GenericResponse<Long>> deleteCartItem(
+            @RequestBody @Validated(ValidationSequence.class) CartDeleteForm cartDeleteForm,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
+        Member member = customUserDetails.getMember();
+        Long deleteProductId = cartService.deleteCartItem(cartDeleteForm, member);
+
+        return ResponseEntity.status(HttpStatus.OK).body(GenericResponse.of(deleteProductId));
     }
 
 }

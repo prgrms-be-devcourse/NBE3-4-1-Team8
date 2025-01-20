@@ -1,6 +1,7 @@
 package com.example.backend.domain.cart.service;
 
 import com.example.backend.domain.cart.converter.CartConverter;
+import com.example.backend.domain.cart.dto.CartDeleteForm;
 import com.example.backend.domain.cart.dto.CartForm;
 import com.example.backend.domain.cart.dto.CartResponse;
 import com.example.backend.domain.cart.dto.CartUpdateForm;
@@ -76,5 +77,16 @@ public class CartService {
         cart.updateQuantity(cartUpdateForm.quantity());
 
         return cart.getId();
+    }
+
+    @Transactional
+    public Long deleteCartItem(CartDeleteForm cartDeleteForm, Member member) {
+        // 해당 상품이 장바구니에 있는지 조회 후 없으면 exception 발생
+        Cart cart = cartRepository.findByProductIdAndMemberId(cartDeleteForm.productId(), member.getId())
+                .orElseThrow(() -> new CartException(CartErrorCode.PRODUCT_NOT_FOUND_IN_CART));
+
+        cartRepository.delete(cart);
+
+        return cart.getProduct().getId();
     }
 }
