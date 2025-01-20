@@ -219,7 +219,7 @@ public class OrdersRepositoryTest {
 	@Test
 	@DisplayName("전날 오후 2시부터 당일 2시까지 배송 준비중인 데이터 조회")
 	void findReadyOrders() {
-        //given
+		//given
 		Member savedMember = memberRepository.save(createMember());
 		Product savedProduct = productRepository.save(createProduct());
 
@@ -247,26 +247,79 @@ public class OrdersRepositoryTest {
 
 		createOrders3.changeStatus(DeliveryStatus.SHIPPED);
 
-        ordersRepository.saveAll(List.of(createOrders1, createOrders2, createOrders3));
+		ordersRepository.saveAll(List.of(createOrders1, createOrders2, createOrders3));
 
-        ZonedDateTime now = ZonedDateTime.now();
+		ZonedDateTime now = ZonedDateTime.now();
 		ZonedDateTime startTime = now.minusDays(1).with(LocalTime.of(14, 0));
 		ZonedDateTime endTime = now.with(LocalTime.of(14, 0));
 
-        //when
-        List<Orders> orders = ordersRepository.findReadyOrders(startTime, endTime);
+		//when
+		List<Orders> ordersList = ordersRepository.findReadyOrders(startTime, endTime);
 
-        //then
-        Orders orders1 = orders.get(0);
-        Orders orders2 = orders.get(1);
+		//then
+		Orders orders1 = ordersList.get(0);
+		Orders orders2 = ordersList.get(1);
 
-        assertThat(orders.size()).isEqualTo(2);
-        assertThat(orders1).isEqualTo(createOrders1);
-        assertThat(orders2).isEqualTo(createOrders2);
-        assertThat(orders1.getModifiedAt()).isAfter(startTime);
-        assertThat(orders1.getModifiedAt()).isBefore(endTime);
-        assertThat(orders2.getModifiedAt()).isAfter(startTime);
-        assertThat(orders2.getModifiedAt()).isBefore(endTime);
-    }
+		assertThat(ordersList.size()).isEqualTo(2);
+		assertThat(orders1).isEqualTo(createOrders1);
+		assertThat(orders2).isEqualTo(createOrders2);
+		assertThat(orders1.getModifiedAt()).isAfter(startTime);
+		assertThat(orders1.getModifiedAt()).isBefore(endTime);
+		assertThat(orders2.getModifiedAt()).isAfter(startTime);
+		assertThat(orders2.getModifiedAt()).isBefore(endTime);
+	}
+
+	@Test
+	@DisplayName("전날 오후 2시부터 당일 2시까지 배송 상태 SHIPPED으로 변경")
+	void bulkUpdateDeliveryStatus() {
+		//given
+		Member savedMember = memberRepository.save(createMember());
+		Product savedProduct = productRepository.save(createProduct());
+
+		ProductOrders productOrders1 = createProductOrders(savedProduct);
+		ProductOrders productOrders2 = createProductOrders(savedProduct);
+		ProductOrders productOrders3 = createProductOrders(savedProduct);
+
+		Orders createOrders1 = Orders.create()
+			.member(savedMember)
+			.address(savedMember.getAddress())
+			.productOrdersList(List.of(productOrders1, productOrders2, productOrders3))
+			.build();
+
+		Orders createOrders2 = Orders.create()
+			.member(savedMember)
+			.address(savedMember.getAddress())
+			.productOrdersList(List.of(productOrders1, productOrders2, productOrders3))
+			.build();
+
+		Orders createOrders3 = Orders.create()
+			.member(savedMember)
+			.address(savedMember.getAddress())
+			.productOrdersList(List.of(productOrders1, productOrders2, productOrders3))
+			.build();
+
+		createOrders3.changeStatus(DeliveryStatus.SHIPPED);
+
+		ordersRepository.saveAll(List.of(createOrders1, createOrders2, createOrders3));
+
+		ZonedDateTime now = ZonedDateTime.now();
+		ZonedDateTime startTime = now.minusDays(1).with(LocalTime.of(14, 0));
+		ZonedDateTime endTime = now.with(LocalTime.of(14, 0));
+
+		//when
+		ordersRepository.bulkUpdateDeliveryStatus(startTime, endTime);
+
+		//then
+		entityManager.flush();
+		entityManager.clear();
+		List<Orders> ordersList = ordersRepository.findAll();
+
+		assertThat(ordersList.size()).isEqualTo(3);
+		assertThat(ordersList).allMatch(order ->
+			order.getDeliveryStatus() == DeliveryStatus.SHIPPED &&
+			order.getModifiedAt().isAfter(startTime) &&
+			order.getModifiedAt().isBefore(endTime)
+		);
+	}
 
 }
