@@ -56,4 +56,11 @@ public class ProductOrders extends BaseEntity {
         return getPrice() * getQuantity();
     }
 
+    /**
+     * 상품 수량 복구
+     */
+    public void restore(int quantity) {
+        product.restore(quantity);
+    }
+
 }
