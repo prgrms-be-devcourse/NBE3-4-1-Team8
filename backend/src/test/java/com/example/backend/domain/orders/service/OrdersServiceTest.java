@@ -62,7 +62,7 @@ class OrdersServiceTest {
         lenient().when(product.getImgUrl()).thenReturn("http://example.com/productA.jpg");
         lenient().when(product.getQuantity()).thenReturn(10);
         lenient().when(productOrder.getProduct()).thenReturn(product);
-        when(productOrder.getQuantity()).thenReturn(1);
+        lenient().when(productOrder.getQuantity()).thenReturn(1);
 
         return List.of(productOrder);
     }

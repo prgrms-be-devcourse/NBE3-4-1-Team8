@@ -36,8 +36,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(OrdersController.class)
@@ -346,6 +345,26 @@ public class OrdersControllerTest {
                 .andExpect(jsonPath("$.errorDetails[0].field").value("city"))
                 .andExpect(jsonPath("$.errorDetails[0].reason").value("도시는 필수입니다."));
     }
+
+    @Test
+    @DisplayName("주문 정상 취소")
+    void order_cancel_success() throws Exception {
+
+        Long orderId = 1L;
+
+        doNothing().when(ordersService).cancelById(orderId);
+
+        mockMvc.perform(patch("/api/v1/orders/{id}", orderId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(user(createMockCustomUserDetails(orderId))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").isEmpty())
+                .andExpect(jsonPath("$.success").value(true));
+
+        verify(ordersService).cancelById(orderId);
+    }
+
+
     // 테스트에서 사용할 MockCustomUserDetails 생성 메서드
     private CustomUserDetails createMockCustomUserDetails(Long memberId) {
         Member mockMember = Member.builder()
