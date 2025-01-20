@@ -11,8 +11,6 @@ import com.example.backend.domain.cart.exception.CartException;
 import com.example.backend.domain.cart.repository.CartRepository;
 import com.example.backend.domain.member.entity.Member;
 import com.example.backend.domain.product.service.ProductService;
-import com.example.backend.global.auth.exception.AuthErrorCode;
-import com.example.backend.global.auth.exception.AuthException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
