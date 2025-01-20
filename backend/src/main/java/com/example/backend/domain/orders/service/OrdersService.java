@@ -91,4 +91,23 @@ public class OrdersService {
     public void deleteByMemberId(Long id) {
         ordersRepository.deleteByMemberId(id);
     }
+
+    @Transactional
+    public void cancelById(Long id) {
+        Orders orders = ordersRepository.findById(id)
+                .orElseThrow(() -> new OrdersException(OrdersErrorCode.NOT_FOUND));
+
+        if (orders.getDeliveryStatus() == DeliveryStatus.CANCEL) {
+            throw new OrdersException(OrdersErrorCode.UNABLE_ORDER_CANCEL_ALREADY_CANCEL);
+        }
+        if (orders.getDeliveryStatus() == DeliveryStatus.SHIPPED) {
+            throw new OrdersException(OrdersErrorCode.UNABLE_ORDER_CANCEL_ALREADY_SHIPPED);
+        }
+
+        orders.changeStatus(DeliveryStatus.CANCEL);
+        orders.getProductOrdersList()
+                .forEach(po -> po.restore(po.getQuantity()));
+
+        ordersRepository.save(orders);
+    }
 }

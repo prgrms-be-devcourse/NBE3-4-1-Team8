@@ -69,5 +69,13 @@ public class OrdersController {
 
     }
 
-
+    @PatchMapping("{id}")
+    public ResponseEntity<GenericResponse<Void>> cancel(
+            @PathVariable(name = "id") Long id,
+            @AuthenticationPrincipal CustomUserDetails CustomUserDetails
+    ) {
+        ordersService.cancelById(id);
+        return ResponseEntity.ok()
+                .body(GenericResponse.of());
+    }
 }
