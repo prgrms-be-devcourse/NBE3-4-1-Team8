@@ -1,6 +1,6 @@
 "use client";
 import Link from 'next/link';
-import { useUser } from '../component/UserProvider';
+import { useUser } from '@/app/components/UserProvider';
 
 export default function NavBar() {
     const { username, setUsername } = useUser();
