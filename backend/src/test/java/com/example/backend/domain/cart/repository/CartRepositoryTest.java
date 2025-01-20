@@ -135,43 +135,50 @@ class CartRepositoryTest {
     }
 
     @Test
-    @DisplayName("장바구니에서 특정 상품과 회원에 해당하는 항목을 조회 및 수량 변경 후 재조회")
-    void findByProduct_IdAndMember_Id_WithQuantityChange() {
-        // Given: 초기 장바구니에 상품 추가
+    @DisplayName("장바구니 상품 조회 및 수량 변경 테스트")
+    void findByProductAndMemberWithQuantityChange() {
+        // Given
         Cart cart = Cart.builder()
                 .member(member)
                 .product(product)
                 .quantity(1)
                 .build();
-
         cartRepository.save(cart);
 
-        // When: 장바구니 항목을 조회
+        // When & Then: 최초 조회 검증
         Optional<Cart> foundCart = cartRepository.findByProductIdAndMemberId(
                 product.getId(),
                 member.getId()
         );
+        assertInitialCart(foundCart);
 
-        // Then: 해당 상품과 회원에 대한 장바구니 항목이 존재하는지 확인
-        assertTrue(foundCart.isPresent());
-        assertThat(foundCart.get().getProduct()).isEqualTo(product);
-        assertThat(foundCart.get().getMember()).isEqualTo(member);
-        assertThat(foundCart.get().getQuantity()).isEqualTo(1); // 수량 확인
+        // When & Then: 수량 변경 후 재조회 검증
+        updateAndVerifyCartQuantity(foundCart.get());
+    }
 
-        // Given: 수량을 변경한 새로운 Cart 객체 생성
-        Cart updatedCart = foundCart.get();
-        updatedCart.updateQuantity(3); // 수량 변경
+    @DisplayName("초기 장바구니 상태 검증")
+    private void assertInitialCart(Optional<Cart> foundCart) {
+        assertTrue(foundCart.isPresent(), "장바구니 항목이 존재해야 합니다");
+        Cart cart = foundCart.get();
+        assertThat(cart.getProduct()).isEqualTo(product);
+        assertThat(cart.getMember()).isEqualTo(member);
+        assertThat(cart.getQuantity()).isEqualTo(1);
+    }
 
-        cartRepository.save(updatedCart); // 변경된 수량을 DB에 저장
+    @DisplayName("장바구니 수량 변경 및 검증")
+    private void updateAndVerifyCartQuantity(Cart cart) {
+        // When: 수량 변경
+        cart.updateQuantity(3);
+        cartRepository.save(cart);
 
-        // When: 변경된 수량으로 다시 장바구니 항목 조회
-        Optional<Cart> updatedFoundCart = cartRepository.findByProductIdAndMemberId(
+        // Then: 변경된 수량 검증
+        Optional<Cart> updatedCart = cartRepository.findByProductIdAndMemberId(
                 product.getId(),
                 member.getId()
         );
-
-        // Then: 변경된 수량이 반영된 장바구니 항목을 확인
-        assertTrue(updatedFoundCart.isPresent());
-        assertThat(updatedFoundCart.get().getQuantity()).isEqualTo(3); // 수량 변경 확인
+        assertTrue(updatedCart.isPresent(), "수정된 장바구니 항목이 존재해야 합니다");
+        assertThat(updatedCart.get().getQuantity())
+                .as("장바구니 수량이 3으로 변경되어야 합니다")
+                .isEqualTo(3);
     }
 }
