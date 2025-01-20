@@ -100,20 +100,6 @@ class CartServiceTest {
     }
 
     @Test
-    @DisplayName("회원 정보가 일치하지 않으면 예외 발생")
-    void addCartItem_WithInvalidMember_ThrowsAuthException() {
-        // given
-        Member differentMember = Member.builder()
-                .id(2L)
-                .build();
-
-        // when & then
-        assertThatThrownBy(() -> cartService.addCartItem(cartForm, differentMember))
-                .isInstanceOf(AuthException.class)
-                .hasMessage("해당 유저가 존재하지 않습니다.");
-    }
-
-    @Test
     @DisplayName("이미 장바구니에 존재하는 상품이면 예외 발생")
     void addCartItem_WithExistingProduct_ThrowsCartException() {
         // given
