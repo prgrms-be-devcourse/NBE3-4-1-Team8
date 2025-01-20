@@ -19,7 +19,7 @@ public class SchedulerService {
 	private final OrdersRepository ordersRepository;
 
 	@Transactional
-	@Scheduled(cron = "0 0/1 00 * * ?")
+	@Scheduled(cron = "0 0 14 * * ?")
 	public void scheduleOrderProcessing() {
 		ZonedDateTime now = ZonedDateTime.now();
 		ZonedDateTime startTime = now.minusDays(1).with(LocalTime.of(14, 0));
