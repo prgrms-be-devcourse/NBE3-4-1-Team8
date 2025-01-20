@@ -75,9 +75,6 @@ public class CartService {
         // 수량 업데이트
         cart.updateQuantity(cartUpdateForm.quantity());
 
-        // 장바구니 수량 업데이트 후 저장
-        cartRepository.save(cart);
-
         return cart.getId();
     }
 }
