@@ -9,7 +9,7 @@ import lombok.Builder;
  */
 @Builder
 public record ProductResponse(
-        Long Id,
+        Long id,
         String name,
         String content,
         int price,

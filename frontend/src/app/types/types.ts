@@ -1,5 +1,5 @@
 interface Product {
-  Id: number;  // 대문자 I로 변경
+  id: number;
   name: string;
   content: string;
   price: number;
