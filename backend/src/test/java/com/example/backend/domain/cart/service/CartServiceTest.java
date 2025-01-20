@@ -1,5 +1,6 @@
 package com.example.backend.domain.cart.service;
 
+import com.example.backend.domain.cart.dto.CartDeleteForm;
 import com.example.backend.domain.cart.dto.CartForm;
 import com.example.backend.domain.cart.dto.CartResponse;
 import com.example.backend.domain.cart.dto.CartUpdateForm;
@@ -203,6 +204,44 @@ class CartServiceTest {
                 .satisfies(exception -> {
                     CartException cartException = (CartException) exception;
                     assertThat(cartException.getCode()).isEqualTo(CartErrorCode.SAME_QUANTITY_IN_CART.getCode());
+                });
+    }
+
+    /**
+     * deleteCartItem() 메서드 테스트
+     * - 장바구니 상품 삭제 성공
+     * - 장바구니에 해당 상품이 없는 경우 예외 발생
+     */
+    @Test
+    @DisplayName("장바구니 상품 삭제 성공")
+    void deleteCartItem_Success() {
+        // given
+        CartDeleteForm cartDeleteForm = new CartDeleteForm(product.getId());
+        given(cartRepository.findByProductIdAndMemberId(cartDeleteForm.productId(), member.getId()))
+                .willReturn(Optional.of(cart));
+
+        // when
+        Long deletedProductId = cartService.deleteCartItem(cartDeleteForm, member);
+
+        // then
+        assertThat(deletedProductId).isEqualTo(product.getId());
+        verify(cartRepository).delete(cart);
+    }
+
+    @Test
+    @DisplayName("장바구니에 해당 상품이 없는 경우 예외 발생")
+    void deleteCartItem_WithProductNotInCart_ThrowsCartException() {
+        // given
+        CartDeleteForm cartDeleteForm = new CartDeleteForm(999L);
+        given(cartRepository.findByProductIdAndMemberId(cartDeleteForm.productId(), member.getId()))
+                .willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> cartService.deleteCartItem(cartDeleteForm, member))
+                .isInstanceOf(CartException.class)
+                .satisfies(exception -> {
+                    CartException cartException = (CartException) exception;
+                    assertThat(cartException.getCode()).isEqualTo(CartErrorCode.PRODUCT_NOT_FOUND_IN_CART.getCode());
                 });
     }
 }
