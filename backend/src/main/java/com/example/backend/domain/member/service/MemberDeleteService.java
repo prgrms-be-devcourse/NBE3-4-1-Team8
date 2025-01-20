@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class MemberDeleteService {
 
 	private final MemberRepository memberRepository;
@@ -23,6 +22,7 @@ public class MemberDeleteService {
 	private final CartService cartService;
 	private final OrdersService ordersService;
 
+	@Transactional
 	public void delete(MemberDto memberDto) {
 		redisService.delete(memberDto.username());
 		SecurityContextHolder.clearContext();
