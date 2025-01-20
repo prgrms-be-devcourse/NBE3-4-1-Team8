@@ -18,6 +18,7 @@ import com.example.backend.domain.member.dto.MemberInfoResponse;
 import com.example.backend.domain.member.dto.MemberModifyForm;
 import com.example.backend.domain.member.dto.MemberSignupForm;
 import com.example.backend.domain.member.entity.Member;
+import com.example.backend.domain.member.entity.MemberStatus;
 import com.example.backend.domain.member.entity.Role;
 import com.example.backend.domain.member.exception.MemberErrorCode;
 import com.example.backend.domain.member.exception.MemberException;
@@ -26,7 +27,10 @@ import com.example.backend.global.mail.service.MailService;
 import com.example.backend.global.redis.service.RedisService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lombok.extern.slf4j.Slf4j;
+
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 class MemberServiceTest {
 	@Mock
 	private MemberRepository memberRepository;
@@ -96,6 +100,81 @@ class MemberServiceTest {
 		verify(memberRepository, times(1)).save(any(Member.class));
 	}
 
+	@DisplayName("비밀번호 변경 성공 테스트")
+	@Test
+	void password_change_success() {
+	    //given
+		Address givenAddress = Address.builder()
+			.city("testCity")
+			.detail("testDetail")
+			.country("testCountry")
+			.district("testDistrict")
+			.build();
+
+		Member givenMember = Member.builder()
+			.username("testUsername")
+			.nickname("testNickname")
+			.password("!testPassword1234")
+			.address(givenAddress)
+			.memberStatus(MemberStatus.ACTIVE)
+			.role(Role.ROLE_USER)
+			.build();
+
+		String changePassword = "!changePassword1234";
+
+		Member givenChangePasswordMember = Member.builder()
+			.username("testUsername")
+			.nickname("testNickname")
+			.password(changePassword)
+			.address(givenAddress)
+			.memberStatus(MemberStatus.ACTIVE)
+			.role(Role.ROLE_USER)
+			.build();
+
+		given(passwordEncoder.matches(any(String.class), any(String.class))).willReturn(true);
+		given(passwordEncoder.encode(changePassword)).willReturn(changePassword);
+		given(memberRepository.save(any(Member.class))).willReturn(givenChangePasswordMember);
+
+	    //when
+		memberService.passwordChange(givenMember.getPassword(), changePassword, givenMember);
+
+	    //then
+		verify(passwordEncoder, times(1)).matches(any(String.class), any(String.class));
+		verify(passwordEncoder, times(1)).encode(changePassword);
+		verify(memberRepository, times(1)).save(any(Member.class));
+	}
+
+	@DisplayName("비밀번호 변경시 원래 비밀번호와 일치하지 않을 때 실패 테스트")
+	@Test
+	void password_not_match_success() {
+	    //given
+		Address givenAddress = Address.builder()
+			.city("testCity")
+			.detail("testDetail")
+			.country("testCountry")
+			.district("testDistrict")
+			.build();
+
+		Member givenMember = Member.builder()
+			.username("testUsername")
+			.nickname("testNickname")
+			.password("!testPassword1234")
+			.address(givenAddress)
+			.memberStatus(MemberStatus.ACTIVE)
+			.role(Role.ROLE_USER)
+			.build();
+
+		String changePassword = "!changePassword12345";
+
+		given(passwordEncoder.matches(changePassword, givenMember.getPassword())).willReturn(false);
+
+	    //when & then
+		assertThatThrownBy(() -> memberService.passwordChange(changePassword, changePassword, givenMember))
+			.isInstanceOf(MemberException.class)
+			.hasMessage(MemberErrorCode.PASSWORD_NOT_MATCH.getMessage());
+
+	}
+
 	@DisplayName("회원가입 이메일 중복 실패 테스트")
 	@Test
 	void signup_exists_username_fail() {
@@ -118,7 +197,7 @@ class MemberServiceTest {
 			.district(givenMemberSignupForm.district())
 			.build();
 
-		MemberDto givenMember = MemberDto.builder()
+		Member givenMember = Member.builder()
 			.username(givenMemberSignupForm.username())
 			.nickname(givenMemberSignupForm.nickname())
 			.password(givenMemberSignupForm.password())
@@ -126,8 +205,8 @@ class MemberServiceTest {
 			.role(Role.ROLE_USER)
 			.build();
 
-		given(memberRepository.existsByUsername(givenMember.username())).willReturn(true);
-		given(memberRepository.existsByNickname(givenMember.nickname())).willReturn(false);
+		given(memberRepository.existsByUsername(givenMember.getUsername())).willReturn(true);
+		given(memberRepository.existsByNickname(givenMember.getNickname())).willReturn(false);
 
 		//when & then
 		assertThatThrownBy(() -> memberService.signup(

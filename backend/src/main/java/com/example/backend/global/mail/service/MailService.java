@@ -1,7 +1,6 @@
 package com.example.backend.global.mail.service;
 
-import java.util.Map;
-
+import com.example.backend.domain.common.EmailCertification;
 import com.example.backend.global.mail.util.TemplateName;
 
 /**
@@ -16,5 +15,6 @@ public interface MailService {
 	 * @param htmlParameterMap 템플릿에 들어갈 파라미터
 	 * @param templateName 템플릿 이름
 	 */
-	void sendEmail(String to, Map<String, String> htmlParameterMap, TemplateName templateName);
+	void sendCertificationMail(String to, EmailCertification emailCertification, TemplateName templateName);
+	void sendTemporaryPasswordMail(String to, String temporaryPassword, TemplateName templateName);
 }

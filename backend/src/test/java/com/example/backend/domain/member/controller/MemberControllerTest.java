@@ -4,14 +4,6 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import com.example.backend.domain.member.conveter.MemberConverter;
-import com.example.backend.domain.member.dto.MemberDto;
-import com.example.backend.domain.member.dto.MemberInfoResponse;
-import com.example.backend.domain.member.dto.MemberModifyForm;
-import com.example.backend.domain.member.service.MemberDeleteService;
-import com.example.backend.global.auth.service.CookieService;
-import com.example.backend.global.config.TestSecurityConfig;
-import com.example.backend.global.config.CorsConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,20 +11,30 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.example.backend.domain.common.Address;
+import com.example.backend.domain.member.conveter.MemberConverter;
+import com.example.backend.domain.member.dto.MemberDto;
+import com.example.backend.domain.member.dto.MemberInfoResponse;
+import com.example.backend.domain.member.dto.MemberModifyForm;
 import com.example.backend.domain.member.dto.MemberSignupForm;
+import com.example.backend.domain.member.dto.PasswordChangeForm;
 import com.example.backend.domain.member.entity.Member;
 import com.example.backend.domain.member.entity.MemberStatus;
 import com.example.backend.domain.member.entity.Role;
 import com.example.backend.domain.member.exception.MemberErrorCode;
 import com.example.backend.domain.member.exception.MemberException;
+import com.example.backend.domain.member.service.MemberDeleteService;
 import com.example.backend.domain.member.service.MemberService;
 import com.example.backend.global.auth.model.CustomUserDetails;
+import com.example.backend.global.auth.service.CookieService;
+import com.example.backend.global.config.CorsConfig;
+import com.example.backend.global.config.TestSecurityConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -52,7 +54,7 @@ class MemberControllerTest {
 	CookieService cookieService;
 
 	@Autowired
-    private MockMvc mockMvc;
+	private MockMvc mockMvc;
 
 	@Autowired
 	ObjectMapper objectMapper;
@@ -85,7 +87,7 @@ class MemberControllerTest {
 		resultActions.andExpect(status().isCreated());
 	}
 
-@DisplayName("회원가입 이메일 유효성 검사 실패 테스트")
+	@DisplayName("회원가입 이메일 유효성 검사 실패 테스트")
 	@Test
 	void signup_username_valid_username_fail() throws Exception {
 		//given
@@ -362,11 +364,10 @@ class MemberControllerTest {
 			.district("testDistrict")
 			.build();
 
-
 		doThrow(new MemberException(MemberErrorCode.EXISTS_NICKNAME))
 			.when(memberService).signup(any(String.class), any(String.class),
-			any(String.class), any(String.class), any(String.class),
-			any(String.class), any(String.class));
+				any(String.class), any(String.class), any(String.class),
+				any(String.class), any(String.class));
 
 		//when
 		ResultActions resultActions = mockMvc.perform(post("/api/v1/members/join")
@@ -394,11 +395,10 @@ class MemberControllerTest {
 			.district("testDistrict")
 			.build();
 
-
 		doThrow(new MemberException(MemberErrorCode.EXISTS_USERNAME))
 			.when(memberService).signup(any(String.class), any(String.class),
-			any(String.class), any(String.class), any(String.class),
-			any(String.class), any(String.class));
+				any(String.class), any(String.class), any(String.class),
+				any(String.class), any(String.class));
 
 		//when
 		ResultActions resultActions = mockMvc.perform(post("/api/v1/members/join")
@@ -806,5 +806,150 @@ class MemberControllerTest {
 
 		// then
 		resultActions.andExpect(status().isNoContent());
+	}
+
+	@WithMockUser
+	@DisplayName("비밀번호 변경 성공 테스트")
+	@Test
+	void password_change_success() throws Exception {
+		//given
+		Address address = Address.builder()
+			.city("testCity")
+			.district("testDistrict")
+			.country("testCountry")
+			.detail("testDetail")
+			.build();
+
+		Member givenMember = Member.builder()
+			.username("test@naver.com")
+			.nickname("testNickname")
+			.password("!testPassword1234")
+			.memberStatus(MemberStatus.ACTIVE)
+			.role(Role.ROLE_USER)
+			.address(address)
+			.build();
+
+		CustomUserDetails customUserDetails = new CustomUserDetails(givenMember);
+
+		// Authentication 설정
+		UsernamePasswordAuthenticationToken authenticationToken =
+			new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+
+		PasswordChangeForm givenPasswordChangeForm = PasswordChangeForm.builder()
+			.originalPassword(givenMember.getPassword())
+			.password("!changePassword1234")
+			.passwordCheck("!changePassword1234")
+			.build();
+
+		doNothing().when(memberService)
+			.passwordChange(givenMember.getPassword(), givenPasswordChangeForm.password(), givenMember);
+
+		//when
+		ResultActions resultActions = mockMvc.perform(patch("/api/v1/members/password")
+			.with(SecurityMockMvcRequestPostProcessors.authentication(authenticationToken))
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(givenPasswordChangeForm)));
+
+		//then
+		resultActions.andExpect(status().isOk());
+	}
+
+	@WithMockUser
+	@DisplayName("비밀번호 변경시 비밀번호 유효성 검사 실패 테스트")
+	@Test
+	void password_change_password_valid_success() throws Exception {
+		//given
+		Address address = Address.builder()
+			.city("testCity")
+			.district("testDistrict")
+			.country("testCountry")
+			.detail("testDetail")
+			.build();
+
+		Member givenMember = Member.builder()
+			.username("test@naver.com")
+			.nickname("testNickname")
+			.password("!testPassword1234")
+			.memberStatus(MemberStatus.ACTIVE)
+			.role(Role.ROLE_USER)
+			.address(address)
+			.build();
+
+		CustomUserDetails customUserDetails = new CustomUserDetails(givenMember);
+
+		// Authentication 설정
+		UsernamePasswordAuthenticationToken authenticationToken =
+			new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+
+		PasswordChangeForm givenPasswordChangeForm = PasswordChangeForm.builder()
+			.originalPassword(givenMember.getPassword())
+			.password("changePassword1234")
+			.passwordCheck("!changePassword1234")
+			.build();
+
+		doNothing().when(memberService)
+			.passwordChange(givenMember.getPassword(), givenPasswordChangeForm.password(), givenMember);
+
+		//when
+		ResultActions resultActions = mockMvc.perform(patch("/api/v1/members/password")
+			.with(SecurityMockMvcRequestPostProcessors.authentication(authenticationToken))
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(givenPasswordChangeForm)));
+
+		//then
+		resultActions.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("400-1"))
+			.andExpect(jsonPath("$.errorDetails[0].field").value("password"))
+			.andExpect(jsonPath("$.errorDetails[0].reason")
+				.value("공백 없이 비밀번호는 최소 8자리, 최대 20자리이며 대소문자, 숫자, 특수문자 1개씩 필수 입력해야 합니다."));
+	}
+
+	@DisplayName("비밀번호 변경시 비밀번호 매치 실패 테스트")
+	@Test
+	void password_not_match_success() throws Exception {
+		//given
+		Address address = Address.builder()
+			.city("testCity")
+			.district("testDistrict")
+			.country("testCountry")
+			.detail("testDetail")
+			.build();
+
+		Member givenMember = Member.builder()
+			.username("test@naver.com")
+			.nickname("testNickname")
+			.password("!testPassword1234")
+			.memberStatus(MemberStatus.ACTIVE)
+			.role(Role.ROLE_USER)
+			.address(address)
+			.build();
+
+		CustomUserDetails customUserDetails = new CustomUserDetails(givenMember);
+
+		// Authentication 설정
+		UsernamePasswordAuthenticationToken authenticationToken =
+			new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+
+		PasswordChangeForm givenPasswordChangeForm = PasswordChangeForm.builder()
+			.originalPassword(givenMember.getPassword())
+			.password("!changePassword12345")
+			.passwordCheck("!changePassword1234")
+			.build();
+
+		doNothing().when(memberService)
+			.passwordChange(givenMember.getPassword(), givenPasswordChangeForm.password(), givenMember);
+
+		//when
+		ResultActions resultActions = mockMvc.perform(patch("/api/v1/members/password")
+			.with(SecurityMockMvcRequestPostProcessors.authentication(authenticationToken))
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(givenPasswordChangeForm)));
+
+		//then
+		resultActions.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("400-1"))
+			.andExpect(jsonPath("$.errorDetails[0].field").value("passwordChangeForm"))
+			.andExpect(jsonPath("$.errorDetails[0].reason")
+				.value("비밀번호와 비밀번호 확인이 일치하지 않습니다."));
 	}
 }

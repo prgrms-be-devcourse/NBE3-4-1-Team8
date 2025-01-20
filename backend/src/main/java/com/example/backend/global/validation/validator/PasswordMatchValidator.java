@@ -13,7 +13,6 @@ import jakarta.validation.ConstraintValidatorContext;
  * @author Kim Dong O
  */
 public class PasswordMatchValidator implements ConstraintValidator<PasswordMatch, PasswordMatchable> {
-	private PasswordMatch passwordMatch;
 
 	@Override
 	public boolean isValid(PasswordMatchable passwordMatchable, ConstraintValidatorContext constraintValidatorContext) {
@@ -23,6 +22,5 @@ public class PasswordMatchValidator implements ConstraintValidator<PasswordMatch
 
 	@Override
 	public void initialize(PasswordMatch constraintAnnotation) {
-		this.passwordMatch = constraintAnnotation;
 	}
 }

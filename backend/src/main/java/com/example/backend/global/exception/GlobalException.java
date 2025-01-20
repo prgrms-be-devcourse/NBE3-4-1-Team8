@@ -3,7 +3,7 @@ package com.example.backend.global.exception;
 import org.springframework.http.HttpStatus;
 
 public class GlobalException extends RuntimeException {
-	private GlobalErrorCode globalErrorCode;
+	private final GlobalErrorCode globalErrorCode;
 
 	public GlobalException(GlobalErrorCode globalErrorCode) {
 		super(globalErrorCode.message);

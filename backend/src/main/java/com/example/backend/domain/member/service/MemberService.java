@@ -1,10 +1,8 @@
 package com.example.backend.domain.member.service;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,9 +31,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Transactional
 public class MemberService {
-	@Value("${mail.verify-url}")
-	private String verifyUrl;
-	private static final String REDIS_EMAIL_PREFIX = "certification_email:";
+	private static final String REDIS_CERTIFICATION_PREFIX = "certification_email:";
 	private final MemberRepository memberRepository;
 	private final RedisService redisService;
 	private final MailService mailService;
@@ -49,9 +45,7 @@ public class MemberService {
 		//TODO 추후에 인증 메일 발송 기능 구현 후 수정 예정
 
 		String certificationCode = UUID.randomUUID().toString();
-		String certificationUrl = generateCertificationUrl(username, certificationCode, VerifyType.SIGNUP);
 
-		//Redis에 인증코드 10분으로 설정
 		EmailCertification emailCertification = EmailCertification.builder()
 			.sendCount("1")
 			.certificationCode(certificationCode)
@@ -60,13 +54,10 @@ public class MemberService {
 
 		Map convertValue = objectMapper.convertValue(emailCertification, Map.class);
 
-		redisService.setHashDataAll(REDIS_EMAIL_PREFIX + username, convertValue);
-		redisService.setTimeout(REDIS_EMAIL_PREFIX + username, 10);
+		redisService.setHashDataAll(REDIS_CERTIFICATION_PREFIX + username, convertValue);
+		redisService.setTimeout(REDIS_CERTIFICATION_PREFIX + username, 10);
 
-		Map<String, String> htmlParameterMap = new HashMap<>();
-		htmlParameterMap.put("certificationUrl", certificationUrl);
-
-		mailService.sendEmail(username, htmlParameterMap, TemplateName.SIGNUP_VERIFY);
+		mailService.sendCertificationMail(username, emailCertification, TemplateName.SIGNUP_VERIFY);
 
 		Address saveAddress = Address.builder()
 			.city(city)
@@ -87,22 +78,15 @@ public class MemberService {
 		memberRepository.save(Member.from(saveMemberDto)).toModel();
 	}
 
-	private void existsMember(String username, String nickname) {
-		boolean usernameExists = memberRepository.existsByUsername(username);
-		boolean nicknameExists = memberRepository.existsByNickname(nickname);
+	public void passwordChange(String originalPassword, String changePassword, Member loginMember) {
 
-		if (usernameExists) {
-			throw new MemberException(MemberErrorCode.EXISTS_USERNAME);
+		if (!passwordEncoder.matches(originalPassword, loginMember.getPassword())) {
+			throw new MemberException(MemberErrorCode.PASSWORD_NOT_MATCH);
 		}
 
-		if (nicknameExists) {
-			throw new MemberException(MemberErrorCode.EXISTS_NICKNAME);
-		}
-	}
+		loginMember.changePassword(passwordEncoder.encode(changePassword));
 
-	private String generateCertificationUrl(String to, String certificationCode, VerifyType verifyType) {
-		return verifyUrl + "email=" + to + "&certificationCode="
-			+ certificationCode + "&verifyType=" + verifyType.toString();
+		memberRepository.save(loginMember);
 	}
 
 	public MemberInfoResponse modify(MemberDto memberDto, MemberModifyForm memberModifyForm) {
@@ -111,6 +95,16 @@ public class MemberService {
 		return MemberConverter.from(
 			memberRepository.save(Member.from(MemberConverter.of(memberDto, memberModifyForm))));
 	}
+
+	private void existsMember(String username, String nickname) {
+		boolean usernameExists = memberRepository.existsByUsername(username);
+		existsNickname(nickname);
+
+		if (usernameExists) {
+			throw new MemberException(MemberErrorCode.EXISTS_USERNAME);
+		}
+	}
+
 
 	private void existsNickname (String nickname) {
 		boolean nicknameExists = memberRepository.existsByNickname(nickname);
