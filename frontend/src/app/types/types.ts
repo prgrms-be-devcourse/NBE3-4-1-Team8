@@ -12,14 +12,14 @@ interface ApiResponse<T> {
   data: {
     content: T[];
     pageable: {
-      pageNumber: number;
-      pageSize: number;
-      offset: number;
-    };
-    totalElements: number;
-    totalPages: number;
-    number: number;
-    size: number;
+      pageNumber: number | null;
+      pageSize: number | null;
+      offset: number | null;
+    } | null;
+    totalElements: number | null;
+    totalPages: number | null;
+    number: number | null;
+    size: number | null;
   };
   success: boolean;
 }
