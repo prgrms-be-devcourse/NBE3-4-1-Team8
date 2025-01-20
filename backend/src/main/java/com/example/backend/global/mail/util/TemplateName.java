@@ -6,5 +6,5 @@ package com.example.backend.global.mail.util;
  * @author Kim Dong O
  */
 public enum TemplateName {
-	SIGNUP_VERIFY, PASSWORD_RESET, PASSWORD_RESET_VERIFY;
+	SIGNUP_VERIFY, PASSWORD_RESET, PASSWORD_RESET_VERIFY, DELIVERY_START;
 }

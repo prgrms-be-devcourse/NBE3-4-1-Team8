@@ -53,6 +53,9 @@ public class MailConfig {
 	@Value("${mail.templates.signup-verify}")
     private String signupVerify;
 
+	@Value("${mail.templates.delivery-start}")
+	private String deliveryStart;
+
 
 	@Bean
 	public JavaMailSender mailSender() {
@@ -76,6 +79,7 @@ public class MailConfig {
 		templateNameMap.put(TemplateName.PASSWORD_RESET.toString(), passwordReset);
 		templateNameMap.put(TemplateName.PASSWORD_RESET_VERIFY.toString(), emailVerify);
 		templateNameMap.put(TemplateName.SIGNUP_VERIFY.toString(), signupVerify);
+		templateNameMap.put(TemplateName.DELIVERY_START.toString(), deliveryStart);
 
 		EmailTemplateMaker emailTemplateMaker = new EmailTemplateMaker(
 			thymeleafTemplateEngine(),
