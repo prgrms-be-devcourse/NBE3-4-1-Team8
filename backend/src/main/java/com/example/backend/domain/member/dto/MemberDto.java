@@ -22,20 +22,7 @@ import lombok.Builder;
  * @param modifiedAt
  * @author Kim Dong O
  */
+@Builder
 public record MemberDto(Long id, String username, String nickname, String password, MemberStatus memberStatus, Role role, Address address, ZonedDateTime createdAt,
 						ZonedDateTime modifiedAt) {
-
-	@Builder
-	public MemberDto(Long id, String username, String nickname, String password, MemberStatus memberStatus, Role role, Address address, ZonedDateTime createdAt,
-		ZonedDateTime modifiedAt) {
-		this.id = id;
-		this.username = username;
-		this.nickname = nickname;
-		this.password = password;
-		this.memberStatus = memberStatus;
-		this.role = role;
-		this.address = address;
-		this.createdAt = createdAt;
-		this.modifiedAt = modifiedAt;
-	}
 }

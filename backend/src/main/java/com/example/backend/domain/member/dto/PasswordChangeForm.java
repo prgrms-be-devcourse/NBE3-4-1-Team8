@@ -9,19 +9,13 @@ import com.example.backend.global.validation.validator.PasswordMatchable;
 import lombok.Builder;
 
 @PasswordMatch(groups = PatternGroup.class)
+@Builder
 public record PasswordChangeForm(
 	@ValidPassword(groups = PatternGroup.class) String originalPassword,
 
 	@ValidPassword(groups = PatternGroup.class) String password,
 
 	@ValidPassword(groups = PatternGroup.class) String passwordCheck) implements PasswordMatchable {
-
-	@Builder
-	public PasswordChangeForm(String originalPassword, String password, String passwordCheck) {
-		this.originalPassword = originalPassword;
-		this.password = password;
-		this.passwordCheck = passwordCheck;
-	}
 
 	@Override
 	public String getPassword() {
