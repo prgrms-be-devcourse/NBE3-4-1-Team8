@@ -4,6 +4,7 @@ import com.example.backend.domain.cart.dto.CartForm;
 import com.example.backend.domain.cart.dto.CartResponse;
 import com.example.backend.domain.cart.dto.CartUpdateForm;
 import com.example.backend.domain.cart.entity.Cart;
+import com.example.backend.domain.cart.exception.CartErrorCode;
 import com.example.backend.domain.cart.exception.CartException;
 import com.example.backend.domain.cart.repository.CartRepository;
 import com.example.backend.domain.member.entity.Member;
@@ -167,7 +168,7 @@ class CartServiceTest {
 
         // Then
         assertThat(updatedCartId).isEqualTo(cart.getId());
-        verify(cartRepository).save(any(Cart.class));
+        assertThat(cart.getQuantity()).isEqualTo(cartUpdateForm.quantity());
     }
 
     @Test
@@ -181,20 +182,27 @@ class CartServiceTest {
         // when & then
         assertThatThrownBy(() -> cartService.updateCartItemQuantity(cartUpdateForm, member))
                 .isInstanceOf(CartException.class)
-                .hasMessage("장바구니에 존재하지 않는 상품입니다.");
+                .satisfies(exception -> {
+                    CartException cartException = (CartException) exception;
+                    assertThat(cartException.getCode()).isEqualTo(CartErrorCode.PRODUCT_NOT_FOUND_IN_CART.getCode());
+                });
     }
 
     @Test
     @DisplayName("수량이 변경되지 않은 경우 예외 발생")
     void updateCartItemQuantity_WithSameQuantity_ThrowsCartException() {
         // given
-        CartUpdateForm cartUpdateForm = new CartUpdateForm(1L, 5);
+        cart.updateQuantity(5);  // 현재 수량을 5로 설정
+        CartUpdateForm cartUpdateForm = new CartUpdateForm(1L, 5);  // 같은 수량으로 업데이트 시도
         given(cartRepository.findByProductIdAndMemberId(cartUpdateForm.productId(), member.getId()))
                 .willReturn(Optional.of(cart));
 
         // when & then
         assertThatThrownBy(() -> cartService.updateCartItemQuantity(cartUpdateForm, member))
                 .isInstanceOf(CartException.class)
-                .hasMessage("현재 수량과 동일한 수량입니다.");
+                .satisfies(exception -> {
+                    CartException cartException = (CartException) exception;
+                    assertThat(cartException.getCode()).isEqualTo(CartErrorCode.SAME_QUANTITY_IN_CART.getCode());
+                });
     }
 }
