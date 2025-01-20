@@ -322,4 +322,53 @@ public class OrdersRepositoryTest {
 		);
 	}
 
+	@Test
+	@DisplayName("전날 오후 2시부터 당일 2시까지 배송 준비중인 회원 username 조회")
+	void findUsernameByReady() {
+		//given
+		Member savedMember = memberRepository.save(createMember());
+		Product savedProduct = productRepository.save(createProduct());
+
+		ProductOrders productOrders1 = createProductOrders(savedProduct);
+		ProductOrders productOrders2 = createProductOrders(savedProduct);
+		ProductOrders productOrders3 = createProductOrders(savedProduct);
+
+		Orders createOrders1 = Orders.create()
+			.member(savedMember)
+			.address(savedMember.getAddress())
+			.productOrdersList(List.of(productOrders1, productOrders2, productOrders3))
+			.build();
+
+		Orders createOrders2 = Orders.create()
+			.member(savedMember)
+			.address(savedMember.getAddress())
+			.productOrdersList(List.of(productOrders1, productOrders2, productOrders3))
+			.build();
+
+		Orders createOrders3 = Orders.create()
+			.member(savedMember)
+			.address(savedMember.getAddress())
+			.productOrdersList(List.of(productOrders1, productOrders2, productOrders3))
+			.build();
+
+		createOrders3.changeStatus(DeliveryStatus.SHIPPED);
+
+		ordersRepository.saveAll(List.of(createOrders1, createOrders2, createOrders3));
+
+		ZonedDateTime now = ZonedDateTime.now();
+		ZonedDateTime startTime = now.minusDays(1).with(LocalTime.of(14, 0));
+		ZonedDateTime endTime = now.with(LocalTime.of(14, 0));
+
+		//when
+		List<String> usernameList = ordersRepository.findUsernameByReady(startTime, endTime);
+
+		//then
+		String username1 = usernameList.get(0);
+		String username2 = usernameList.get(1);
+
+		assertThat(usernameList.size()).isEqualTo(2);
+		assertThat(username1).isEqualTo(createOrders1.getMember().getUsername());
+		assertThat(username2).isEqualTo(createOrders2.getMember().getUsername());
+	}
+
 }

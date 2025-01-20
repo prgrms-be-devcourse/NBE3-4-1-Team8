@@ -1,6 +1,7 @@
 package com.example.backend.global.mail.service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -70,6 +71,24 @@ public class MailServiceImpl implements MailService {
 
 		MimeMessage mimeMessage = templateMaker.create(mailSender.createMimeMessage(), to, title, htmlParameterMap,
 			templateName);
+
+		mailSender.send(mimeMessage);
+	}
+
+	@Async("threadPoolTaskExecutor")
+	@Override
+	public void sendDeliveryStartEmail(List<String> to, TemplateName templateName) {
+		StringBuilder titleBuilder = new StringBuilder();
+
+		switch (templateName) {
+			case TemplateName.DELIVERY_START -> {
+				titleBuilder.append("[TEAM8] 배송 시작 메일 입니다.");
+			}
+		}
+
+		String title = titleBuilder.toString();
+
+		MimeMessage mimeMessage = templateMaker.create(mailSender.createMimeMessage(), to, title, templateName);
 
 		mailSender.send(mimeMessage);
 	}

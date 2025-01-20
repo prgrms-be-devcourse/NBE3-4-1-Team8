@@ -1,5 +1,6 @@
 package com.example.backend.global.mail.util;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,7 +29,7 @@ public class EmailTemplateMaker implements TemplateMaker {
 	}
 
 	@Override
-	public MimeMessage create(MimeMessage newMimeMessage, String email, String title,
+	public MimeMessage create(MimeMessage newMimeMessage, String username, String title,
 		Map<String, String> htmlParameterMap, TemplateName templateName) {
 		try {
 			MimeMessageHelper helper = new MimeMessageHelper(newMimeMessage, true, "UTF-8");
@@ -41,7 +42,30 @@ public class EmailTemplateMaker implements TemplateMaker {
 			String processedHtmlContent = templateEngine.process(templateNameMap.get(templateName.toString()), context);
 			log.info("processedHtmlContent = {}", processedHtmlContent);
 
-			helper.setTo(email);
+			helper.setTo(username);
+			helper.setSubject(title);
+			helper.setText(processedHtmlContent, true);
+
+		} catch (MessagingException e) {
+			throw new RuntimeException(e);
+		}
+
+		return newMimeMessage;
+	}
+
+	@Override
+	public MimeMessage create(MimeMessage newMimeMessage, List<String> usernameList, String title, TemplateName templateName) {
+		try {
+			MimeMessageHelper helper = new MimeMessageHelper(newMimeMessage, true, "UTF-8");
+
+			Context context = new Context();
+
+			String[] emailArray = usernameList.toArray(new String[0]);
+
+			String processedHtmlContent = templateEngine.process(templateNameMap.get(templateName.toString()), context);
+			log.info("processedHtmlContent = {}", processedHtmlContent);
+
+			helper.setTo(emailArray);
 			helper.setSubject(title);
 			helper.setText(processedHtmlContent, true);
 
