@@ -1,5 +1,5 @@
 "use client";
-import {ChangeEvent, FormEvent, useEffect, useState} from "react";
+import {ChangeEvent, FormEvent, useState} from "react";
 import {useRouter} from "next/navigation";
 import {useUser} from "@/app/components/UserProvider";
 
@@ -27,6 +27,7 @@ function LoginForm() {
         password: "",
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [isLoading, setIsLoading] = useState(false);
     const [emailNotVerified, setEmailNotVerified] = useState(false); // 이메일 인증 실패 여부
     const [isEmailSent, setIsEmailSent] = useState<boolean>(false); // 이메일 전송 성공 여부
     const [fixedEmail, setFixedEmail] = useState<string | null>(null); // 고정된 이메일
@@ -34,10 +35,12 @@ function LoginForm() {
     const { setUsername } = useUser();
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+        if (isLoading) return;
         e.preventDefault();
         setErrors({});
         setEmailNotVerified(false);  // 로그인 시 이메일 인증 상태 초기화
         setFixedEmail(null); // 로그인 시마다 고정된 이메일 초기화
+        setIsLoading(true);
 
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
@@ -58,12 +61,14 @@ function LoginForm() {
                     });
                     setEmailNotVerified(true);  // 이메일 인증 미완료 상태로 설정
                     setFixedEmail(formData.username); // 로그인 시도한 이메일로 고정
+                    setIsLoading(false);
                     return;
                 }
 
                 setErrors({
                     form: errorData.message || "알 수 없는 오류가 발생했습니다.",
                 });
+                setIsLoading(false);
                 return;
             }
 
@@ -80,6 +85,8 @@ function LoginForm() {
                 form: "서버와의 통신 중 오류가 발생했습니다.",
             });
             console.error(error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -92,6 +99,8 @@ function LoginForm() {
     };
 
     const handleResendEmail = async (email: string) => {
+        if(isLoading) return;
+        setIsLoading(true);
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/code`, {
                 method: "POST",
@@ -110,6 +119,7 @@ function LoginForm() {
                     form: "이메일 재전송에 실패했습니다. 다시 시도해주세요.",
                 });
                 setIsEmailSent(false);  // 실패 시 이메일 전송 성공 상태를 false로 설정
+                setIsLoading(false);
                 return;
             }
 
@@ -120,6 +130,9 @@ function LoginForm() {
             });
             console.error(error);
             setIsEmailSent(false);  // 실패 시 이메일 전송 성공 상태를 false로 설정
+            setIsLoading(false);
+        } finally {
+            setIsLoading(false);
         }
     };
 
