@@ -47,6 +47,7 @@ public class GlobalControllerAdvice {
 	@ExceptionHandler({MethodArgumentNotValidException.class})
 	public ResponseEntity<HttpErrorInfo> handlerMethodArgumentNotValidException(MethodArgumentNotValidException ex,
 		HttpServletRequest request) {
+		log.error("handlerMethodArgumentNotValidException", ex);
 		BindingResult bindingResult = ex.getBindingResult();
 		List<ErrorDetail> errors = new ArrayList<>();
 		GlobalErrorCode globalErrorCode = GlobalErrorCode.NOT_VALID;
@@ -87,6 +88,8 @@ public class GlobalControllerAdvice {
 	@ExceptionHandler(ConstraintViolationException.class)
 	public ResponseEntity<HttpErrorInfo> handleConstraintViolationException(ConstraintViolationException ex,
 		HttpServletRequest request) {
+		log.error("handleConstraintViolationException", ex);
+
 		Set<ConstraintViolation<?>> constraintViolations = ex.getConstraintViolations();
 		List<ErrorDetail> errorDetails = new ArrayList<>();
 
@@ -113,21 +116,21 @@ public class GlobalControllerAdvice {
 	 */
 	@ExceptionHandler(MemberException.class)
 	public ResponseEntity<HttpErrorInfo> handlerMemberException(MemberException ex, HttpServletRequest request) {
-		log.error("GlobalControllerAdvice={}", ex);
+		log.error("handlerMemberException", ex);
 		return ResponseEntity.status(ex.getStatus())
 			.body(HttpErrorInfo.of(ex.getCode(), request.getRequestURI(), ex.getMessage()));
 	}
 
 	@ExceptionHandler(GlobalException.class)
 	public ResponseEntity<HttpErrorInfo> handlerGlobalException(GlobalException ex, HttpServletRequest request) {
-		log.error("GlobalControllerAdvice={}", ex);
+		log.error("handlerGlobalException", ex);
 		return ResponseEntity.status(ex.getStatus())
 			.body(HttpErrorInfo.of(ex.getCode(), request.getRequestURI(), ex.getMessage()));
 	}
 
 	@ExceptionHandler(AuthException.class)
 	public ResponseEntity<HttpErrorInfo> handlerAuthException(AuthException ex, HttpServletRequest request) {
-		log.error("AuthControllerAdvice={}", ex);
+		log.error("handlerAuthException", ex);
 		return ResponseEntity.status(ex.getStatus())
 			.body(HttpErrorInfo.of(ex.getCode(), request.getRequestURI(), ex.getMessage()));
 	}
@@ -141,7 +144,7 @@ public class GlobalControllerAdvice {
 	 */
 	@ExceptionHandler(ProductException.class)
 	public ResponseEntity<HttpErrorInfo> handlerProductException(ProductException ex, HttpServletRequest request) {
-		log.info("GlobalControllerAdvice={}", ex);
+		log.error("handlerProductException", ex);
 		return ResponseEntity.status(ex.getStatus())
 			.body(HttpErrorInfo.of(ex.getCode(), request.getRequestURI(), ex.getMessage()));
 	}
@@ -155,6 +158,8 @@ public class GlobalControllerAdvice {
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	public ResponseEntity<HttpErrorInfo> handlerHttpMessageNotReadableException(HttpMessageNotReadableException ex,
 		HttpServletRequest request) {
+		log.error("handlerHttpMessageNotReadableException", ex);
+
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 			.body(HttpErrorInfo.of("400", request.getRequestURI(), ex.getMessage()));
 	}

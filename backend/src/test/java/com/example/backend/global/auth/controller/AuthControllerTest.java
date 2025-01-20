@@ -4,9 +4,6 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,20 +20,23 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.example.backend.domain.common.VerifyType;
 import com.example.backend.domain.member.exception.MemberErrorCode;
 import com.example.backend.domain.member.exception.MemberException;
+import com.example.backend.global.auth.dto.AuthForm;
+import com.example.backend.global.auth.dto.AuthResponse;
 import com.example.backend.global.auth.dto.EmailCertificationForm;
+import com.example.backend.global.auth.dto.SendEmailCertificationCodeForm;
 import com.example.backend.global.auth.exception.AuthErrorCode;
 import com.example.backend.global.auth.exception.AuthException;
 import com.example.backend.global.auth.service.AuthService;
 import com.example.backend.global.auth.service.CookieService;
-import com.example.backend.global.auth.dto.AuthForm;
-import com.example.backend.global.auth.dto.AuthResponse;
 import com.example.backend.global.config.CorsConfig;
 import com.example.backend.global.config.TestSecurityConfig;
 import com.example.backend.global.exception.GlobalErrorCode;
 import com.example.backend.global.exception.GlobalException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 @ExtendWith(SpringExtension.class)
@@ -437,5 +437,77 @@ public class AuthControllerTest {
 		verify(cookieService, times(1)).getAccessTokenFromRequest(any(HttpServletRequest.class));
 		verify(authService, times(1)).logout(accessToken);
 		verify(cookieService, times(1)).deleteRefreshTokenFromCookie(any(HttpServletResponse.class));
+	}
+
+	@DisplayName("인증 코드 이메일 전송 성공 테스트")
+	@Test
+	void send_success() throws Exception {
+	    //given
+		SendEmailCertificationCodeForm givenSendEmailCertificationCodeForm = SendEmailCertificationCodeForm.builder()
+			.username("testEmail@naver.com")
+			.verifyType(VerifyType.SIGNUP)
+			.build();
+
+		doNothing().when(authService)
+			.send(givenSendEmailCertificationCodeForm.username(), givenSendEmailCertificationCodeForm.verifyType());
+
+		//when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/auth/code")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(givenSendEmailCertificationCodeForm)));
+
+	    //then
+		resultActions
+			.andExpect(status().isOk());
+	}
+
+	@DisplayName("인증 타입이 일치하지 않을 때 실패 테스트")
+	@Test
+	void send_verify_type_not_match_fail() throws Exception {
+	    //given
+		SendEmailCertificationCodeForm givenSendEmailCertificationCodeForm = SendEmailCertificationCodeForm.builder()
+			.username("testEmail@naver.com")
+			.verifyType(VerifyType.SIGNUP)
+			.build();
+
+		doThrow(new AuthException(AuthErrorCode.VERIFY_TYPE_NOT_MATCH))
+			.when(authService)
+			.send(givenSendEmailCertificationCodeForm.username(), givenSendEmailCertificationCodeForm.verifyType());
+
+		//when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/auth/code")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(givenSendEmailCertificationCodeForm)));
+
+	    //then
+		resultActions
+			.andExpect(status().isUnauthorized())
+			.andExpect(jsonPath("$.code").value(AuthErrorCode.VERIFY_TYPE_NOT_MATCH.getCode()))
+			.andExpect(jsonPath("$.message").value(AuthErrorCode.VERIFY_TYPE_NOT_MATCH.getMessage()));
+	}
+
+	@DisplayName("인증 타입이 일치하지 않을 때 실패 테스트")
+	@Test
+	void send_too_many_resend_attempts_fail() throws Exception {
+	    //given
+		SendEmailCertificationCodeForm givenSendEmailCertificationCodeForm = SendEmailCertificationCodeForm.builder()
+			.username("testEmail@naver.com")
+			.verifyType(VerifyType.SIGNUP)
+			.build();
+
+		doThrow(new AuthException(AuthErrorCode.TOO_MANY_RESEND_ATTEMPTS))
+			.when(authService)
+			.send(givenSendEmailCertificationCodeForm.username(), givenSendEmailCertificationCodeForm.verifyType());
+
+		//when
+		ResultActions resultActions = mockMvc.perform(post("/api/v1/auth/code")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(givenSendEmailCertificationCodeForm)));
+
+	    //then
+		resultActions
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value(AuthErrorCode.TOO_MANY_RESEND_ATTEMPTS.getCode()))
+			.andExpect(jsonPath("$.message").value(AuthErrorCode.TOO_MANY_RESEND_ATTEMPTS.getMessage()));
 	}
 }

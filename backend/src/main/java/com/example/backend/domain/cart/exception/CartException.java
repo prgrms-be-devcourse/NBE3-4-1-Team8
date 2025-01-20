@@ -3,7 +3,7 @@ package com.example.backend.domain.cart.exception;
 import org.springframework.http.HttpStatus;
 
 public class CartException extends RuntimeException {
-    private CartErrorCode cartErrorCode;
+    private final CartErrorCode cartErrorCode;
 
     public CartException(CartErrorCode cartErrorCode) {
         super(cartErrorCode.message);

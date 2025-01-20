@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 
 public class OrdersException extends RuntimeException {
 
-    private OrdersErrorCode ordersErrorCode;
+    private final OrdersErrorCode ordersErrorCode;
 
     public OrdersException(OrdersErrorCode ordersErrorCode) {
         super(ordersErrorCode.message);

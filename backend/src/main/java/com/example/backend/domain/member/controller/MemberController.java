@@ -17,6 +17,7 @@ import com.example.backend.domain.member.dto.MemberInfoResponse;
 import com.example.backend.domain.member.dto.MemberModifyForm;
 import com.example.backend.domain.member.dto.MemberSignupForm;
 import com.example.backend.domain.member.service.MemberDeleteService;
+import com.example.backend.domain.member.dto.PasswordChangeForm;
 import com.example.backend.domain.member.service.MemberService;
 import com.example.backend.global.auth.model.CustomUserDetails;
 import com.example.backend.global.auth.service.CookieService;
@@ -75,4 +76,16 @@ public class MemberController {
 		memberDeleteService.delete(customUserDetails.getMember().toModel());
 		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(GenericResponse.of());
 	}
+
+	@Operation(summary = "회원 비밀번호 변경")
+	@PatchMapping("/password")
+	public ResponseEntity<GenericResponse<Void>> changePassword(@Validated(ValidationSequence.class) @RequestBody
+	PasswordChangeForm passwordChangeForm, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
+		memberService.passwordChange(passwordChangeForm.originalPassword(), passwordChangeForm.getPassword(),
+			customUserDetails.getMember());
+
+		return ResponseEntity.ok().body(GenericResponse.of());
+	}
+
 }

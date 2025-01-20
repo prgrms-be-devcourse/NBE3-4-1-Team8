@@ -6,7 +6,11 @@ import com.example.backend.domain.member.dto.MemberInfoResponse;
 import com.example.backend.domain.member.dto.MemberModifyForm;
 import com.example.backend.domain.member.entity.Member;
 
-public final class MemberConverter {
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class MemberConverter {
 
 	public static MemberInfoResponse from(Member member){
 		return MemberInfoResponse.builder()
@@ -16,8 +20,8 @@ public final class MemberConverter {
 			.build();
 	}
 
-	public static MemberDto of(MemberDto memberDto, MemberModifyForm memberModifyForm){
-		return MemberDto.builder()
+	public static Member of(MemberDto memberDto, MemberModifyForm memberModifyForm){
+		return Member.builder()
 			.id(memberDto.id())
 			.username(memberDto.username())
 			.nickname(memberModifyForm.nickname())

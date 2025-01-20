@@ -1,17 +1,5 @@
 package com.example.backend.global.auth.controller;
 
-import com.example.backend.global.auth.dto.AuthForm;
-import com.example.backend.global.auth.dto.AuthLoginResponse;
-import com.example.backend.global.auth.dto.AuthResponse;
-import com.example.backend.global.auth.service.AuthService;
-import com.example.backend.global.auth.service.CookieService;
-import com.example.backend.global.response.GenericResponse;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -20,8 +8,21 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.backend.global.auth.dto.AuthForm;
+import com.example.backend.global.auth.dto.AuthLoginResponse;
+import com.example.backend.global.auth.dto.AuthResponse;
 import com.example.backend.global.auth.dto.EmailCertificationForm;
+import com.example.backend.global.auth.dto.SendEmailCertificationCodeForm;
+import com.example.backend.global.auth.service.AuthService;
+import com.example.backend.global.auth.service.CookieService;
+import com.example.backend.global.response.GenericResponse;
 import com.example.backend.global.validation.ValidationSequence;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -63,6 +64,15 @@ public class AuthController {
 	EmailCertificationForm emailCertificationForm) {
 		authService.verify(emailCertificationForm.username(), emailCertificationForm.certificationCode(),
 			emailCertificationForm.verifyType());
+
+		return ResponseEntity.ok().body(GenericResponse.of());
+	}
+
+	@Operation(summary = "이메일 인증 코드 발송")
+	@PostMapping("/code")
+	public ResponseEntity<GenericResponse<Void>> code(@RequestBody @Validated(ValidationSequence.class)
+		SendEmailCertificationCodeForm sendEmailCertificationCodeForm) {
+		authService.send(sendEmailCertificationCodeForm.username(), sendEmailCertificationCodeForm.verifyType());
 
 		return ResponseEntity.ok().body(GenericResponse.of());
 	}

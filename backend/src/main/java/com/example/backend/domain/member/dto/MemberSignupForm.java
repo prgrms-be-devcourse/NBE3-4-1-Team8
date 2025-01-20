@@ -24,6 +24,7 @@ import lombok.Builder;
  * @param detail 상세 주소
  * @author Kim Dong O
  */
+@Builder
 @PasswordMatch(groups = PatternGroup.class)
 public record MemberSignupForm(
 	@ValidUsername(groups = PatternGroup.class)
@@ -50,19 +51,6 @@ public record MemberSignupForm(
 	@NotBlank(message = "상세 주소는 필수 항목 입니다.", groups = NotBlankGroup.class)
 	String detail)
 	implements PasswordMatchable {
-
-	@Builder
-	public MemberSignupForm(String username, String nickname, String password, String passwordCheck,
-		String city, String district, String country, String detail) {
-		this.username = username;
-		this.nickname = nickname;
-		this.password = password;
-		this.passwordCheck = passwordCheck;
-		this.city = city;
-		this.district = district;
-		this.country = country;
-		this.detail = detail;
-	}
 
 	@Override
 	public String getPassword() {
