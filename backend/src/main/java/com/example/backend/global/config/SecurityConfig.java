@@ -49,7 +49,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                 .requestMatchers(HttpMethod.GET, "/api/v1/products").permitAll()
                 .requestMatchers("/api/v1/members/join", "/api/v1/auth/verify", "/api/v1/auth/login", "/api/v1/auth/code").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/products/{id}").hasRole("USERv")
+                .requestMatchers(HttpMethod.GET, "/api/v1/products/{id}").hasAnyRole("USER")
                 .requestMatchers("/api/v1/members/**").hasAnyRole("USER", "ADMIN")
                 .requestMatchers("/api/v1/auth/**").hasAnyRole("USER", "ADMIN")
                 .requestMatchers("/api/v1/products/**").hasAnyRole("ADMIN")
