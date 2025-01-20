@@ -43,12 +43,12 @@ class OrdersServiceTest {
         ZonedDateTime now = ZonedDateTime.now();
         List<ProductOrders> productOrders = mockProductOrders();
 
-        when(orders.getId()).thenReturn(id);
-        when(orders.getTotalPrice()).thenReturn(1000);
-        when(orders.getDeliveryStatus()).thenReturn(status);
-        when(orders.getCreatedAt()).thenReturn(now);
-        when(orders.getModifiedAt()).thenReturn(now);
-        when(orders.getProductOrdersList()).thenReturn(productOrders);
+        lenient().when(orders.getId()).thenReturn(id);
+        lenient().when(orders.getTotalPrice()).thenReturn(1000);
+        lenient().when(orders.getDeliveryStatus()).thenReturn(status);
+        lenient().when(orders.getCreatedAt()).thenReturn(now);
+        lenient().when(orders.getModifiedAt()).thenReturn(now);
+        lenient().when(orders.getProductOrdersList()).thenReturn(productOrders);
 
         return orders;
     }
@@ -58,9 +58,11 @@ class OrdersServiceTest {
         Product product = mock(Product.class);
 
         // OrdersResponse에서 실제로 사용하는 필드만 stub
-        when(product.getName()).thenReturn("A");
+        lenient().when(product.getName()).thenReturn("A");
         lenient().when(product.getImgUrl()).thenReturn("http://example.com/productA.jpg");
-        when(productOrder.getProduct()).thenReturn(product);
+        lenient().when(product.getQuantity()).thenReturn(10);
+        lenient().when(productOrder.getProduct()).thenReturn(product);
+        when(productOrder.getQuantity()).thenReturn(1);
 
         return List.of(productOrder);
     }
@@ -280,5 +282,47 @@ class OrdersServiceTest {
                         DeliveryStatus.READY,
                         DeliveryStatus.SHIPPED)
         );
+    }
+
+    //todo 이미 취소 상태일때 취소불가, 배송중일때 취소 불가, 수량 정상 복구
+
+    @Test
+    @DisplayName("주문 정상 취소")
+    void order_cancel_success() {
+        Orders orders = mockOrder(1L, DeliveryStatus.READY);
+
+        when(ordersRepository.findOrderById(1L)).thenReturn(Optional.of(orders));
+
+        ordersService.cancelById(1L);
+
+        verify(orders).changeStatus(DeliveryStatus.CANCEL);
+        verify(orders.getProductOrdersList().get(0)).restore(1);
+        verify(ordersRepository).save(orders);
+    }
+
+    @Test
+    @DisplayName("이미 주문 취소 상태이면 취소 불가")
+    void fail_if_status_cancel() {
+
+        Orders orders = mockOrder(1L, DeliveryStatus.CANCEL);
+        when(ordersRepository.findOrderById(1L)).thenReturn(Optional.of(orders));
+
+        assertThatThrownBy(() -> ordersService.cancelById(1L))
+                .isInstanceOf(OrdersException.class)
+                .hasMessage("이미 취소된 상품입니다.");
+
+    }
+
+    @Test
+    @DisplayName("배송중일때 취소 불가")
+    void fail_if_status_shipped() {
+        Orders orders = mockOrder(1L, DeliveryStatus.SHIPPED);
+
+        when(ordersRepository.findOrderById(1L)).thenReturn(Optional.of(orders));
+
+        assertThatThrownBy(() -> ordersService.cancelById(1L))
+                .isInstanceOf(OrdersException.class)
+                .hasMessage("이미 배송중입니다.");
+
     }
 }

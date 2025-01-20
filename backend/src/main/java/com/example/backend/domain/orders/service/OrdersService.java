@@ -94,7 +94,7 @@ public class OrdersService {
 
     @Transactional
     public void cancelById(Long id) {
-        Orders orders = ordersRepository.findById(id)
+        Orders orders = ordersRepository.findOrderById(id)
                 .orElseThrow(() -> new OrdersException(OrdersErrorCode.NOT_FOUND));
 
         if (orders.getDeliveryStatus() == DeliveryStatus.CANCEL) {
