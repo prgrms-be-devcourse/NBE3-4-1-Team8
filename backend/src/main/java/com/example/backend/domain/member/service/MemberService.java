@@ -93,7 +93,7 @@ public class MemberService {
 		existsNickname(memberModifyForm.nickname());
 
 		return MemberConverter.from(
-			memberRepository.save(Member.from(MemberConverter.of(memberDto, memberModifyForm))));
+			memberRepository.save(MemberConverter.of(memberDto, memberModifyForm)));
 	}
 
 	private void existsMember(String username, String nickname) {
