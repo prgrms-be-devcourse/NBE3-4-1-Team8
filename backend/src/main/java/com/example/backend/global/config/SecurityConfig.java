@@ -3,6 +3,7 @@ package com.example.backend.global.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -46,6 +47,7 @@ public class SecurityConfig {
                 SessionCreationPolicy.STATELESS))
             .addFilter(corsConfig.corsFilter())
             .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+                .requestMatchers(HttpMethod.GET, "/api/v1/products").permitAll()
                 .requestMatchers("/api/v1/members/join", "/api/v1/auth/verify", "/api/v1/auth/login", "/api/v1/auth/code").permitAll()
                 .requestMatchers("/api/v1/members/**").hasAnyRole("USER", "ADMIN")
                 .requestMatchers("/api/v1/auth/**").hasAnyRole("USER", "ADMIN")
