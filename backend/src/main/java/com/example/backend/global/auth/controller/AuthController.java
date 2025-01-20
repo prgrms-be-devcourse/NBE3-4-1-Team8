@@ -49,9 +49,9 @@ public class AuthController {
 	@Operation(summary = "로그아웃", description = "accessToken, refreshToken 을 제거")
     @PostMapping("/logout")
     public ResponseEntity<GenericResponse<Void>> logout(HttpServletRequest request, HttpServletResponse response) {
-        String accessToken = cookieService.getAccessTokenFromRequest(request);
+        String refreshToken = cookieService.getRefreshTokenFromRequest(request);
 
-        authService.logout(accessToken);
+        authService.logout(refreshToken);
 		cookieService.deleteAccessTokenFromCookie(response);
         cookieService.deleteRefreshTokenFromCookie(response);
 
