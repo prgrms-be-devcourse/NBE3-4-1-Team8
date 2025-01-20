@@ -18,5 +18,6 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
 
     void deleteByMemberId(Long memberId);
 
-    Optional<Cart> findByProductIdAndMemberId(Long productId, Long memberId);
+    @Query("SELECT c FROM Cart c JOIN FETCH c.member WHERE c.product.id = :productId AND c.member.id = :memberId")
+    Optional<Cart> findByProductIdAndMemberId(@Param("productId") Long productId, @Param("memberId") Long memberId);
 }
