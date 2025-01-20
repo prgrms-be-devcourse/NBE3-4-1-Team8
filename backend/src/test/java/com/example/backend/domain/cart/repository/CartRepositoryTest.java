@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -131,5 +132,53 @@ class CartRepositoryTest {
                 .containsExactlyInAnyOrder("Test Product", "Test Product 2");
         assertThat(cartList).extracting("quantity")
                 .containsExactlyInAnyOrder(1, 2);
+    }
+
+    @Test
+    @DisplayName("장바구니 상품 조회 및 수량 변경 테스트")
+    void findByProductAndMemberWithQuantityChange() {
+        // Given
+        Cart cart = Cart.builder()
+                .member(member)
+                .product(product)
+                .quantity(1)
+                .build();
+        cartRepository.save(cart);
+
+        // When & Then: 최초 조회 검증
+        Optional<Cart> foundCart = cartRepository.findByProductIdAndMemberId(
+                product.getId(),
+                member.getId()
+        );
+        assertInitialCart(foundCart);
+
+        // When & Then: 수량 변경 후 재조회 검증
+        updateAndVerifyCartQuantity(foundCart.get());
+    }
+
+    @DisplayName("초기 장바구니 상태 검증")
+    private void assertInitialCart(Optional<Cart> foundCart) {
+        assertTrue(foundCart.isPresent(), "장바구니 항목이 존재해야 합니다");
+        Cart cart = foundCart.get();
+        assertThat(cart.getProduct()).isEqualTo(product);
+        assertThat(cart.getMember()).isEqualTo(member);
+        assertThat(cart.getQuantity()).isEqualTo(1);
+    }
+
+    @DisplayName("장바구니 수량 변경 및 검증")
+    private void updateAndVerifyCartQuantity(Cart cart) {
+        // When: 수량 변경
+        cart.updateQuantity(3);
+        cartRepository.save(cart);
+
+        // Then: 변경된 수량 검증
+        Optional<Cart> updatedCart = cartRepository.findByProductIdAndMemberId(
+                product.getId(),
+                member.getId()
+        );
+        assertTrue(updatedCart.isPresent(), "수정된 장바구니 항목이 존재해야 합니다");
+        assertThat(updatedCart.get().getQuantity())
+                .as("장바구니 수량이 3으로 변경되어야 합니다")
+                .isEqualTo(3);
     }
 }

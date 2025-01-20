@@ -2,7 +2,9 @@ package com.example.backend.domain.cart.service;
 
 import com.example.backend.domain.cart.dto.CartForm;
 import com.example.backend.domain.cart.dto.CartResponse;
+import com.example.backend.domain.cart.dto.CartUpdateForm;
 import com.example.backend.domain.cart.entity.Cart;
+import com.example.backend.domain.cart.exception.CartErrorCode;
 import com.example.backend.domain.cart.exception.CartException;
 import com.example.backend.domain.cart.repository.CartRepository;
 import com.example.backend.domain.member.entity.Member;
@@ -20,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -144,4 +147,62 @@ class CartServiceTest {
         verify(cartRepository).findAllByMemberWithProducts(member);
     }
 
+    /**
+     * updateCartItemQuantity() 메서드 테스트
+     * - 장바구니 수량 업데이트 성공
+     * - 수량이 0 이하일 때 예외 발생
+     * - 장바구니에 해당 상품이 없는 경우 예외 발생
+     * - 수량이 변경되지 않은 경우 예외 발생
+     */
+
+    @Test
+    @DisplayName("장바구니 수량 업데이트 성공")
+    void updateCartItemQuantity_Success() {
+        // Given
+        CartUpdateForm cartUpdateForm = new CartUpdateForm(product.getId(), 10);
+        given(cartRepository.findByProductIdAndMemberId(cartUpdateForm.productId(), member.getId()))
+                .willReturn(Optional.of(cart));
+
+        // When
+        Long updatedCartId = cartService.updateCartItemQuantity(cartUpdateForm, member);
+
+        // Then
+        assertThat(updatedCartId).isEqualTo(cart.getId());
+        assertThat(cart.getQuantity()).isEqualTo(cartUpdateForm.quantity());
+    }
+
+    @Test
+    @DisplayName("장바구니에 해당 상품이 없는 경우 예외 발생")
+    void updateCartItemQuantity_WithProductNotInCart_ThrowsCartException() {
+        // given
+        CartUpdateForm cartUpdateForm = new CartUpdateForm(1L, 3);
+        given(cartRepository.findByProductIdAndMemberId(cartUpdateForm.productId(), member.getId()))
+                .willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> cartService.updateCartItemQuantity(cartUpdateForm, member))
+                .isInstanceOf(CartException.class)
+                .satisfies(exception -> {
+                    CartException cartException = (CartException) exception;
+                    assertThat(cartException.getCode()).isEqualTo(CartErrorCode.PRODUCT_NOT_FOUND_IN_CART.getCode());
+                });
+    }
+
+    @Test
+    @DisplayName("수량이 변경되지 않은 경우 예외 발생")
+    void updateCartItemQuantity_WithSameQuantity_ThrowsCartException() {
+        // given
+        cart.updateQuantity(5);  // 현재 수량을 5로 설정
+        CartUpdateForm cartUpdateForm = new CartUpdateForm(1L, 5);  // 같은 수량으로 업데이트 시도
+        given(cartRepository.findByProductIdAndMemberId(cartUpdateForm.productId(), member.getId()))
+                .willReturn(Optional.of(cart));
+
+        // when & then
+        assertThatThrownBy(() -> cartService.updateCartItemQuantity(cartUpdateForm, member))
+                .isInstanceOf(CartException.class)
+                .satisfies(exception -> {
+                    CartException cartException = (CartException) exception;
+                    assertThat(cartException.getCode()).isEqualTo(CartErrorCode.SAME_QUANTITY_IN_CART.getCode());
+                });
+    }
 }
