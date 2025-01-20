@@ -27,16 +27,11 @@ function LoginForm() {
         password: "",
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
-    const [isClient, setIsClient] = useState(false);
     const [emailNotVerified, setEmailNotVerified] = useState(false); // 이메일 인증 실패 여부
     const [isEmailSent, setIsEmailSent] = useState<boolean>(false); // 이메일 전송 성공 여부
     const [fixedEmail, setFixedEmail] = useState<string | null>(null); // 고정된 이메일
     const router = useRouter();
     const { setUsername } = useUser();
-
-    useEffect(() => {
-        setIsClient(true);
-    }, []);
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -127,8 +122,6 @@ function LoginForm() {
             setIsEmailSent(false);  // 실패 시 이메일 전송 성공 상태를 false로 설정
         }
     };
-
-    if (!isClient) return null;
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
