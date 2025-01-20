@@ -16,8 +16,8 @@ public final class MemberConverter {
 			.build();
 	}
 
-	public static MemberDto of(MemberDto memberDto, MemberModifyForm memberModifyForm){
-		return MemberDto.builder()
+	public static Member of(MemberDto memberDto, MemberModifyForm memberModifyForm){
+		return Member.builder()
 			.id(memberDto.id())
 			.username(memberDto.username())
 			.nickname(memberModifyForm.nickname())
