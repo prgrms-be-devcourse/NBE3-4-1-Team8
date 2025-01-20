@@ -55,4 +55,21 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 		AND o.deliveryStatus = 'READY'
 		   """)
 	List<Orders> findReadyOrders(@Param("startTime") ZonedDateTime startTime, @Param("endTime") ZonedDateTime endTime);
+
+	/**
+	 * 배송 상태가 READY이며 modifiedAt가 startTime, endTime 사이인 <br>
+	 * 주문의 배송 상태를 SHIPPED로 변경합니다.
+	 * @param startTime
+	 * @param endTime
+	 */
+	@Modifying
+	@Query("""
+		UPDATE Orders o
+		SET o.deliveryStatus = 'SHIPPED'
+		WHERE CAST(o.modifiedAt AS timestamp) >= CAST(:startTime AS timestamp)
+		AND CAST(o.modifiedAt AS timestamp) < CAST(:endTime AS timestamp)
+		AND o.deliveryStatus = 'READY'
+		""")
+	void bulkUpdateDeliveryStatus(@Param("startTime") ZonedDateTime startTime,
+		@Param("endTime") ZonedDateTime endTime);
 }
