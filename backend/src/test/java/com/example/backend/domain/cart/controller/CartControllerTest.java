@@ -1,8 +1,10 @@
 package com.example.backend.domain.cart.controller;
 
+import com.example.backend.domain.cart.dto.CartDeleteForm;
 import com.example.backend.domain.cart.dto.CartForm;
 import com.example.backend.domain.cart.dto.CartResponse;
 import com.example.backend.domain.cart.dto.CartUpdateForm;
+import com.example.backend.domain.cart.exception.CartErrorCode;
 import com.example.backend.domain.cart.exception.CartException;
 import com.example.backend.domain.cart.service.CartService;
 import com.example.backend.domain.member.entity.Member;
@@ -149,5 +151,52 @@ class CartControllerTest {
         assertEquals(cartId, response.getBody().getData());
 
         verify(cartService).updateCartItemQuantity(cartUpdateForm, member);
+    }
+
+    /**
+     * deleteCartItem() 메서드 테스트
+     * - 장바구니 상품 삭제 성공
+     * - 존재하지 않는 상품 삭제 시도
+     */
+    @Test
+    @WithMockUser
+    @DisplayName("장바구니 상품 삭제 성공")
+    void deleteCartItem_Success() {
+        // given
+        Long productId = 1L;
+        CartDeleteForm cartDeleteForm = new CartDeleteForm(productId);
+
+        when(cartService.deleteCartItem(cartDeleteForm, member)).thenReturn(productId);
+
+        // when
+        ResponseEntity<GenericResponse<Long>> response =
+                cartController.deleteCartItem(cartDeleteForm, customUserDetails);
+
+        // then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(productId, response.getBody().getData());
+
+        verify(cartService).deleteCartItem(cartDeleteForm, member);
+    }
+
+    @Test
+    @WithMockUser
+    @DisplayName("존재하지 않는 장바구니 상품 삭제 시도")
+    void deleteCartItem_WithNonExistingProduct_ThrowsException() {
+        // given
+        Long nonExistingProductId = 999L;
+        CartDeleteForm cartDeleteForm = new CartDeleteForm(nonExistingProductId);
+
+        when(cartService.deleteCartItem(cartDeleteForm, member))
+                .thenThrow(new CartException(CartErrorCode.PRODUCT_NOT_FOUND_IN_CART));
+
+        // when & then
+        CartException exception = assertThrows(CartException.class, () ->
+                cartController.deleteCartItem(cartDeleteForm, customUserDetails));
+
+        assertEquals(CartErrorCode.PRODUCT_NOT_FOUND_IN_CART.getCode(), exception.getCode());
+
+        verify(cartService).deleteCartItem(cartDeleteForm, member);
     }
 }
