@@ -58,7 +58,7 @@ public class FilterUtils {
         // GET 메서드인 경우
         if ("GET".equalsIgnoreCase(method)) {
             // GET 요청은 보호되지 않는 URL 목록에 있는지 확인
-            if (path.startsWith("/api/v1/products")) {
+            if ("/api/v1/products".equals(path)) {
                 return true; // GET 요청은 보호되지 않는 URL로 간주
             }
         }
