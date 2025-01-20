@@ -3,14 +3,14 @@ interface Product {
   name: string;
   content: string;
   price: number;
-  imgUrl: string;  // image → imgUrl로 변경
+  imgUrl: string;
 }
 
 interface ApiResponse<T> {
   timestamp: string;
   message: string | null;
   data: {
-    content: T[];
+    content: T | T[];
     pageable: {
       pageNumber: number | null;
       pageSize: number | null;

@@ -17,7 +17,7 @@ export const ProductCard = ({ product }: ProductCardProps) => (
     </div>
     <div className="flex flex-col space-y-2 mt-4">
       <Link
-        href={`/product/${product.Id}`}
+        href={`/product/${product.id}`}
         className="font-semibold text-black hover:text-gray-700 transition-colors text-lg"
       >
         {product.name}

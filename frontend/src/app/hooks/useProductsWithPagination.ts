@@ -32,8 +32,8 @@ export const useProductsWithPagination = () => {
           throw new Error(responseData.message || '상품을 불러오는데 실패했습니다.');
         }
 
-        setProducts(responseData.data.content);
-        setTotalPages(responseData.data.totalPages);
+        setProducts(Array.isArray(responseData.data.content) ? responseData.data.content : [responseData.data.content]);
+        setTotalPages(responseData.data.totalPages ?? 0);
       } catch (err) {
         setError(err instanceof Error ? err.message : '상품을 불러오는데 실패했습니다.');
         setProducts([]);

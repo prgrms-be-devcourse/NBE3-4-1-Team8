@@ -48,7 +48,7 @@ class CartControllerTest {
         when(member.getId()).thenReturn(1L);
         when(customUserDetails.getMember()).thenReturn(member);
 
-        cartForm = new CartForm(1L, 1L, 2);
+        cartForm = new CartForm(1L, 2);
     }
 
     /**
