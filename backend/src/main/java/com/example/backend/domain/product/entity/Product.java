@@ -72,4 +72,8 @@ public class Product extends BaseEntity {
         this.quantity = productForm.quantity();
     }
 
+    public void restore(int quantity) {
+        this.quantity += quantity;
+    }
+
 }
