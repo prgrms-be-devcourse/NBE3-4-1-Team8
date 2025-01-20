@@ -65,7 +65,7 @@ class CartServiceTest {
                 .quantity(10)
                 .build();
 
-        cartForm = new CartForm(1L, 1L, 5);
+        cartForm = new CartForm( 1L, 5);
 
         cart = Cart.builder()
                 .id(1L)

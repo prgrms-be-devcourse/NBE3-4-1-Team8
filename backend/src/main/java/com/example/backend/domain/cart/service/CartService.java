@@ -27,10 +27,6 @@ public class CartService {
 
     @Transactional
     public Long addCartItem(CartForm cartForm, Member member) {
-        // 로그인한 회원과 요청한 회원이 다르면 exception 발생
-        if (member.getId() != cartForm.memberId()) {
-            throw new AuthException(AuthErrorCode.MEMBER_NOT_FOUND);
-        }
         // 요청한 상품 ID로 상품 조회
         Long productId = cartForm.productId();
 
