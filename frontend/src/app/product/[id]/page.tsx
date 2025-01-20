@@ -1,7 +1,10 @@
+// app/product/[id]/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useProduct } from "@/app/hooks/useProduct";
+import { useCart } from "@/app/hooks/useCart";
+import { QuantitySelector } from "../../components/QuantitySelectorProps";
 import Image from 'next/image';
 import { use } from 'react';
 
@@ -9,9 +12,9 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
   const productId = parseInt(unwrappedParams.id);
   const [quantity, setQuantity] = useState<number>(1);
-  const [isAddedToCart, setIsAddedToCart] = useState<boolean>(false);
 
   const product = useProduct(productId);
+  const { isLoading, addToCart } = useCart();
 
   if (!product) {
     return (
@@ -23,7 +26,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     );
   }
 
-  console.log(product);
   const updateQuantity = (change: number) => {
     const newQuantity = quantity + change;
     if (newQuantity >= 1) {
@@ -32,8 +34,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   };
 
   const handleAddToCart = () => {
-    setIsAddedToCart(true);
-    setTimeout(() => setIsAddedToCart(false), 2000);
+    addToCart(productId, quantity);
   };
 
   return (
@@ -61,30 +62,18 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                 <p className="mt-1 text-gray-600">{product.content}</p>
               </div>
               <div className="space-y-4">
-                <div>
-                  <h2 className="font-semibold mb-2">수량</h2>
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => updateQuantity(-1)}
-                      className="px-3 py-1 border border-gray-800 rounded hover:bg-gray-800 hover:text-white transition-colors"
-                    >
-                      -
-                    </button>
-                    <span className="w-12 text-center">{quantity}</span>
-                    <button
-                      onClick={() => updateQuantity(1)}
-                      className="px-3 py-1 border border-gray-800 rounded hover:bg-gray-800 hover:text-white transition-colors"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
+                <QuantitySelector
+                  quantity={quantity}
+                  onUpdate={updateQuantity}
+                  disabled={isLoading}
+                />
                 <div className="pt-4">
                   <button
                     onClick={handleAddToCart}
-                    className="w-full bg-gray-800 text-white py-3 rounded hover:bg-gray-700 transition-colors"
+                    disabled={isLoading}
+                    className="w-full bg-gray-800 text-white py-3 rounded hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isAddedToCart ? '장바구니에 담았습니다!' : '장바구니 담기'}
+                    {isLoading ? '처리중...' : '장바구니 담기'}
                   </button>
                 </div>
               </div>

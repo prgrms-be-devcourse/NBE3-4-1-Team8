@@ -5,10 +5,8 @@ export const useProduct = (productId: number) => {
   const [product, setProduct] = useState<Product | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  console.log(productId);
 
   if (productId === null) {
-    console.error('test')
     throw new Error('상품 ID 값이 존재하지 않습니다.');
   }
 
