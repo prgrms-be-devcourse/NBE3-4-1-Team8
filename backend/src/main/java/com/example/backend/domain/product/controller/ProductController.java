@@ -58,4 +58,12 @@ public class ProductController {
         return ResponseEntity.ok().body(GenericResponse.of("상품이 정상적으로 수정되었습니다."));
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<GenericResponse<String>> delete(@PathVariable("id") Long id) {
+
+        productService.delete(id);
+
+        return ResponseEntity.ok().body(GenericResponse.of("상품이 정상적으로 삭제되었습니다."));
+    }
+
 }

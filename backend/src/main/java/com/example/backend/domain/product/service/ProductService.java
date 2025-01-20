@@ -7,6 +7,7 @@ import com.example.backend.domain.product.entity.Product;
 import com.example.backend.domain.product.exception.ProductErrorCode;
 import com.example.backend.domain.product.exception.ProductException;
 import com.example.backend.domain.product.repository.ProductRepository;
+import com.example.backend.domain.productOrders.repository.ProductOrdersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,23 +23,26 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final ProductOrdersRepository productOrdersRepository;
 
+    @Transactional(readOnly = true)
     public Product findById(Long id) {
 
         return productRepository.findById(id).orElseThrow(()
                 -> new ProductException(ProductErrorCode.NOT_FOUND));
     }
 
+    @Transactional(readOnly = true)
     public ProductResponse findProductResponseById(Long id) {
 
         return productRepository.findProductResponseById(id).orElseThrow(()
                 -> new ProductException(ProductErrorCode.NOT_FOUND));
     }
 
+    @Transactional(readOnly = true)
     public Page<ProductResponse> findAllPaged(int page) {
 
         Sort sortByNameAsc = Sort.by(Sort.Order.asc("name"));
@@ -89,5 +93,15 @@ public class ProductService {
 
         existsProduct(id, productForm.name());
         findById(id).modify(productForm);
+    }
+
+    @Transactional
+    public void delete(Long id) {
+
+        if(productOrdersRepository.existsByProductId(id)) {
+            throw new ProductException(ProductErrorCode.EXISTS_ORDER_HISTORY);
+        }
+
+        productRepository.delete(findById(id));
     }
 }

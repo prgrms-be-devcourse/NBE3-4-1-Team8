@@ -448,4 +448,61 @@ public class ProductControllerTest {
                 .andExpect(jsonPath("$.message").value("중복된 상품 이름입니다."));
     }
 
+    @Test
+    @DisplayName("상품 삭제 성공 테스트")
+    void deleteSuccessTest() throws Exception {
+
+        doNothing().when(productService).delete(1L);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(delete("/api/v1/products/1" )
+                .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        //then
+        resultActions
+                .andExpect(handler().handlerType(ProductController.class))
+                .andExpect(handler().methodName("delete"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("상품이 정상적으로 삭제되었습니다."));
+    }
+
+    @Test
+    @DisplayName("상품 삭제 실패(해당 상품 존재하지 않음) 테스트")
+    void deleteFailWhenProductNotExistsTest() throws Exception {
+
+        doThrow(new ProductException(ProductErrorCode.NOT_FOUND)).when(productService).delete(1L);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(delete("/api/v1/products/1" )
+                .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        //then
+        resultActions
+                .andExpect(handler().handlerType(ProductController.class))
+                .andExpect(handler().methodName("delete"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("상품을 찾을 수 없습니다."));
+    }
+
+    @Test
+    @DisplayName("상품 삭제 실패(해당 상품 주문 내역 존재) 테스트")
+    void deleteFailWhenProductExistsOrderHistoryTest() throws Exception {
+
+        doThrow(new ProductException(ProductErrorCode.EXISTS_ORDER_HISTORY)).when(productService).delete(1L);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(delete("/api/v1/products/1" )
+                .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        //then
+        resultActions
+                .andExpect(handler().handlerType(ProductController.class))
+                .andExpect(handler().methodName("delete"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("주문 내역이 존재하는 상품입니다."));
+    }
+
 }
