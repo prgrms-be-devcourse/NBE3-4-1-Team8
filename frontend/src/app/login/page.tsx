@@ -1,7 +1,7 @@
 "use client";
 import {ChangeEvent, FormEvent, useEffect, useState} from "react";
 import {useRouter} from "next/navigation";
-import {useUser} from "@/app/component/UserProvider";
+import {useUser} from "@/app/components/UserProvider";
 
 interface LoginForm {
     username: string;
