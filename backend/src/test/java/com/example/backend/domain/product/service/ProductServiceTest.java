@@ -6,6 +6,7 @@ import com.example.backend.domain.product.dto.ProductResponse;
 import com.example.backend.domain.product.entity.Product;
 import com.example.backend.domain.product.exception.ProductException;
 import com.example.backend.domain.product.repository.ProductRepository;
+import com.example.backend.domain.productOrders.repository.ProductOrdersRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +36,8 @@ class ProductServiceTest {
 
     @Mock
     private ProductRepository productRepository;
+    @Mock
+    private ProductOrdersRepository productOrdersRepository;
 
     @InjectMocks
     private ProductService productService;
@@ -68,11 +71,11 @@ class ProductServiceTest {
         verify(productRepository, times(1)).save(productCaptor.capture());
         Product savedProduct = productCaptor.getValue();
 
-        assertThat(name1).isEqualTo(savedProduct.getName());
-        assertThat(content1).isEqualTo(savedProduct.getContent());
-        assertThat(price1).isEqualTo(savedProduct.getPrice());
-        assertThat(imgUrl1).isEqualTo(savedProduct.getImgUrl());
-        assertThat(quantity1).isEqualTo(savedProduct.getQuantity());
+        assertThat(savedProduct.getName()).isEqualTo(name1);
+        assertThat(savedProduct.getContent()).isEqualTo(content1);
+        assertThat(savedProduct.getPrice()).isEqualTo(price1);
+        assertThat(savedProduct.getImgUrl()).isEqualTo(imgUrl1);
+        assertThat(savedProduct.getQuantity()).isEqualTo(quantity1);
     }
 
     @Test
@@ -257,6 +260,72 @@ class ProductServiceTest {
         assertThat(exception.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(exception.getCode()).isEqualTo("400-2");
         assertThat(exception.getMessage()).isEqualTo("중복된 상품 이름입니다.");
+    }
+
+    @Test
+    @DisplayName("상품 삭제 성공 테스트")
+    void deleteSuccessTest() {
+        //given
+        Long id = 1L;
+        ArgumentCaptor<Product> productCaptor = ArgumentCaptor.forClass(Product.class);
+        when(productOrdersRepository.existsByProductId(id)).thenReturn(false);
+        when(productRepository.findById(id)).thenReturn(Optional.of(product1));
+
+        //when
+        productService.delete(id);
+
+        // then
+        verify(productOrdersRepository, times(1)).existsByProductId(id);
+        verify(productRepository, times(1)).delete(productCaptor.capture());
+        Product deletedProduct = productCaptor.getValue();
+
+        assertThat(deletedProduct.getName()).isEqualTo(name1);
+        assertThat(deletedProduct.getContent()).isEqualTo(content1);
+        assertThat(deletedProduct.getPrice()).isEqualTo(price1);
+        assertThat(deletedProduct.getImgUrl()).isEqualTo(imgUrl1);
+        assertThat(deletedProduct.getQuantity()).isEqualTo(quantity1);
+    }
+
+    @Test
+    @DisplayName("상품 삭제 실패(해당 상품 존재하지 않음) 테스트")
+    void deleteFailWhenProductNotExistsTest() {
+        //given
+        Long id = 1L;
+        when(productOrdersRepository.existsByProductId(id)).thenReturn(false);
+        when(productRepository.findById(id)).thenReturn(Optional.empty());
+
+        //when
+        ProductException exception = assertThrows(ProductException.class,
+                () -> productService.delete(id)
+        );
+
+        // then
+        verify(productOrdersRepository, times(1)).existsByProductId(id);
+        verify(productRepository, times(1)).findById(id);
+
+        assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(exception.getCode()).isEqualTo("404");
+        assertThat(exception.getMessage()).isEqualTo("상품을 찾을 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName("상품 삭제 실패(해당 상품 주문 내역 존재) 테스트")
+    void deleteFailWhenProductExistsOrderHistoryTest() {
+        //given
+        Long id = 1L;
+        when(productOrdersRepository.existsByProductId(id)).thenReturn(true);
+
+        //when
+        ProductException exception = assertThrows(ProductException.class,
+                () -> productService.delete(id)
+        );
+
+        // then
+        verify(productOrdersRepository, times(1)).existsByProductId(id);
+
+        assertThat(exception.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(exception.getCode()).isEqualTo("400-3");
+        assertThat(exception.getMessage()).isEqualTo("주문 내역이 존재하는 상품입니다.");
     }
 
 }

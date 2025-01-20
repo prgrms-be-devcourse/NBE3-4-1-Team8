@@ -56,6 +56,21 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 		   """)
 	List<Orders> findReadyOrders(@Param("startTime") ZonedDateTime startTime, @Param("endTime") ZonedDateTime endTime);
 
+    /**
+	 * 배송 상태가 READY이며  modifiedAt가 startTime, endTime 사이인 주문한 username을 조회합니다.
+	 * @param startTime
+	 * @param endTime
+	 * @return {@link List<Orders>}
+	 */
+	@Query("""
+		      SELECT o.member.username FROM Orders o
+		      join o.member
+		WHERE o.modifiedAt >= :startTime
+		AND o.modifiedAt < :endTime
+		AND o.deliveryStatus = 'READY'
+		   """)
+	List<String> findUsernameByReady(@Param("startTime") ZonedDateTime startTime, @Param("endTime") ZonedDateTime endTime);
+
 	/**
 	 * 배송 상태가 READY이며 modifiedAt가 startTime, endTime 사이인 <br>
 	 * 주문의 배송 상태를 SHIPPED로 변경합니다.

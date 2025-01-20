@@ -1,7 +1,10 @@
 package com.example.backend.domain.product.repository;
 
+import com.example.backend.domain.orders.dto.OrdersForm;
 import com.example.backend.domain.product.dto.ProductResponse;
 import com.example.backend.domain.product.entity.Product;
+import com.example.backend.domain.productOrders.entity.ProductOrders;
+import com.example.backend.domain.productOrders.repository.ProductOrdersRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +33,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ProductRepositoryTest {
     @Autowired
     private ProductRepository productRepository;
+    @Autowired
+    private ProductOrdersRepository productOrdersRepository;
 
     @PersistenceContext
     private EntityManager em;
@@ -178,4 +183,38 @@ public class ProductRepositoryTest {
 
     }
 
+    @Test
+    @DisplayName("상품 삭제 성공 테스트")
+    void deleteTest() {
+        //given
+        Long id = 1L;
+        Product product = productRepository.findById(id).get();
+
+        //when
+        productRepository.delete(product);
+
+        //then
+        assertThat(productRepository.findById(id).isPresent()).isFalse();
+    }
+
+    @Test
+    @DisplayName("상품 주문 내역 존재 여부 검증 테스트")
+    void existsProductOrdersByProductIdTest() {
+        //given
+        Product product1 = productRepository.findById(1L).get();
+
+        ProductOrders productOrders = ProductOrders.create()
+                .product(product1)
+                .build();
+
+        productOrdersRepository.save(productOrders);
+
+        //when
+        boolean isExists1 = productOrdersRepository.existsByProductId(1L);
+        boolean isExists2 = productOrdersRepository.existsByProductId(2L);
+
+        //then
+        assertThat(isExists1).isTrue();
+        assertThat(isExists2).isFalse();
+    }
 }

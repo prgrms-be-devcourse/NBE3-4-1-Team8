@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
  *
  * @author 100minha
  */
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ProductConverter {
 
     public static Product from(ProductForm productForm) {
