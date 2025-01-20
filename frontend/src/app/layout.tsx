@@ -2,8 +2,8 @@ import type {Metadata} from "next";
 import {Geist, Geist_Mono} from "next/font/google";
 import "./globals.css";
 import React from "react";
-import {UserProvider} from "./component/UserProvider";
-import NavBar from "./component/Navbar";
+import {UserProvider} from "@/app/components/UserProvider";
+import NavBar from "@/app/components/Navbar";
 
 export const metadata: Metadata = {
     title: "Create Next App",
