@@ -90,7 +90,9 @@ public class MemberService {
 	}
 
 	public MemberInfoResponse modify(MemberDto memberDto, MemberModifyForm memberModifyForm) {
-		existsNickname(memberModifyForm.nickname());
+		if (!memberDto.nickname().equals(memberModifyForm.nickname())) {
+			existsNickname(memberModifyForm.nickname());
+		}
 
 		return MemberConverter.from(
 			memberRepository.save(MemberConverter.of(memberDto, memberModifyForm)));

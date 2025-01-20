@@ -418,14 +418,14 @@ public class AuthControllerTest {
 	@WithMockUser
 	void logout_success() throws Exception {
 		// given
-		String accessToken = "accessToken";
-		when(cookieService.getAccessTokenFromRequest(any(HttpServletRequest.class))).thenReturn(accessToken);
-		doNothing().when(authService).logout(accessToken);
+		String refreshToken = "refreshToken";
+		when(cookieService.getRefreshTokenFromRequest(any(HttpServletRequest.class))).thenReturn(refreshToken);
+		doNothing().when(authService).logout(refreshToken);
 		doNothing().when(cookieService).deleteRefreshTokenFromCookie(any(HttpServletResponse.class));
 
 		// when
 		ResultActions resultActions = mockMvc.perform(post("/api/v1/auth/logout")
-			.cookie(new Cookie("accessToken", accessToken)));
+			.cookie(new Cookie("refreshToken", refreshToken)));
 
 		// then
 		resultActions
@@ -434,8 +434,8 @@ public class AuthControllerTest {
 			.andExpect(jsonPath("$.message").value("로그아웃 성공"))
 			.andExpect(jsonPath("$.data").isEmpty());
 
-		verify(cookieService, times(1)).getAccessTokenFromRequest(any(HttpServletRequest.class));
-		verify(authService, times(1)).logout(accessToken);
+		verify(cookieService, times(1)).getRefreshTokenFromRequest(any(HttpServletRequest.class));
+		verify(authService, times(1)).logout(refreshToken);
 		verify(cookieService, times(1)).deleteRefreshTokenFromCookie(any(HttpServletResponse.class));
 	}
 
