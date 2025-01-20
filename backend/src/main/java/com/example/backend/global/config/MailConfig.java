@@ -38,7 +38,7 @@ public class MailConfig {
 	@Value("${mail.properties.mail.smtp.auth}")
     private boolean smtpAuth;
 
-    @Value("${mail.properties.mail.smtp.stattls.enable}")
+    @Value("${mail.properties.mail.smtp.starttls.enable}")
     private boolean smtpStartTlsEnable;
 
     @Value("${mail.templates.path}")
@@ -66,7 +66,7 @@ public class MailConfig {
 		mailSender.setPassword(mailPassword);
 		Properties props = System.getProperties();
 		props.put("mail.transport.protocol", "smtp");
-		props.put("mail.smtp.starttls.enable", "true");
+		props.put("mail.smtp.starttls.enable", smtpStartTlsEnable);
 		mailSender.setJavaMailProperties(props);
 		return mailSender;
 	}
