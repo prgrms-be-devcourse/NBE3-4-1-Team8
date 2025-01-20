@@ -54,7 +54,8 @@ public class AuthService {
 			throw new AuthException(AuthErrorCode.NOT_CERTIFICATION);
 		}
 
-		String accessToken = jwtProvider.generateAccessToken(findMember.getId(), findMember.getUsername(), findMember.getRole());
+		String accessToken = jwtProvider.generateAccessToken(findMember.getId(), findMember.getUsername(),
+			findMember.getRole());
 		String refreshToken = jwtProvider.generateRefreshToken(findMember.getId(), findMember.getUsername(),
 			findMember.getRole());
 		refreshTokenService.saveRefreshToken(findMember.getUsername(), refreshToken);
@@ -71,9 +72,14 @@ public class AuthService {
 	}
 
 	public void verify(String username, String certificationCode, VerifyType verifyType) {
-		handleVerify(username, certificationCode, verifyType);
 		Member findMember = memberRepository.findByUsername(username)
 			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+		if (MemberStatus.ACTIVE.equals(findMember.getMemberStatus())) {
+			throw new AuthException(AuthErrorCode.ALREADY_CERTIFIED);
+		}
+
+		handleVerify(username, certificationCode, verifyType);
 
 		// 비밀번호 초기화 코드면 인증 후 임시 비밀번호 발송 로직 추가할 것
 		switch (verifyType) {
@@ -125,6 +131,10 @@ public class AuthService {
 
 		Member findMember = memberRepository.findByUsername(username)
 			.orElseThrow(() -> new AuthException(AuthErrorCode.MEMBER_NOT_FOUND));
+
+		if (VerifyType.SIGNUP.equals(verifyType) && MemberStatus.ACTIVE.equals(findMember.getMemberStatus())) {
+			throw new AuthException(AuthErrorCode.ALREADY_CERTIFIED);
+		}
 
 		String certificationCode = UUID.randomUUID().toString();
 

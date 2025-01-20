@@ -1,5 +1,6 @@
 "use client";
 import { useState, ChangeEvent, FormEvent } from "react";
+import {useRouter} from "next/navigation";
 
 interface FormData {
   username: string;
@@ -26,6 +27,7 @@ interface ApiError {
 }
 
 const SignupForm = () => {
+  const router = useRouter();
   const [formData, setFormData] = useState<FormData>({
     username: "",
     nickname: "",
@@ -44,7 +46,7 @@ const SignupForm = () => {
     setErrors({});
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/members/join`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/members/join`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,10 +69,8 @@ const SignupForm = () => {
         setErrors(newErrors);
         return;
       }
-
-      // 성공 시 처리
-      console.log('회원가입 성공!');
-
+      router.push('/login');
+      alert('회원가입에 성공하였습니다. \n이메일 인증을 완료해 주세요!');
     } catch (error) {
       setErrors({
         form: '서버와의 통신 중 오류가 발생했습니다.',
@@ -113,7 +113,7 @@ const SignupForm = () => {
                 name="username"
                 value={formData.username}
                 onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-black"
                 placeholder="example@email.com"
               />
               {errors.username && (
@@ -131,7 +131,7 @@ const SignupForm = () => {
                 name="nickname"
                 value={formData.nickname}
                 onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-black"
                 placeholder="닉네임 입력"
               />
               {errors.nickname && (
@@ -149,7 +149,7 @@ const SignupForm = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-black"
                 placeholder="비밀번호 입력"
               />
               {errors.password && (
@@ -167,7 +167,7 @@ const SignupForm = () => {
                 name="passwordCheck"
                 value={formData.passwordCheck}
                 onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-black"
                 placeholder="비밀번호 재입력"
               />
               {errors.passwordCheck && (
@@ -188,7 +188,7 @@ const SignupForm = () => {
                   name="city"
                   value={formData.city}
                   onChange={handleChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-black"
                   placeholder="시/도 입력"
                 />
                 {errors.city && (
@@ -206,7 +206,7 @@ const SignupForm = () => {
                   name="district"
                   value={formData.district}
                   onChange={handleChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-black"
                   placeholder="시/군/구 입력"
                 />
                 {errors.district && (
@@ -216,7 +216,7 @@ const SignupForm = () => {
 
               <div>
                 <label htmlFor="country" className="block text-sm font-medium text-gray-700">
-                  국가
+                  도로명주소
                 </label>
                 <input
                   type="text"
@@ -224,7 +224,7 @@ const SignupForm = () => {
                   name="country"
                   value={formData.country}
                   onChange={handleChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-black"
                   placeholder="국가 입력"
                 />
                 {errors.country && (
@@ -242,7 +242,7 @@ const SignupForm = () => {
                   name="detail"
                   value={formData.detail}
                   onChange={handleChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-black"
                   placeholder="상세주소 입력"
                 />
                 {errors.detail && (

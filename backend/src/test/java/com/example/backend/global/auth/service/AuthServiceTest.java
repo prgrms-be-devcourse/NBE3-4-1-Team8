@@ -283,8 +283,6 @@ class AuthServiceTest {
 			.role(Role.ROLE_USER)
 			.build();
 
-		givenMember.verify();
-
 		EmailCertificationForm givenEmailCertificationForm = EmailCertificationForm.builder()
 			.certificationCode("testCode")
 			.verifyType(VerifyType.SIGNUP)
@@ -293,6 +291,8 @@ class AuthServiceTest {
 
 		given(redisService.getHashDataAll(givenRedisPrefix + givenEmailCertificationForm.username()))
 			.willReturn(Map.of());
+
+		given(memberRepository.findByUsername(givenMember.getUsername())).willReturn(Optional.of(givenMember));
 
 		//when & then
 		assertThatThrownBy(() -> authService.verify(givenEmailCertificationForm.username(),
@@ -314,7 +314,7 @@ class AuthServiceTest {
 			.district("testDistrict")
 			.build();
 
-		MemberDto givenMember = MemberDto.builder()
+		Member givenMember = Member.builder()
 			.username("testEmail@naver.com")
 			.nickname("testNickName")
 			.password("!testPassword1234")
@@ -336,6 +336,8 @@ class AuthServiceTest {
 			.build();
 
 		Map<Object, Object> givenConvertMap = testObjectMapper.convertValue(givenEmailCertification, Map.class);
+
+		given(memberRepository.findByUsername(givenMember.getUsername())).willReturn(Optional.of(givenMember));
 
 		given(redisService.getHashDataAll(givenRedisPrefix + givenEmailCertificationForm.username()))
 			.willReturn(givenConvertMap);
@@ -385,6 +387,8 @@ class AuthServiceTest {
 
 		Map<Object, Object> givenConvertMap = testObjectMapper.convertValue(givenEmailCertification, Map.class);
 
+		given(memberRepository.findByUsername(givenMember.getUsername())).willReturn(Optional.of(givenMember));
+
 		given(redisService.getHashDataAll(givenRedisPrefix + givenEmailCertificationForm.username()))
 			.willReturn(givenConvertMap);
 
@@ -431,17 +435,8 @@ class AuthServiceTest {
 			.sendCount("1")
 			.build();
 
-		Map<Object, Object> givenConvertMap = testObjectMapper.convertValue(givenEmailCertification, Map.class);
-
-		given(redisService.getHashDataAll(givenRedisPrefix + givenEmailCertificationForm.username()))
-			.willReturn(givenConvertMap);
-
-		given(objectMapper.convertValue(givenConvertMap, EmailCertification.class)).willReturn(givenEmailCertification);
-
 		given(memberRepository.findByUsername(givenEmailCertificationForm.username()))
 			.willReturn(Optional.empty());
-
-		doNothing().when(redisService).delete(givenRedisPrefix + givenEmailCertificationForm.username());
 
 		//when & then
 		assertThatThrownBy(() -> authService.verify(givenEmailCertificationForm.username(),
@@ -483,17 +478,8 @@ class AuthServiceTest {
 			.sendCount("1")
 			.build();
 
-		Map<Object, Object> givenConvertMap = testObjectMapper.convertValue(givenEmailCertification, Map.class);
-
-		given(redisService.getHashDataAll(givenRedisPrefix + givenEmailCertificationForm.username()))
-			.willReturn(givenConvertMap);
-
-		given(objectMapper.convertValue(givenConvertMap, EmailCertification.class)).willReturn(givenEmailCertification);
-
 		given(memberRepository.findByUsername(givenEmailCertificationForm.username()))
 			.willReturn(Optional.of(Member.from(givenMember)));
-
-		doNothing().when(redisService).delete(givenRedisPrefix + givenEmailCertificationForm.username());
 
 		//when & then
 		assertThatThrownBy(() -> authService.verify(givenEmailCertificationForm.username(),
